@@ -1,5 +1,9 @@
 # Rust bindings for Sciter
 
+_Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another languages._
+
+----
+
 Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/) HTML/CSS/script engine with GPU accelerated rendering designed to render modern desktop application UI. It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
 
 Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples.
@@ -23,22 +27,40 @@ Check <http://sciter.com> website and its [documentation resources](http://scite
 
 ## Getting started:
 
-TBD
+1. Download [Sciter SDK](http://sciter.com/download/) and extract it somewhere.
+2. Add target platform binaries to PATH (`bin`, `bin.osx` or `bin.gtk`) and install Sciter shared library to your LIBRARY_PATH.
+3. Add this to your Cargo.toml: `sciter = "*"`.
+4. Build library and run the minimal sciter sample: `cargo run --example minimal`.
 
 ## Brief look:
 
-TBD
+Here is a minimal sciter app:
 
+```rust
+extern crate sciter;
 
+fn main() {
+    let mut frame = sciter::Window::new();
+    frame.host.load_file("minimal.htm");
+    frame.run_app(true);
+}
+```
 
+It looks similar like this:
+
+![Minimal pysciter sample](http://i.imgur.com/ojcM5JJ.png)
+
+### Interoperability
+
+TDB.
 
 ## What supported right now:
 
-* [ ] [sciter::window](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-window.hpp) which brings together window creation, host and event handlers
-* [ ] [sciter::host](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) extensible implementation with transparent script calls from python code
+* [x] [sciter::window](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-window.hpp) which brings together window creation, host and event handlers
+* [x] [sciter::host](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) extensible implementation with transparent script calls from python code
 * [ ] [sciter::event_handler](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-behavior.h) with basic event handling (attached, document_complete, on_script_call), additional handlers will come
 * [ ] [sciter::dom](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-dom.hpp) for HTML DOM access and manipulation methods
-* [ ] [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.hpp) pythonic wrapper with sciter::script_error and sciter::native_function support
+* [x] [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.hpp) pythonic wrapper with sciter::script_error and sciter::native_function support
 * [ ] [sciter::graphics](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-graphics.hpp) - platform independent graphics native interface (can be used in native behaviors)
 * [ ] [sciter::request](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-request.hpp) - resource request object, used for custom resource downloading and handling
 * [ ] [sciter::video](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-video-api.h) - custom video rendering
@@ -47,7 +69,7 @@ TBD
 
 ### Platforms:
 
-* [ ] Windows (in development)
+* [x] Windows (in development)
 * [ ] OSX
 * [ ] Linux
 

@@ -1,7 +1,7 @@
 [package]
 name = "sciter"
 version = "0.1.0"
-description = "A rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit)."
+description = "A Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit)."
 keywords = ["gui", "sciter", "tiscript", "htmlayout", "html", "css", "web", "cross-platform"]
 
 authors = ["pravic <ehysta@gmail.com>"]
