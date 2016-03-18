@@ -160,6 +160,17 @@ pub fn w2s(sz: LPCWSTR) -> String
 	return s;
 }
 
+/// Rust string to UTF-8 conversion
+macro_rules! s2u {
+	($s:expr) => ( ::utf::s2un($s) )
+}
+
+pub fn s2un(s: &str) -> (CString, u32) {
+	let cs = CString::new(s).unwrap();
+	let n = cs.as_bytes().len() as u32;
+	return (cs, n);
+}
+
 /// Rust string to UTF-16 conversion
 macro_rules! s2w {
 	($s:expr) => ( ::utf::s2vecn($s) )

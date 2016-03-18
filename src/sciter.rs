@@ -20,10 +20,12 @@ mod scvalue;
 
 
 /* Rust interface */
+mod platform;
+pub mod window;
+pub mod host;
 pub mod value;
-// pub use self::value::{Value};
 
-
+pub type Window = window::Window;
 
 /* Loader */
 

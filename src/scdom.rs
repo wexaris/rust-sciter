@@ -2,8 +2,8 @@
 
 use sctypes::*;
 
-pub type HELEMENT = LPCVOID;
-pub type HNODE = LPCVOID;
+pub type HELEMENT = LPVOID;
+pub type HNODE = LPVOID;
 
 #[repr(C)]
 pub enum SCDOM_RESULT {
@@ -17,6 +17,5 @@ pub enum SCDOM_RESULT {
 }
 
 pub type SciterElementCallback = extern "stdcall" fn (he: HELEMENT, param: LPVOID) -> BOOL;
-pub type ElementEventProc = extern "stdcall" fn (tag: LPVOID, he: HELEMENT, evtg: UINT, prms: LPVOID) -> BOOL;
 
 pub type ELEMENT_COMPARATOR = extern "stdcall" fn (he1: HELEMENT, he2: HELEMENT, param: LPVOID) -> INT;

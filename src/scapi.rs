@@ -47,7 +47,7 @@ pub struct ISciterAPI
 	pub SciterTranslateMessage: extern "stdcall" fn (lpMsg: * mut MSG) -> BOOL,
   // #endif
 
-	pub SciterSetOption: extern "stdcall" fn (hWnd: HWINDOW, option: UINT, value: UINT_PTR) -> BOOL,
+	pub SciterSetOption: extern "stdcall" fn (hWnd: HWINDOW, option: SCITER_RT_OPTIONS, value: UINT_PTR) -> BOOL,
 	pub SciterGetPPI: extern "stdcall" fn (hWndSciter: HWINDOW, px: * mut UINT, py: * mut UINT) -> VOID,
 	pub SciterGetViewExpando: extern "stdcall" fn (hwnd: HWINDOW, pval: * mut VALUE) -> BOOL,
 
@@ -73,7 +73,7 @@ pub struct ISciterAPI
 	pub SciterCreateWidget: extern "stdcall" fn (frame: LPRECT) -> HWINDOW, // returns GtkWidget
   // #endif
 
-	pub SciterCreateWindow: extern "stdcall" fn (creationFlags: UINT, frame: LPRECT, delegate: * mut SciterWindowDelegate, delegateParam: LPVOID, parent: HWINDOW) -> HWINDOW,
+	pub SciterCreateWindow: extern "stdcall" fn (creationFlags: UINT, frame: LPCRECT, delegate: * const SciterWindowDelegate, delegateParam: LPVOID, parent: HWINDOW) -> HWINDOW,
 	pub SciterSetupDebugOutput: extern "stdcall" fn (hwndOrNull: HWINDOW, param: LPVOID, pfOutput: DEBUG_OUTPUT_PROC),
 
 	//|
@@ -205,7 +205,7 @@ pub struct ISciterAPI
 	pub ValueSetValueToKey: extern "stdcall" fn (pval: * mut VALUE, pkey: * const VALUE, pval_to_set: * const VALUE) -> VALUE_RESULT,
 	pub ValueGetValueOfKey: extern "stdcall" fn (pval: * const VALUE, pkey: * const VALUE, pretval: * mut VALUE) -> VALUE_RESULT,
 	pub ValueToString: extern "stdcall" fn (pval: * mut VALUE, how: VALUE_STRING_CVT_TYPE) -> VALUE_RESULT,
-	pub ValueFromString: extern "stdcall" fn (pval: * mut VALUE, str: LPCWSTR, strLength: UINT, how: VALUE_STRING_CVT_TYPE) -> VALUE_RESULT,
+	pub ValueFromString: extern "stdcall" fn (pval: * mut VALUE, str: LPCWSTR, strLength: UINT, how: VALUE_STRING_CVT_TYPE) -> UINT,
 	pub ValueInvoke: extern "stdcall" fn (pval: * mut VALUE, pthis: * mut VALUE, argc: UINT, argv: * const VALUE, pretval: * mut VALUE, url: LPCWSTR) -> VALUE_RESULT,
 	pub ValueNativeFunctorSet: extern "stdcall" fn (pval: * mut VALUE, pinvoke: * mut NATIVE_FUNCTOR_INVOKE, prelease: * mut NATIVE_FUNCTOR_RELEASE, tag: * mut VOID) -> VALUE_RESULT,
 	pub ValueIsNativeFunctor: extern "stdcall" fn (pval: * const VALUE) -> BOOL,

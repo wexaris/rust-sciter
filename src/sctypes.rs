@@ -50,6 +50,7 @@ pub type PBOOL = *mut BOOL;
 
 
 #[repr(C)]
+#[derive(Default)]
 pub struct RECT {
     pub left: LONG,
     pub top: LONG,
@@ -61,6 +62,7 @@ pub type LPCRECT = *const RECT;
 
 
 #[repr(C)]
+#[derive(Default)]
 pub struct POINT {
     pub x: LONG,
     pub y: LONG,
@@ -69,6 +71,7 @@ pub type LPPOINT = *mut POINT;
 
 
 #[repr(C)]
+#[derive(Default)]
 pub struct SIZE {
     pub cx: LONG,
     pub cy: LONG,
