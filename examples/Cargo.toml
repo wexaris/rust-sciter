@@ -1,0 +1,11 @@
+[package]
+name = "sciter-examples"
+version = "0.1.0"
+authors = ["pravic <ehysta@gmail.com>"]
+
+[dependencies.sciter]
+path = "../"
+
+[[bin]]
+name = "first"
+path = "./first/first.rs"
