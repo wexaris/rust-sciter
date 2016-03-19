@@ -1,7 +1,5 @@
 //! Sciter host application helpers.
 
-#![allow(dead_code)]
-
 use ::{_API};
 use sctypes::*;
 use scdef::*;

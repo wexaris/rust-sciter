@@ -4,7 +4,7 @@ use ::{_API};
 use scvalue::*;
 use sctypes::*;
 
-
+/// sciter::value wrapper.
 #[derive(Debug)]
 pub struct Value
 {

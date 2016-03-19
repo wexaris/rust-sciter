@@ -1,3 +1,7 @@
+//! C interface for behaviors support (a.k.a windowless controls).
+
+#![allow(non_camel_case_types, non_snake_case)]
+
 use sctypes::*;
 use scdom::*;
 use scvalue::{VALUE};

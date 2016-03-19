@@ -1,10 +1,11 @@
-#![allow(non_camel_case_types, non_snake_case)]
+//#![allow(non_camel_case_types, non_snake_case)]
 
 
 /* Macros */
 
 #[macro_use] extern crate lazy_static;
-#[macro_use] mod utf;
+
+#[macro_use] mod macros;
 
 
 /* C interface headers */
@@ -20,7 +21,9 @@ mod scvalue;
 
 
 /* Rust interface */
+mod utf;
 mod platform;
+
 pub mod window;
 pub mod host;
 pub mod value;
@@ -43,7 +46,7 @@ mod ext {
 	extern "stdcall" { pub fn SciterAPI() -> *const ::scapi::ISciterAPI;	}
 }
 
-
+#[allow(non_snake_case)]
 pub fn SciterAPI<'a>() -> &'a ::scapi::ISciterAPI {
 	let ap = unsafe {
 		let p = ext::SciterAPI();

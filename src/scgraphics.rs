@@ -1,3 +1,7 @@
+//! Sciter's platform independent graphics interface.
+
+#![allow(non_camel_case_types, non_snake_case)]
+
 use sctypes::{LPVOID};
 
 pub type HGFX = LPVOID;

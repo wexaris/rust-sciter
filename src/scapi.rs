@@ -1,3 +1,5 @@
+//! Sciter C API interface.
+
 #![allow(non_snake_case, non_camel_case_types)]
 
 use sctypes::*;
@@ -10,6 +12,7 @@ use scgraphics::{SciterGraphicsAPI};
 use screquest::{SciterRequestAPI};
 use utf::*;
 
+/// Sciter API functions.
 #[repr(C)]
 pub struct ISciterAPI
 {

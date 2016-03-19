@@ -12,6 +12,7 @@ use std::ffi::{CStr, CString};
 use sctypes::{LPCSTR, LPCWSTR};
 
 
+/// UTF-8 to UTF-16* converter.
 #[allow(unused_parens)]
 fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 {
@@ -84,6 +85,8 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 	return num_errors == 0;
 }
 
+
+/// UTF-16 to UTF-8 converter.
 #[allow(unused_parens)]
 fn fromwcs(wcs: &[u16], outbuf: &mut Vec<u8>) -> bool
 {
@@ -120,7 +123,7 @@ fn fromwcs(wcs: &[u16], outbuf: &mut Vec<u8>) -> bool
 }
 
 
-/// UTF-16 string length like libc::wcslen
+/// UTF-16 string length like `libc::wcslen`.
 fn wcslen(sz: LPCWSTR) -> usize
 {
 	if sz.is_null() {
@@ -137,7 +140,7 @@ fn wcslen(sz: LPCWSTR) -> usize
 	return i as usize;
 }
 
-/// UTF8 to rust string conversion
+/// UTF8 to rust string conversion. See also `s2u!`.
 pub fn u2s(sz: LPCSTR) -> String
 {
 	if sz.is_null() {
@@ -148,7 +151,7 @@ pub fn u2s(sz: LPCSTR) -> String
 	return cow.into_owned();
 }
 
-/// UTF-16 to rust string conversion
+/// UTF-16 to rust string conversion. See also `s2w!`.
 pub fn w2s(sz: LPCWSTR) -> String
 {
 	if sz.is_null() {
@@ -160,22 +163,14 @@ pub fn w2s(sz: LPCWSTR) -> String
 	return s;
 }
 
-/// Rust string to UTF-8 conversion
-macro_rules! s2u {
-	($s:expr) => ( ::utf::s2un($s) )
-}
-
+/// Rust string to UTF-8 conversion.
 pub fn s2un(s: &str) -> (CString, u32) {
 	let cs = CString::new(s).unwrap();
 	let n = cs.as_bytes().len() as u32;
 	return (cs, n);
 }
 
-/// Rust string to UTF-16 conversion
-macro_rules! s2w {
-	($s:expr) => ( ::utf::s2vecn($s) )
-}
-
+/// Rust string to UTF-16 conversion.
 pub fn s2vec(s: &str) -> Vec<u16> {
 	let cs = CString::new(s).unwrap();
 	let mut out = Vec::with_capacity(s.len() * 2);
@@ -186,6 +181,7 @@ pub fn s2vec(s: &str) -> Vec<u16> {
 	return out;
 }
 
+/// Rust string to UTF-16 conversion.
 pub fn s2vecn(s: &str) -> (Vec<u16>, u32) {
 	let cs = CString::new(s).unwrap();
 	let mut out = Vec::with_capacity(s.len() * 2);
@@ -251,5 +247,4 @@ mod tests {
 		assert_eq!(n, 0);
 		assert_eq!(cs, []);
 	}
-
 }

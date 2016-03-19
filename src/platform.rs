@@ -1,7 +1,5 @@
 //! Platform-dependent windows support.
 
-#![allow(dead_code)]
-
 use sctypes::*;
 
 

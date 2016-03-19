@@ -1,4 +1,6 @@
-#![allow(dead_code)]
+//! DOM access methods, C interface.
+
+#![allow(non_camel_case_types, non_snake_case)]
 
 use sctypes::*;
 

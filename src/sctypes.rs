@@ -1,5 +1,6 @@
+//! Sciter platform-dependent types.
+
 #![allow(non_camel_case_types, non_snake_case)]
-#![allow(dead_code)]
 
 extern crate libc;
 
