@@ -5,7 +5,8 @@
 
 #[macro_use] extern crate lazy_static;
 
-#[macro_use] mod macros;
+#[macro_use]
+mod macros;
 
 
 /* C interface headers */
@@ -22,7 +23,7 @@ mod schandler;
 
 
 /* Rust interface */
-mod utf;
+pub mod utf;
 mod platform;
 
 pub mod window;

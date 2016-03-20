@@ -27,3 +27,15 @@ macro_rules! s2u {
 macro_rules! s2w {
 	($s:expr) => ( ::utf::s2vecn($s) )
 }
+
+/// UTF-16 to `String` conversion.
+#[macro_export]
+macro_rules! w2s {
+	($s:expr) => ( ::utf::w2s($s) )
+}
+
+/// UTF-8 to `String` conversion.
+#[macro_export]
+macro_rules! u2s {
+	($s:expr) => ( ::utf::u2s($s) )
+}
