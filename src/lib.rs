@@ -18,6 +18,7 @@ mod screquest;
 mod sctiscript;
 mod sctypes;
 mod scvalue;
+mod schandler;
 
 
 /* Rust interface */
