@@ -42,6 +42,12 @@ mod windows {
 		fn PostQuitMessage(code: INT);
 	}
 
+	#[link(name="ole32")]
+	extern "stdcall"
+	{
+		fn OleInitialize(pv: LPCVOID) -> i32;	// HRESULT
+	}
+
 	pub struct OsWindow
 	{
 		hwnd: HWINDOW,
@@ -51,6 +57,10 @@ mod windows {
 
 		pub fn new() -> OsWindow {
 			OsWindow { hwnd: 0 as HWINDOW }
+		}
+
+		fn init_app() {
+			unsafe { OleInitialize(::std::ptr::null()) };
 		}
 
 	}
@@ -64,9 +74,17 @@ mod windows {
 
 		/// Create a new native window.
 		fn create(&mut self, flags: UINT, parent: HWINDOW) -> HWINDOW {
+
+			if (flags & SCITER_CREATE_WINDOW_FLAGS::SW_MAIN as u32) != 0 {
+				OsWindow::init_app();
+			}
+
 			let rc = RECT::default();
 			let cb = 0 as *const SciterWindowDelegate;
 			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+			if self.hwnd.is_null() {
+				panic!("Failed to create window!");
+			}
 			return self.hwnd;
 		}
 		
