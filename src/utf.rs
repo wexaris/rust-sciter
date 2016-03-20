@@ -154,10 +154,15 @@ pub fn u2s(sz: LPCSTR) -> String
 /// UTF-16 to rust string conversion. See also `s2w!`.
 pub fn w2s(sz: LPCWSTR) -> String
 {
+	return w2sn(sz, wcslen(sz));
+}
+
+/// UTF-16 to rust string conversion. See also `s2w!`.
+pub fn w2sn(sz: LPCWSTR, len: usize) -> String
+{
 	if sz.is_null() {
 		return String::new();
 	}
-	let len = wcslen(sz);
 	let chars = unsafe { ::std::slice::from_raw_parts(sz, len) };
 	let s = String::from_utf16_lossy(chars);
 	return s;

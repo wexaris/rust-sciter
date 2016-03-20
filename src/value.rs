@@ -4,19 +4,19 @@ use ::{_API};
 use scvalue::*;
 use sctypes::*;
 
+
 /// sciter::value wrapper.
-#[derive(Debug)]
 pub struct Value
 {
 	data: VALUE,
+	tmp: * mut Value,
 }
-
 
 impl Value {
 
 	/// Return a new sciter value object (undefined).
 	pub fn new() -> Value {
-		Value { data: VALUE { t: VALUE_TYPE::T_UNDEFINED, u: 0, d: 0 } }
+		Value { data: VALUE::default(), tmp: ::std::ptr::null_mut() }
 	}
 
 	/// Make explicit json null value.
@@ -61,10 +61,7 @@ impl Value {
 	/// Note that `Value::from_str()` parses a json string to value object and returns a `Result<Value>`
 	/// unlike `Value::from()`, which returns just string object only.
 	pub fn from_str(val: &str) -> Result<Self, VALUE_RESULT> {
-		match Value::parse(val) {
-			Ok(v) => Ok(v),
-			Err(_) => Err(VALUE_RESULT::HV_BAD_PARAMETER),
-		}
+		Value::parse(val).or(Err(VALUE_RESULT::HV_BAD_PARAMETER))
 	}
 
 	pub fn as_ptr(&mut self) -> *mut VALUE {
@@ -75,6 +72,24 @@ impl Value {
 		&self.data as *const VALUE
 	}
 
+	pub fn as_mut_ptr(&self) -> * mut VALUE {
+		unsafe { ::std::mem::transmute(self.as_cptr()) }
+	}
+
+	/// Get inner value type.
+	pub fn get_type(&self) -> VALUE_TYPE {
+		return self.data.t;
+	}
+
+	pub fn full_type(&self) -> (VALUE_TYPE, UINT) {
+		return (self.data.t, self.data.u);
+	}
+
+	/// Convert T_OBJECT value type to JSON T_MAP or T_ARRAY.
+	pub fn isolate(&mut self) {
+		(_API.ValueIsolate)(self.as_ptr());
+	}
+
 	/// Clear the VALUE and deallocates all assosiated structures that are not used anywhere else.
 	pub fn clear(&mut self) -> &mut Value {
 		(_API.ValueClear)(self.as_ptr());
@@ -82,19 +97,127 @@ impl Value {
 	}
 
 	/// Return the number of items in the T_ARRAY, T_MAP, T_FUNCTION and T_OBJECT sciter::value.
-	pub fn length(&self) -> i32 {
-		let mut n: i32 = 0;
+	pub fn len(&self) -> usize {
+		let mut n: INT = 0;
 		(_API.ValueElementsCount)(self.as_cptr(), &mut n);
-		return n;
+		return n as usize;
 	}
 
-	// TODO: isolate, copy?
-	// TODO: append, insert
+	/// Append value to the end of T_ARRAY sciter::value.
+	pub fn push(&mut self, src: Value) {
+		(_API.ValueNthElementValueSet)(self.as_ptr(), self.len() as INT, src.as_cptr());
+	}
+
+	/// Insert or set value at given `index` of T_ARRAY, T_MAP, T_FUNCTION and T_OBJECT sciter::value.
+	pub fn insert(&mut self, index: usize, src: Value) {
+		(_API.ValueNthElementValueSet)(self.as_ptr(), index as INT, src.as_cptr());
+	}
+
+	/// Value to integer.
+	pub fn to_int(&self) -> Option<i32> {
+		let mut val = 0 as i32;
+		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::HV_OK => Some(val),
+			_ => None
+		}
+	}
+
+	/// Value to bool.
+	pub fn to_bool(&self) -> Option<bool> {
+		let mut val = 0 as i32;
+		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::HV_OK => Some(val != 0),
+			_ => None
+		}
+	}
+
+	/// Value to float.
+	pub fn to_float(&self) -> Option<f64> {
+		let mut val = 0 as f64;
+		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::HV_OK => Some(val),
+			_ => None
+		}
+	}
+
+	/// Value to string.
+	pub fn as_string(&self) -> Option<String> {
+		let mut s = 0 as LPCWSTR;
+		let mut n = 0 as UINT;
+		match (_API.ValueStringData)(self.as_cptr(), &mut s, &mut n) {
+			VALUE_RESULT::HV_OK => Some(::utf::w2sn(s, n as usize)),
+			_ => None
+		}
+	}
+
+	/// Value as json string (converted in-place).
+	pub fn into_string(&mut self) -> String {
+		(_API.ValueToString)(self.as_ptr(), VALUE_STRING_CVT_TYPE::CVT_JSON_LITERAL);
+		return self.as_string().unwrap();
+	}
+
+	/// Value as byte slice for T_BYTES type.
+	pub fn as_bytes(&self) -> Option<&[u8]> {
+		let mut s = 0 as LPCBYTE;
+		let mut n = 0 as UINT;
+		match (_API.ValueBinaryData)(self.as_cptr(), &mut s, &mut n) {
+			VALUE_RESULT::HV_OK => Some(unsafe { ::std::slice::from_raw_parts(s, n as usize) }),
+			_ => None
+		}
+	}
+
+	/// Value to byte vector for T_BYTES type.
+	pub fn to_bytes(&self) -> Option<Vec<u8>> {
+		match self.as_bytes() {
+			Some(r) => Some(r.to_owned()),
+			None => None,
+		}
+	}
+
+	pub fn pack_to(&self, dst: &mut VALUE) {
+		(_API.ValueCopy)(dst, self.as_cptr());
+	}
+
+	pub fn pack_args(args: &[Value]) -> Vec<VALUE> {
+		let argc = args.len();
+		let mut argv: Vec<VALUE> = Vec::with_capacity(argc);
+		argv.resize(argc, VALUE::default());
+		for i in 0..argc {
+			args[i].pack_to(&mut argv[i]);
+		}
+		return argv;
+	}
+
+	pub fn unpack_from(args: * const VALUE, count: UINT) -> Vec<Value> {
+		let argc = count as usize;
+		let args = unsafe { ::std::slice::from_raw_parts(args, argc) };
+		let mut argv: Vec<Value> = Vec::with_capacity(argc);
+		for i in 0..argc {
+			let mut v = Value::new();
+			(_API.ValueCopy)(v.as_ptr(), &args[i]);
+			argv.push(v);
+		}
+		return argv;
+	}
+
+	fn ensure_tmp_mut(&self) -> &mut Value {
+		let cp = self as *const Value;
+		let mp = cp as *mut Value;
+		let me = unsafe { &mut *mp };
+		return me.ensure_tmp();
+	}
+
+	fn ensure_tmp(&mut self) -> &mut Value {
+		if self.tmp.is_null() {
+			let tmp = Box::new(Value::new());
+			self.tmp = Box::into_raw(tmp);
+		}
+		return unsafe { &mut *self.tmp };
+	}
+
 	// TODO: get_item, set_item
 	// TODO: keys, values, items
 	// TODO: call
-	// TOOD: get type?
-	// TODO: get / set_value
 
 	pub fn is_undefined(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_UNDEFINED
@@ -154,10 +277,101 @@ impl Value {
 	}
 }
 
+impl ::std::fmt::Display for Value {
+	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+		let mut copy = self.clone();
+		let re = copy.into_string();
+		f.write_str(&re)
+	}
+}
+
+
+impl ::std::fmt::Debug for Value {
+	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+		let mut tname = format!("{:?}", self.data.t);
+		if self.is_undefined() || self.is_null() {
+			return f.write_str(&tname[2..].to_lowercase());
+		}
+		if self.is_string() && self.data.u != 0 {
+			let units = ["symbol", "string", "error", "secure"];
+			tname.push_str(":");
+			tname.push_str(units[(self.data.u as i16 + 1) as usize]);
+		}
+		try!(f.write_str(&tname[2..].to_lowercase()));
+		try!(f.write_str(":"));
+		write!(f, "{}", &self)
+	}
+}
+
 impl Drop for Value {
 	/// Destroy pointed value.
 	fn drop(&mut self) {
+		if !self.tmp.is_null() {
+			unsafe { Box::from_raw(self.tmp) };
+		}
 		(_API.ValueClear)(self.as_ptr());
+	}
+}
+
+impl Default for Value {
+	fn default() -> Self {
+		return Value::new();
+	}
+}
+
+impl Clone for Value {
+	fn clone(&self) -> Self {
+		let mut dst = Value::new();
+		(_API.ValueCopy)(dst.as_ptr(), self.as_cptr());
+		return dst;
+	}
+}
+
+impl ::std::cmp::PartialEq for Value {
+	fn eq(&self, other: &Self) -> bool {
+		match (_API.ValueCompare)(self.as_cptr(), other.as_cptr()) {
+			VALUE_RESULT::HV_OK_TRUE => true,
+			VALUE_RESULT::HV_OK => false,
+			_ => false
+		}
+	}
+}
+
+/// Get item by index for array type.
+impl ::std::ops::Index<usize> for Value {
+	type Output = Value;
+	fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
+		let tmp = self.ensure_tmp_mut();
+		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_mut_ptr());
+		return tmp;
+	}
+}
+
+/// Get item by index for array type.
+impl ::std::ops::IndexMut<usize> for Value {
+	fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut Value {
+		let tmp = self.ensure_tmp_mut();
+		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_ptr());
+		return tmp;
+	}
+}
+
+/// Get item by key for map type.
+impl ::std::ops::Index<Value> for Value {
+	type Output = Value;
+	fn index<'a>(&'a self, index: Value) -> &'a Self::Output {
+		let tmp = self.ensure_tmp_mut();
+		(_API.ValueGetValueOfKey)(self.as_cptr(), index.as_cptr(), tmp.as_mut_ptr());
+		return tmp;
+	}
+}
+
+/// Get item by key for map type.
+impl ::std::ops::IndexMut<Value> for Value {
+	fn index_mut<'a>(&'a mut self, index: Value) -> &'a mut Value {
+		let tmp = self.ensure_tmp_mut();
+		(_API.ValueGetValueOfKey)(self.as_cptr(), index.as_cptr(), tmp.as_mut_ptr());
+		return tmp;
 	}
 }
 
@@ -199,6 +413,15 @@ impl<'a> From<&'a str> for Value {
 	}
 }
 
+/// Value from string.
+impl From<String> for Value {
+	fn from(val: String) -> Self {
+		let mut me = Value::new();
+		me.assign_str(&val, VALUE_UNIT_TYPE_STRING::UT_STRING_STRING);
+		return me;
+	}
+}
+
 /// Value from json string.
 impl ::std::str::FromStr for Value {
 	type Err = VALUE_RESULT;
@@ -216,6 +439,49 @@ impl<'a> From<&'a [u8]> for Value {
 	}
 }
 
+/// Value from sequence of i32.
+impl ::std::iter::FromIterator<i32> for Value {
+	fn from_iter<I: IntoIterator<Item=i32>>(iterator: I) -> Self {
+		let mut v = Value::new();
+		for i in iterator {
+			v.push(Value::from(i));
+		}
+		return v;
+	}
+}
+
+/// Value from sequence of f64.
+impl ::std::iter::FromIterator<f64> for Value {
+	fn from_iter<I: IntoIterator<Item=f64>>(iterator: I) -> Self {
+		let mut v = Value::new();
+		for i in iterator {
+			v.push(Value::from(i));
+		}
+		return v;
+	}
+}
+
+/// Value from sequence of &str.
+impl<'a> ::std::iter::FromIterator<&'a str> for Value {
+	fn from_iter<I: IntoIterator<Item=&'a str>>(iterator: I) -> Self {
+		let mut v = Value::new();
+		for i in iterator {
+			v.push(Value::from(i));
+		}
+		return v;
+	}
+}
+
+/// Value from sequence of String.
+impl ::std::iter::FromIterator<String> for Value {
+	fn from_iter<I: IntoIterator<Item=String>>(iterator: I) -> Self {
+		let mut v = Value::new();
+		for i in iterator {
+			v.push(Value::from(i));
+		}
+		return v;
+	}
+}
 
 
 mod tests {
@@ -245,12 +511,12 @@ mod tests {
 		assert_eq!(data.t, VALUE_TYPE::T_UNDEFINED);
 
 		let mut v = Value::new();
-		println!("value {:?}", v);
+		// println!("value {:?}", v);
 
-		let p1 = v.as_ptr();
-		let p2 = &mut v.data as *mut VALUE;
-		println!("p1 {:?} p2 {:?} ", p1, p2);
-		assert!(p1 == p2);
+		// let p1 = v.as_ptr();
+		// let p2 = &mut v.data as *mut VALUE;
+		// println!("p1 {:?} p2 {:?} ", p1, p2);
+		// assert!(p1 == p2);
 	}
 
 	#[test]

@@ -14,6 +14,7 @@ macro_rules! s2u {
 	($s:expr) => ( ::utf::s2un($s) )
 }
 
+
 /// Rust string to UTF-16 conversion. See also `utf::w2s`.
 /// 
 /// # Example:
@@ -28,14 +29,34 @@ macro_rules! s2w {
 	($s:expr) => ( ::utf::s2vecn($s) )
 }
 
+
 /// UTF-16 to `String` conversion.
 #[macro_export]
 macro_rules! w2s {
 	($s:expr) => ( ::utf::w2s($s) )
 }
 
+
 /// UTF-8 to `String` conversion.
 #[macro_export]
 macro_rules! u2s {
 	($s:expr) => ( ::utf::u2s($s) )
+}
+
+
+/// Pack arguments to call the sciter script function.
+#[macro_export]
+macro_rules! pack_args {
+	() => { sciter::value::Value::pack_args(&[]) };
+
+	( $($s:expr),* ) => {
+		{
+			let args = [
+			$(
+				sciter::value::Value::from($s)
+			 ),*
+			];
+			sciter::value::Value::pack_args(&args)
+		}
+	};
 }

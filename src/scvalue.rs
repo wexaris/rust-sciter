@@ -6,12 +6,18 @@
 use sctypes::*;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VALUE
 {
 	pub t: VALUE_TYPE,
 	pub u: UINT,
 	pub d: UINT64,
+}
+
+impl Default for VALUE {
+	fn default() -> Self {
+		VALUE { t: VALUE_TYPE::T_UNDEFINED, u: 0, d: 0 }
+	}
 }
 
 #[repr(C)]
@@ -35,7 +41,7 @@ pub enum VALUE_STRING_CVT_TYPE {
 
 
 #[repr(C)]
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub enum VALUE_TYPE {
 	T_UNDEFINED = 0,
 	T_NULL = 1,
