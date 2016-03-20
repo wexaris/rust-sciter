@@ -4,17 +4,16 @@ use scdef::*;
 use sctypes::*;
 
 use platform::{BaseWindow, OsWindow};
-use host::{Host};
+use host::{Host, HostHandler};
 
 
 /// Sciter window.
 pub struct Window
 {
 	base: OsWindow,
-	pub host: Host,
+	host: Host,
 	// event: EventHandler,
 }
-
 
 impl Window {
 
@@ -30,11 +29,28 @@ impl Window {
 
 		let hwnd = wnd.base.get_hwnd();
 		if !hwnd.is_null() {
-			wnd.host.setup_debug();
-			wnd.host.setup_callback(hwnd);
+			wnd.host = Host::from(hwnd);
+			// wnd.host.setup_debug();
+			// wnd.host.setup_callback(hwnd);
 			// wnd.event.attach(hwnd);
 		}
 		return wnd;
+	}
+
+	/// Set callback for sciter engine events.
+	pub fn sciter_handler<T: HostHandler>(&mut self, handler: T) {
+		println!("set custom sciter handler");
+		self.host.setup_callback(self.base.get_hwnd(), handler);
+	}
+
+	/// Load HTML document from file.
+	pub fn load_file(&mut self, uri: &str) {
+		self.host.load_file(uri)
+	}
+
+	/// Load HTML document from memory.
+	pub fn load_html(&mut self, html: &[u8], uri: Option<&str>) {
+		self.host.load_html(html, uri)
 	}
 
 	/// Get native window handle.

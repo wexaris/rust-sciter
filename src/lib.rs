@@ -21,6 +21,7 @@ mod sctypes;
 mod scvalue;
 mod schandler;
 
+pub use scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
 
 /* Rust interface */
 pub mod utf;

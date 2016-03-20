@@ -71,6 +71,7 @@ impl ::std::ops::BitOr for SCITER_CREATE_WINDOW_FLAGS {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub enum SCITER_NOTIFICATION {
   SC_LOAD_DATA = 1,
   SC_DATA_LOADED = 2,
