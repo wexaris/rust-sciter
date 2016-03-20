@@ -8,6 +8,6 @@ fn main() {
 	println!("me:  {},\ndir: {}", me.display(), dir.display());
 
 	let mut frame = sciter::Window::new();
-	frame.host.load_file("minimal.htm");
+	frame.load_file("minimal.htm");
 	frame.run_app(true);
 }
