@@ -187,7 +187,7 @@ extern "stdcall" fn _on_handle_notification<T: HostHandler>(pnm: *mut SCITER_CAL
 }
 
 // Sciter debug output handler.
-extern "stdcall" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, 
+extern "stdcall" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY,
 	text: LPCWSTR, _text_length: UINT)
 {
 	// reconstruct pointer to Handler
@@ -195,7 +195,7 @@ extern "stdcall" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsys
 
 	{
 		let me = boxed.as_ref::<T>();
-		let message = w2s(text);
-		me.on_debug_output(subsystem, severity, message.as_str());
+		let message = w2s(text).replace("\r", "\n");
+		me.on_debug_output(subsystem, severity, message.trim_right());
 	}
 }
