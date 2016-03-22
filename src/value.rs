@@ -29,20 +29,20 @@ impl Value {
 	/// Make sciter symbol value.
 	pub fn symbol(val: &str) -> Value {
 		let mut me = Value::new();
-		me.assign_str(val, VALUE_UNIT_TYPE_STRING::UT_STRING_SYMBOL);
+		me.assign_str(val, VALUE_UNIT_TYPE_STRING::SYMBOL);
 		return me;
 	}
 
 	/// Make sciter error value.
 	pub fn error(val: &str) -> Value {
 		let mut me = Value::new();
-		me.assign_str(val, VALUE_UNIT_TYPE_STRING::UT_STRING_ERROR);
+		me.assign_str(val, VALUE_UNIT_TYPE_STRING::ERROR);
 		return me;
 	}
 
 	/// Parse json string into value.
 	pub fn parse(val: &str) -> Result<Value, u32> {
-		return Value::parse_as(val, VALUE_STRING_CVT_TYPE::CVT_JSON_LITERAL);
+		return Value::parse_as(val, VALUE_STRING_CVT_TYPE::JSON_LITERAL);
 	}
 
 	/// Parse json string into value.
@@ -61,7 +61,7 @@ impl Value {
 	/// Note that `Value::from_str()` parses a json string to value object and returns a `Result<Value>`
 	/// unlike `Value::from()`, which returns just string object only.
 	pub fn from_str(val: &str) -> Result<Self, VALUE_RESULT> {
-		Value::parse(val).or(Err(VALUE_RESULT::HV_BAD_PARAMETER))
+		Value::parse(val).or(Err(VALUE_RESULT::BAD_PARAMETER))
 	}
 
 	pub fn as_ptr(&mut self) -> *mut VALUE {
@@ -117,7 +117,7 @@ impl Value {
 	pub fn to_int(&self) -> Option<i32> {
 		let mut val = 0 as i32;
 		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
-			VALUE_RESULT::HV_OK => Some(val),
+			VALUE_RESULT::OK => Some(val),
 			_ => None
 		}
 	}
@@ -126,7 +126,7 @@ impl Value {
 	pub fn to_bool(&self) -> Option<bool> {
 		let mut val = 0 as i32;
 		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
-			VALUE_RESULT::HV_OK => Some(val != 0),
+			VALUE_RESULT::OK => Some(val != 0),
 			_ => None
 		}
 	}
@@ -135,24 +135,24 @@ impl Value {
 	pub fn to_float(&self) -> Option<f64> {
 		let mut val = 0 as f64;
 		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
-			VALUE_RESULT::HV_OK => Some(val),
+			VALUE_RESULT::OK => Some(val),
 			_ => None
 		}
 	}
 
-	/// Value to string.
+	/// Value as string for T_STRING type.
 	pub fn as_string(&self) -> Option<String> {
 		let mut s = 0 as LPCWSTR;
 		let mut n = 0 as UINT;
 		match (_API.ValueStringData)(self.as_cptr(), &mut s, &mut n) {
-			VALUE_RESULT::HV_OK => Some(::utf::w2sn(s, n as usize)),
+			VALUE_RESULT::OK => Some(::utf::w2sn(s, n as usize)),
 			_ => None
 		}
 	}
 
-	/// Value as json string (converted in-place).
+	/// Value to json string (converted in-place).
 	pub fn into_string(&mut self) -> String {
-		(_API.ValueToString)(self.as_ptr(), VALUE_STRING_CVT_TYPE::CVT_JSON_LITERAL);
+		(_API.ValueToString)(self.as_ptr(), VALUE_STRING_CVT_TYPE::JSON_LITERAL);
 		return self.as_string().unwrap();
 	}
 
@@ -161,7 +161,7 @@ impl Value {
 		let mut s = 0 as LPCBYTE;
 		let mut n = 0 as UINT;
 		match (_API.ValueBinaryData)(self.as_cptr(), &mut s, &mut n) {
-			VALUE_RESULT::HV_OK => Some(unsafe { ::std::slice::from_raw_parts(s, n as usize) }),
+			VALUE_RESULT::OK => Some(unsafe { ::std::slice::from_raw_parts(s, n as usize) }),
 			_ => None
 		}
 	}
@@ -171,6 +171,19 @@ impl Value {
 		match self.as_bytes() {
 			Some(r) => Some(r.to_owned()),
 			None => None,
+		}
+	}
+
+	/// Function invokation for T_OBJECT/UT_OBJECT_FUNCTION.
+	pub fn call(&self, this: Option<Value>, args: &[Value], name: Option<&str>) -> Result<Value, VALUE_RESULT> {
+		let mut rv = Value::new();
+		let argv = Value::pack_args(args);
+		let (name,_) = s2w!(name.unwrap_or(""));
+		let ok = (_API.ValueInvoke)(self.as_cptr(), this.unwrap_or(Value::default()).as_ptr(),
+			argv.len() as UINT, argv.as_ptr(), rv.as_ptr(), name.as_ptr());
+		match ok {
+			VALUE_RESULT::OK => Ok(rv),
+			_ => Err(ok)
 		}
 	}
 
@@ -241,10 +254,10 @@ impl Value {
 		self.data.t == VALUE_TYPE::T_STRING
 	}
 	pub fn is_symbol(&self) -> bool {
-		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::UT_STRING_SYMBOL as UINT
+		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::SYMBOL as UINT
 	}
 	pub fn is_error_string(&self) -> bool {
-		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::UT_STRING_ERROR as UINT
+		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::ERROR as UINT
 	}
 	pub fn is_date(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_DATE
@@ -330,8 +343,8 @@ impl Clone for Value {
 impl ::std::cmp::PartialEq for Value {
 	fn eq(&self, other: &Self) -> bool {
 		match (_API.ValueCompare)(self.as_cptr(), other.as_cptr()) {
-			VALUE_RESULT::HV_OK_TRUE => true,
-			VALUE_RESULT::HV_OK => false,
+			VALUE_RESULT::OK_TRUE => true,
+			VALUE_RESULT::OK => false,
 			_ => false
 		}
 	}
@@ -408,7 +421,7 @@ impl From<bool> for Value {
 impl<'a> From<&'a str> for Value {
 	fn from(val: &'a str) -> Self {
 		let mut me = Value::new();
-		me.assign_str(val, VALUE_UNIT_TYPE_STRING::UT_STRING_STRING);
+		me.assign_str(val, VALUE_UNIT_TYPE_STRING::STRING);
 		return me;
 	}
 }
@@ -417,7 +430,7 @@ impl<'a> From<&'a str> for Value {
 impl From<String> for Value {
 	fn from(val: String) -> Self {
 		let mut me = Value::new();
-		me.assign_str(&val, VALUE_UNIT_TYPE_STRING::UT_STRING_STRING);
+		me.assign_str(&val, VALUE_UNIT_TYPE_STRING::STRING);
 		return me;
 	}
 }
@@ -486,7 +499,7 @@ impl ::std::iter::FromIterator<String> for Value {
 
 mod tests {
 	#![allow(unused_imports, unused_variables, unused_mut)]
-	
+
 	use super::{Value};
 	use ::scvalue::*;
 	use std::mem;

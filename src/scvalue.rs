@@ -24,19 +24,19 @@ impl Default for VALUE {
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum VALUE_RESULT
 {
-  HV_OK_TRUE = -1,
-  HV_OK = 0,
-  HV_BAD_PARAMETER = 1,
-  HV_INCOMPATIBLE_TYPE = 2,
+  OK_TRUE = -1,
+  OK = 0,
+  BAD_PARAMETER = 1,
+  INCOMPATIBLE_TYPE = 2,
 }
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum VALUE_STRING_CVT_TYPE {
-	CVT_SIMPLE = 0,
-	CVT_JSON_LITERAL = 1,
-	CVT_JSON_MAP = 2,
-	CVT_XJSON_LITERAL = 3,
+	SIMPLE = 0,
+	JSON_LITERAL = 1,
+	JSON_MAP = 2,
+	XJSON_LITERAL = 3,
 }
 
 
@@ -64,10 +64,10 @@ pub enum VALUE_TYPE {
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum VALUE_UNIT_TYPE_STRING
 {
-    UT_STRING_STRING = 0,        // string
-    UT_STRING_ERROR  = 1,         // is an error string
-    UT_STRING_SECURE = 2,        // secure string ("wiped" on destroy)
-    UT_STRING_SYMBOL = 0xffff,   // symbol in tiscript sense
+	STRING = 0,        // string
+	ERROR  = 1,         // is an error string
+	SECURE = 2,        // secure string ("wiped" on destroy)
+	SYMBOL = 0xffff,   // symbol in tiscript sense
 }
 
 

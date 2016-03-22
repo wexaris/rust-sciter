@@ -149,6 +149,21 @@ fn pack_args_works() {
 }
 
 #[test]
+fn make_args_works() {
+	let args = make_args!();
+	assert_eq!(args.len(), 0);
+
+	let args = make_args!(777);
+	assert_eq!(args.len(), 1);
+
+	let args = make_args!(1,2,3);
+	assert_eq!(args.len(), 3);
+
+	let args = make_args!(1, "2", 3.0);
+	assert_eq!(args.len(), 3);
+}
+
+#[test]
 fn append_works() {
 	let mut v = Value::new();
 	v.push(Value::from(1));
@@ -212,7 +227,7 @@ fn index_works() {
 
 #[test]
 fn display_works() {
-	println!("\nvalue strings: new {}, null {}, bool {}, int {}, float {}, symbol {}, str {}", 
+	println!("\nvalue strings: new {}, null {}, bool {}, int {}, float {}, symbol {}, str {}",
 		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(3.14),
 		Value::symbol("symbol"), Value::from("hello"));
 
@@ -221,7 +236,7 @@ fn display_works() {
 
 #[test]
 fn debug_works() {
-	println!("\nvalue strings: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}", 
+	println!("\nvalue strings: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
 		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(3.14),
 		Value::symbol("symbol"), Value::from("hello"));
 

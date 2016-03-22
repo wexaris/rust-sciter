@@ -61,6 +61,22 @@ macro_rules! pack_args {
 	};
 }
 
+/// Make `[Value]` sequence to call the sciter script function.
+#[macro_export]
+macro_rules! make_args {
+	() => { { let args : [$crate::value::Value; 0] = []; args } };
+
+	( $($s:expr),* ) => {
+		{
+			let args = [
+			$(
+				$crate::value::Value::from($s)
+			 ),*
+			];
+			args
+		}
+	};
+}
 
 /// Declare handle type (native pointer).
 #[macro_export]
