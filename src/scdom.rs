@@ -4,19 +4,33 @@
 
 use sctypes::*;
 
-pub type HELEMENT = LPVOID;
-pub type HNODE = LPVOID;
+MAKE_HANDLE!(HELEMENT, _HELEMENT);
+MAKE_HANDLE!(HNODE, _HNODE);
 
 #[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum SCDOM_RESULT {
-	SCDOM_OK = 0,
-	SCDOM_INVALID_HWND = 1,
-	SCDOM_INVALID_HANDLE = 2,
-	SCDOM_PASSIVE_HANDLE = 3,
-	SCDOM_INVALID_PARAMETER = 4,
-	SCDOM_OPERATION_FAILED = 5,
-	SCDOM_OK_NOT_HANDLED = -1,
+	OK = 0,
+	INVALID_HWND = 1,
+	INVALID_HANDLE = 2,
+	PASSIVE_HANDLE = 3,
+	INVALID_PARAMETER = 4,
+	OPERATION_FAILED = 5,
+	OK_NOT_HANDLED = -1,
 }
+
+#[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
+pub enum SET_ELEMENT_HTML
+{
+  SIH_REPLACE_CONTENT     = 0,
+  SIH_INSERT_AT_START     = 1,
+  SIH_APPEND_AFTER_LAST   = 2,
+  SOH_REPLACE             = 3,
+  SOH_INSERT_BEFORE       = 4,
+  SOH_INSERT_AFTER        = 5,
+}
+
 
 pub type SciterElementCallback = extern "stdcall" fn (he: HELEMENT, param: LPVOID) -> BOOL;
 

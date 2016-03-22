@@ -9,11 +9,11 @@ use screquest::{HREQUEST};
 use scdom::{HELEMENT};
 
 //////////////////////////////////////////////////////////////////////////////////
-pub type ID2D1RenderTarget = VOID;
-pub type ID2D1Factory = VOID;
-pub type IDWriteFactory = VOID;
-pub type IDXGISwapChain = VOID;
-pub type IDXGISurface = VOID;
+pub enum ID2D1RenderTarget {}
+pub enum ID2D1Factory {}
+pub enum IDWriteFactory {}
+pub enum IDXGISwapChain {}
+pub enum IDXGISurface {}
 
 
 #[repr(C)]
@@ -40,7 +40,7 @@ pub enum SCITER_RT_OPTIONS
   SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8, // value - combination of SCRIPT_RUNTIME_FEATURES flags.
   SCITER_SET_GFX_LAYER = 9,      // hWnd = NULL, value - GFX_LAYER
   SCITER_SET_DEBUG_MODE = 10,    // hWnd, value - TRUE/FALSE
-  SCITER_SET_UX_THEMING = 11,    // hWnd = NULL, value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms. 
+  SCITER_SET_UX_THEMING = 11,    // hWnd = NULL, value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
                                 // That UX theme is not using OS primitives for rendering input elements. Use it if you want exactly
                                 // the same (modulo fonts) look-n-feel on all platforms.
 
@@ -131,7 +131,6 @@ pub struct SCITER_CALLBACK_NOTIFICATION
 pub type LPSCITER_CALLBACK_NOTIFICATION = *mut SCITER_CALLBACK_NOTIFICATION;
 
 pub type SciterHostCallback = extern "stdcall" fn (pns: LPSCITER_CALLBACK_NOTIFICATION, callbackParam: LPVOID) -> UINT;
-pub type LPSciterHostCallback = * const SciterHostCallback;
 
 pub type SciterWindowDelegate = extern "stdcall" fn (hwnd: HWINDOW, msg: UINT, wParam: WPARAM, lParam: LPARAM, pParam: LPVOID, handled: * mut BOOL) -> LRESULT;
 
@@ -159,7 +158,7 @@ pub enum OUTPUT_SEVERITY
 pub type DEBUG_OUTPUT_PROC = extern "stdcall" fn (param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, text: LPCWSTR, text_length: UINT);
 
 pub type LPCWSTR_RECEIVER = extern "stdcall" fn (szstr: LPCWSTR, str_length: UINT, param: LPVOID);
-pub type LPCSTR_RECEIVER = extern "stdcall" fn (szstr: LPCWSTR, str_length: UINT, param: LPVOID);
+pub type LPCSTR_RECEIVER  = extern "stdcall" fn (szstr: LPCSTR,  str_length: UINT, param: LPVOID);
 pub type LPCBYTE_RECEIVER = extern "stdcall" fn (szstr: LPCBYTE, str_length: UINT, param: LPVOID);
 
 #[repr(C)]
@@ -168,7 +167,7 @@ pub struct METHOD_PARAMS {
 }
 
 #[repr(C)]
-pub struct REQUEST_PARAM { 
+pub struct REQUEST_PARAM {
   name: LPCWSTR,
   value: LPCWSTR,
 }

@@ -4,7 +4,7 @@
 
 use sctypes::{LPVOID};
 
-pub type HREQUEST = LPVOID;
+MAKE_HANDLE!(HREQUEST, _HREQUEST);
 
 #[repr(C)]
 pub struct SciterRequestAPI

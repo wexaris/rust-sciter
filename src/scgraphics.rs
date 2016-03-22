@@ -4,10 +4,10 @@
 
 use sctypes::{LPVOID};
 
-pub type HGFX = LPVOID;
-pub type HIMG = LPVOID;
-pub type HPATH = LPVOID;
-pub type HTEXT = LPVOID;
+MAKE_HANDLE!(HGFX, _HGFX);
+MAKE_HANDLE!(HIMG, _HIMG);
+MAKE_HANDLE!(HPATH, _HPATH);
+MAKE_HANDLE!(HTEXT, _HTEXT);
 
 #[repr(C)]
 pub struct SciterGraphicsAPI

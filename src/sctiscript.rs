@@ -4,7 +4,7 @@
 
 use sctypes::{LPVOID, UINT64};
 
-pub type HVM = LPVOID;
+MAKE_HANDLE!(HVM, _HVM);
 pub type tiscript_value = UINT64;
 
 #[repr(C)]
