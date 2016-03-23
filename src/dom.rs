@@ -1,0 +1,693 @@
+//! DOM access methods.
+
+use ::{_API};
+use scdom::*;
+use sctypes::*;
+use value::Value;
+
+
+/// Initialize HELEMENT by nullptr.
+macro_rules! HELEMENT {
+	() => { ::std::ptr::null_mut() }
+}
+
+
+macro_rules! ok_or {
+	($rv:expr, $ok:ident) => {
+		if $ok == SCDOM_RESULT::OK {
+			Ok($rv)
+		} else {
+			Err($ok)
+		}
+	};
+
+	// for DOM access not_handled is ok
+	// for calling function operation_failed is also ok
+	($rv:expr, $ok:ident, $skip_not_handled:expr) => {
+		if $ok == SCDOM_RESULT::OK || ($ok == $skip_not_handled) {
+			Ok($rv)
+		} else {
+			Err($ok)
+		}
+	};
+}
+
+
+trait ElementVisitor {
+	fn on_element(&mut self, el: Element) -> bool;
+	fn result(&self) -> Vec<Element>;
+}
+
+#[derive(Default)]
+struct FindFirstElement {
+	all: Vec<Element>,
+}
+
+impl ElementVisitor for FindFirstElement {
+	fn on_element(&mut self, el: Element) -> bool {
+		self.all.push(el);
+		return true;	// stop enumeration
+	}
+	fn result(&self) -> Vec<Element> {
+		self.all.clone()
+	}
+}
+
+#[derive(Default)]
+struct FindAllElements {
+	all: Vec<Element>,
+}
+
+impl ElementVisitor for FindAllElements {
+	fn on_element(&mut self, el: Element) -> bool {
+		self.all.push(el);
+		return false;	// continue enumeration
+	}
+	fn result(&self) -> Vec<Element> {
+		self.all.clone()
+	}
+}
+
+
+/// DOM element wrapper.
+#[derive(PartialEq)]
+pub struct Element {
+	he: HELEMENT,
+}
+
+impl Element {
+
+	///\name Creation
+
+	/// Construct Element object from HELEMENT handle.
+	pub fn from(he: HELEMENT) -> Element {
+		Element { he: Element::use_or(he) }
+	}
+
+	/// Create new element, the element is disconnected initially from the DOM.
+	pub fn create(tag: &str, text: Option<&str>) -> Element {
+		let mut p = HELEMENT!();
+		let (tag,_) = s2u!(tag);
+		let text = ::utf::s2vec(text.unwrap_or(""));
+		(_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut p);
+		Element::from(p)
+	}
+
+	/// Get root DOM element of the Sciter document.
+	pub fn from_window(hwnd: HWINDOW) -> Element {
+		let mut p = HELEMENT!();
+		(_API.SciterGetRootElement)(hwnd, &mut p);
+		Element::from(p)
+	}
+
+	/// Get focus DOM element of the Sciter document.
+	pub fn from_focus(hwnd: HWINDOW) -> Element {
+		let mut p = HELEMENT!();
+		(_API.SciterGetFocusElement)(hwnd, &mut p);
+		Element::from(p)
+	}
+
+	/// Get highlighted element.
+	pub fn from_highlighted(hwnd: HWINDOW) -> Element {
+		let mut p = HELEMENT!();
+		(_API.SciterGetHighlightedElement)(hwnd, &mut p);
+		Element::from(p)
+	}
+
+	/// Find DOM element of the Sciter document by coordinates.
+	pub fn from_point(hwnd: HWINDOW, pt: POINT) -> Element {
+		let mut p = HELEMENT!();
+		(_API.SciterFindElement)(hwnd, pt, &mut p);
+		Element::from(p)
+	}
+
+	/// Get element handle by its UID.
+	pub fn from_uid(hwnd: HWINDOW, uid: u32) -> Element {
+		let mut p = HELEMENT!();
+		(_API.SciterGetElementByUID)(hwnd, uid, &mut p);
+		Element::from(p)
+	}
+
+	fn use_or(he: HELEMENT) -> HELEMENT {
+		let ok = (_API.Sciter_UseElement)(he);
+		if ok == SCDOM_RESULT::OK {
+			he
+		} else {
+			HELEMENT!()
+		}
+	}
+
+
+	///\name Common methods
+
+	/// Access element pointer.
+	pub fn as_ptr(&self) -> HELEMENT {
+		self.he
+	}
+
+	/// Get element UID - identifier suitable for storage.
+	pub fn get_uid(&self) -> u32 {
+		let mut n = 0;
+		(_API.SciterGetElementUID)(self.he, &mut n);
+		return n;
+	}
+
+	/// Return element tag as string (e.g. 'div', 'body').
+	pub fn get_tag(&self) -> String {
+		let mut s = String::new();
+		(_API.SciterGetElementTypeCB)(self.he, store_astr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Get inner text of the element as string.
+	pub fn get_text(&self) -> String {
+		let mut s = String::new();
+		(_API.SciterGetElementTextCB)(self.he, store_wstr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Set inner text of the element.
+	pub fn set_text(&mut self, text: &str) {
+		let (s,n) = s2w!(text);
+		(_API.SciterSetElementText)(self.he, s.as_ptr(), n);
+	}
+
+	/// Get html representation of the element as utf-8 bytes.
+	pub fn get_html(&self, with_outer_html: bool) -> Vec<u8> {
+		let mut s = Vec::new();
+		(_API.SciterGetElementHtmlCB)(self.he, with_outer_html as BOOL, store_bstr, &mut s as *mut Vec<u8> as LPVOID);
+		return s;
+	}
+
+	/// Set inner or outer html of the element.
+	pub fn set_html(&mut self, html: &[u8], how: Option<SET_ELEMENT_HTML>) {
+		if html.len() == 0 {
+			return self.clear();
+		}
+		(_API.SciterSetElementHtml)(self.he, html.as_ptr(), html.len() as UINT, how.unwrap_or(SET_ELEMENT_HTML::SIH_REPLACE_CONTENT) as UINT);
+	}
+
+	/// Get value of the element.
+	pub fn get_value(&self) -> Value {
+		let mut rv = Value::new();
+		(_API.SciterGetValue)(self.he, rv.as_ptr());
+		return rv;
+	}
+
+	/// Set value of the element.
+	pub fn set_value(&mut self, val: Value) {
+		(_API.SciterSetValue)(self.he, val.as_cptr());
+	}
+
+	/// Get HWINDOW of containing window.
+	pub fn get_hwnd(&self, for_root: bool) -> HWINDOW {
+		let mut hwnd: HWINDOW = ::std::ptr::null_mut();
+		(_API.SciterGetElementHwnd)(self.he, &mut hwnd as *mut HWINDOW, for_root as BOOL);
+		return hwnd;
+	}
+
+	// TODO: get_location
+	// TODO: request_data, request_html
+	// TODO: send_request
+	// TODO: send_event, post_event, fire_event
+
+	/// Evaluate script in element context.
+	pub fn eval_script(&self, script: &str) -> Result<Value, SCDOM_RESULT> {
+		let mut rv = Value::new();
+		let (s,n) = s2w!(script);
+		let ok = (_API.SciterEvalElementScript)(self.he, s.as_ptr(), n, rv.as_ptr());
+		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
+	}
+
+	/// Call scripting function defined in the namespace of the element (a.k.a. global function).
+	pub fn call_function(&self, name: &str, args: &[Value]) -> Result<Value, SCDOM_RESULT> {
+		let mut rv = Value::new();
+		let (name,_) = s2u!(name);
+		let argv = Value::pack_args(args);
+		let ok = (_API.SciterCallScriptingFunction)(self.he, name.as_ptr(), argv.as_ptr(), argv.len() as UINT, rv.as_ptr());
+		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
+	}
+
+	/// Call scripting method defined for the element.
+	pub fn call_method(&self, name: &str, args: &[Value]) -> Result<Value, SCDOM_RESULT> {
+		let mut rv = Value::new();
+		let (name,_) = s2u!(name);
+		let argv = Value::pack_args(args);
+		let ok = (_API.SciterCallScriptingMethod)(self.he, name.as_ptr(), argv.as_ptr(), argv.len() as UINT, rv.as_ptr());
+		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
+	}
+
+
+	///\name Attributes
+	/// Get number of the attributes.
+	pub fn attribute_count(&self) -> usize {
+		let mut n = 0u32;
+		(_API.SciterGetAttributeCount)(self.he, &mut n);
+		return n as usize;
+	}
+
+	/// Get attribute name by its index.
+	pub fn attribute_name(&self, index: usize) -> String {
+		let mut s = String::new();
+		(_API.SciterGetNthAttributeNameCB)(self.he, index as UINT, store_astr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Get attribute value by its.
+	pub fn get_attribute(&self, name: &str) -> Option<String> {
+		let mut s = String::new();
+		let (name,_) = s2u!(name);
+		let ok = (_API.SciterGetAttributeByNameCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
+		match ok {
+			SCDOM_RESULT::OK => Some(s),
+			SCDOM_RESULT::OK_NOT_HANDLED => None,
+			_ => None,
+		}
+	}
+
+	/// Get attribute value by its index.
+	pub fn attribute(&self, index: usize) -> String {
+		let mut s = String::new();
+		(_API.SciterGetNthAttributeValueCB)(self.he, index as UINT, store_wstr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Add or replace attribute.
+	pub fn set_attribute(&mut self, name: &str, value: &str) {
+		let (name,_) = s2u!(name);
+		let (value,_) = s2w!(value);
+		(_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value.as_ptr());
+	}
+
+	/// Remove attribute.
+	pub fn remove_attribute(&mut self, name: &str) {
+		let (name,_) = s2u!(name);
+		let value = ::std::ptr::null();
+		(_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value);
+	}
+
+	/// Toggle attribute.
+	pub fn toggle_attribute(&mut self, name: &str, isset: bool, value: Option<&str>) {
+		if isset {
+			self.set_attribute(name, value.unwrap());
+		} else {
+			self.remove_attribute(name);
+		}
+	}
+
+	/// Remove all attributes from the element.
+	pub fn clear_attributes(&mut self) {
+		(_API.SciterClearAttributes)(self.he);
+	}
+
+
+	///\name Style Attributes
+
+	/// Get style attribute of the element by its name.
+	pub fn style_attribute(&self, name: &str) -> String {
+		let mut s = String::new();
+		let (name,_) = s2u!(name);
+		(_API.SciterGetStyleAttributeCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Set style attribute.
+	pub fn set_style_attribute(&mut self, name: &str, value: &str) {
+		let (name,_) = s2u!(name);
+		let (value,_) = s2w!(value);
+		(_API.SciterSetStyleAttribute)(self.he, name.as_ptr(), value.as_ptr());
+	}
+
+	///\name State methods
+
+
+	///\name DOM tree access
+
+	/// Get index of this element in its parent collection.
+	pub fn index(&self) -> usize {
+		let mut n = 0u32;
+		(_API.SciterGetElementIndex)(self.he, &mut n as *mut UINT);
+		return n as usize;
+	}
+
+	/// Get root of the element.
+	pub fn root(&self) -> Element {
+		if let Some(dad) = self.parent() {
+			dad.root()
+		} else {
+			self.clone()
+		}
+	}
+
+	/// Get parent element.
+	pub fn parent(&self) -> Option<Element> {
+		let mut p = HELEMENT!();
+		(_API.SciterGetParentElement)(self.he, &mut p);
+		if p.is_null() {
+			None
+		} else {
+			Some(Element::from(p))
+		}
+	}
+
+	/// Get first sibling element.
+	pub fn first_sibling(&self) -> Option<Element> {
+		if let Some(dad) = self.parent() {
+			let count = dad.len();
+			if count > 0 {
+				return dad.child(0);
+			}
+		}
+		None
+	}
+
+	/// Get last sibling element.
+	pub fn last_sibling(&self) -> Option<Element> {
+		if let Some(dad) = self.parent() {
+			let count = dad.len();
+			if count > 0 {
+				return dad.child(count - 1);
+			}
+		}
+		None
+	}
+
+	/// Get next sibling element.
+	pub fn next_sibling(&self) -> Option<Element> {
+		let idx = self.index() + 1;
+		if let Some(dad) = self.parent() {
+			let count = dad.len();
+			if idx < count {
+				return dad.child(idx);
+			}
+		}
+		None
+	}
+
+	/// Get previous sibling element.
+	pub fn prev_sibling(&self) -> Option<Element> {
+		let idx = self.index();
+		if let Some(dad) = self.parent() {
+			let count = dad.len();
+			if idx > 0 && (idx - 1) < count {
+				return dad.child(idx - 1);
+			}
+		}
+		None
+	}
+
+	/// Get element child at specified index.
+	pub fn get(&self, index: usize) -> Option<Element> {
+		return self.child(index);
+	}
+
+	/// Get element child at specified index.
+	pub fn child(&self, index: usize) -> Option<Element> {
+		let mut p = HELEMENT!();
+		let ok = (_API.SciterGetNthChild)(self.he, index as UINT, &mut p);
+		match ok {
+			SCDOM_RESULT::OK => Some(Element::from(p)),
+			_ => None
+		}
+	}
+
+	/// Get number of child elements.
+	pub fn children_count(&self) -> usize {
+		let mut n = 0u32;
+		(_API.SciterGetChildrenCount)(self.he, &mut n as *mut UINT);
+		return n as usize;
+	}
+
+	/// Get number of child elements.
+	pub fn len(&self) -> usize {
+		return self.children_count();
+	}
+
+	/// Clear content of the element.
+	pub fn clear(&mut self) {
+		(_API.SciterSetElementText)(self.he, ::std::ptr::null(), 0);
+	}
+
+	/// Create new element as copy of existing element.
+	///
+	/// The new element is a full (deep) copy of the element and is initially disconnected from the DOM.
+	/// Note that `Element.clone()` does not clone DOM element, just increments its reference count.
+	pub fn clone_element(&self) -> Element {
+		let mut e = Element { he: HELEMENT!() };
+		(_API.SciterCloneElement)(self.he, &mut e.he);
+		return e;
+	}
+
+	/// Insert element at `index` position of this element.
+	pub fn insert(&mut self, index: usize, child: Element) {
+		(_API.SciterInsertElement)(self.he, child.he, index as UINT);
+	}
+
+	/// Append element as last child of this element.
+	pub fn append(&mut self, child: Element) {
+		self.insert(0x7FFFFFFF, child);
+	}
+
+	/// Append element as last child of this element.
+	pub fn push(&mut self, element: Element) {
+		return self.append(element);
+	}
+
+	/// Remove the last child from this element and returns it, or `None` if this element is empty.
+	pub fn pop(&mut self) -> Option<Element> {
+		let count = self.len();
+		if count > 0 {
+			if let Some(mut child) = self.get(count - 1) {
+				child.detach();
+				return Some(child);
+			}
+		}
+		return None;
+	}
+
+	/// Take element out of its container (and DOM tree).
+	pub fn detach(&mut self) {
+		(_API.SciterDetachElement)(self.he);
+	}
+
+	/// Take element out of its container (and DOM tree) and force destruction of all behaviors.
+	pub fn destroy(&mut self) {
+		let mut p = HELEMENT!();
+		::std::mem::swap(&mut self.he, &mut p);
+		(_API.SciterDeleteElement)(p);
+	}
+
+	/// Swap element positions.
+	pub fn swap(&mut self, other: &mut Element) {
+		(_API.SciterSwapElements)(self.he, other.he);
+	}
+
+	///\name Selectors
+
+	/// Test this element against CSS selector(s).
+	pub fn test(&self, selector: &str) -> bool {
+		let mut p = HELEMENT!();
+		let (s,_) = s2u!(selector);
+		(_API.SciterSelectParent)(self.he, s.as_ptr(), 1, &mut p);
+		return !p.is_null();
+	}
+
+	/// Call specified function for every element in a DOM that meets specified CSS selectors.
+	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Vec<Element> {
+		extern "stdcall" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
+			let handler = ::schandler::NativeHandler::from_mut_ptr3(param);
+			let mut obj = handler.as_mut::<T>();
+			let e = Element::from(he);
+			let stop = obj.on_element(e);
+			return stop as BOOL;
+		}
+		let (s,_) = s2u!(selector);
+		let handler = ::schandler::NativeHandler::from(callback);
+		(_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
+
+		let obj = handler.as_ref::<T>();
+		return obj.result();
+	}
+
+	/// Will find first parent element starting from this satisfying given css selector(s).
+	pub fn find_nearest_parent(&self, selector: &str) -> Option<Element> {
+		let mut p = HELEMENT!();
+		let (s,_) = s2u!(selector);
+		(_API.SciterSelectParent)(self.he, s.as_ptr(), 0, &mut p);
+		if p.is_null() { None } else { Some(Element::from(p)) }
+	}
+
+	/// Will find first element starting from this satisfying given css selector(s).
+	pub fn find_first(&self, selector: &str) -> Option<Element> {
+		let cb = FindFirstElement::default();
+		let mut all = self.select_elements(selector, cb);
+		return all.pop();
+	}
+
+	/// Will find all elements starting from this satisfying given css selector(s).
+	pub fn find_all(&self, selector: &str) -> Option<Vec<Element>> {
+		let cb = FindFirstElement::default();
+		let all = self.select_elements(selector, cb);
+		return Some(all);
+	}
+
+	///\name Scroll methods:
+
+	///\name Other methods:
+
+	/// Apply changes and refresh element area in its window.
+	pub fn update(&self, render_now: bool) {
+		(_API.SciterUpdateElement)(self.he, render_now as BOOL);
+	}
+
+	/// Start Timer for the element. Element will receive on_timer event.
+	pub fn start_timer(&self, period_ms: u32, timer_id: usize) {
+		(_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::sctypes::UINT_PTR);
+	}
+
+	/// Stop Timer for the element.
+	pub fn stop_timer(&self, timer_id: usize) {
+		if !self.he.is_null() {
+			(_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::sctypes::UINT_PTR);
+		}
+	}
+}
+
+impl Drop for Element {
+	/// Release element pointer.
+	fn drop(&mut self) {
+		(_API.Sciter_UnuseElement)(self.he);
+		self.he = HELEMENT!();
+	}
+}
+
+impl Clone for Element {
+	/// Increment reference count of the dom element.
+	fn clone(&self) -> Self {
+		Element::from(self.he)
+	}
+}
+
+/// Human element representation.
+impl ::std::fmt::Display for Element {
+
+	/// Human element representation.
+	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+		if self.he.is_null() {
+			return f.write_str("None");
+		}
+		// "tag#id.class|type(name)"
+		// "tag#id.class"
+		let (t,n,i,c) = (self.get_attribute("type"), self.get_attribute("name"), self.get_attribute("id"), self.get_attribute("class"));
+		let tag = self.get_tag();
+		try!(f.write_str(&tag));
+		if i.is_some() {
+			try!(write!(f, "#{}", i.unwrap()));
+		}
+		if c.is_some() {
+			try!(write!(f, ".{}", c.unwrap()));
+		}
+		if t.is_some() {
+			try!(write!(f, "|{}", t.unwrap()));
+		}
+		if n.is_some() {
+			try!(write!(f, "({})", n.unwrap()));
+		}
+		return Ok(());
+	}
+}
+
+/// Machine-like element visualization.
+impl ::std::fmt::Debug for Element {
+
+	/// Machine-like element visualization.
+	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+		// "tag#id.class(name):0xdfdfdf"
+		write!(f, "{{{}:{:?}}}", self, self.he)
+	}
+}
+
+// TODO: PartialEq
+
+use ::utf;
+
+/// Convert an incoming UTF-16 to `String`.
+extern "stdcall" fn store_wstr(szstr: LPCWSTR, str_length: UINT, param: LPVOID) {
+	let s = utf::w2sn(szstr, str_length as usize);
+	let out = param as *mut String;
+	unsafe { *out = s };
+}
+
+/// Convert an incoming UTF-8 to `String`.
+extern "stdcall" fn store_astr(szstr: LPCSTR,  str_length: UINT, param: LPVOID) {
+	let s = utf::u2sn(szstr, str_length as usize);
+	let out = param as *mut String;
+	unsafe { *out = s };
+}
+
+/// Convert an incoming html string (UTF-8 in fact) to `String`.
+extern "stdcall" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
+	let s = unsafe { ::std::slice::from_raw_parts(szstr, str_length as usize) };
+	let pout = param as *mut Vec<u8>;
+	let out = unsafe {&mut *pout};
+	out.extend_from_slice(s);
+}
+
+/* Not implemented yet or not used APIs:
+
+SciterAttachEventHandler
+SciterAttachHwndToElement
+
+SciterCallBehaviorMethod
+SciterCombineURL
+SciterControlGetType
+SciterDetachEventHandler
+SciterFireEvent
+SciterGetElementIntrinsicHeight
+SciterGetElementIntrinsicWidths
+SciterGetElementLocation
+SciterGetElementNamespace
+SciterGetElementState
+SciterGetElementType
+SciterGetExpando
+SciterGetObject
+SciterGetScrollInfo
+SciterHidePopup
+SciterHttpRequest
+SciterIsElementEnabled
+SciterIsElementVisible
+SciterPostEvent
+SciterRefreshElementArea
+SciterReleaseCapture
+SciterRequestElementData
+SciterScrollToView
+SciterSendEvent
+SciterSetCapture
+SciterSetElementState
+SciterSetHighlightedElement
+SciterSetScrollPos
+SciterShowPopup
+SciterShowPopupAt
+SciterSortElements
+SciterTraverseUIEvent
+
+SciterCreateCommentNode
+SciterCreateTextNode
+SciterNodeAddRef
+SciterNodeCastFromElement
+SciterNodeCastToElement
+SciterNodeChildrenCount
+SciterNodeFirstChild
+SciterNodeGetText
+SciterNodeInsert
+SciterNodeLastChild
+SciterNodeNextSibling
+SciterNodeNthChild
+SciterNodeParent
+SciterNodePrevSibling
+SciterNodeRelease
+SciterNodeRemove
+SciterNodeSetText
+SciterNodeType
+
+*/
