@@ -9,7 +9,7 @@ use scvalue::*;
 use sctiscript::{HVM, tiscript_value, tiscript_native_interface};
 use scbehavior::*;
 use scgraphics::{SciterGraphicsAPI};
-use screquest::{SciterRequestAPI};
+use screquest::{SciterRequestAPI, HREQUEST};
 use utf::*;
 
 /// Sciter API functions.
@@ -21,7 +21,7 @@ pub struct ISciterAPI
 	pub SciterClassName: extern "stdcall" fn () -> LPCWSTR,
 	pub SciterVersion: extern "stdcall" fn (major: bool) -> UINT,
 	pub SciterDataReady: extern "stdcall" fn (hwnd: HWINDOW, uri: LPCWSTR, data: LPCBYTE, dataLength: UINT) -> BOOL,
-	pub SciterDataReadyAsync: extern "stdcall" fn (hwnd: HWINDOW, uri: LPCWSTR, data: LPCBYTE, dataLength: UINT, requestId: LPVOID) -> BOOL,
+	pub SciterDataReadyAsync: extern "stdcall" fn (hwnd: HWINDOW, uri: LPCWSTR, data: LPCBYTE, dataLength: UINT, requestId: HREQUEST) -> BOOL,
 
   // #ifdef WINDOWS
   #[cfg(windows)]
@@ -90,19 +90,19 @@ pub struct ISciterAPI
 	pub SciterGetChildrenCount: extern "stdcall" fn (he: HELEMENT, count: * mut UINT) -> SCDOM_RESULT,
 	pub SciterGetNthChild: extern "stdcall" fn (he: HELEMENT, n: UINT, phe: * mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterGetParentElement: extern "stdcall" fn (he: HELEMENT, p_parent_he: * mut HELEMENT) -> SCDOM_RESULT,
-	pub SciterGetElementHtmlCB: extern "stdcall" fn (he: HELEMENT, outer: BOOL, rcv: * mut LPCBYTE_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
-	pub SciterGetElementTextCB: extern "stdcall" fn (he: HELEMENT, rcv: * mut LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetElementHtmlCB: extern "stdcall" fn (he: HELEMENT, outer: BOOL, rcv: LPCBYTE_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetElementTextCB: extern "stdcall" fn (he: HELEMENT, rcv: LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
 	pub SciterSetElementText: extern "stdcall" fn (he: HELEMENT, utf16: LPCWSTR, length: UINT) -> SCDOM_RESULT,
 	pub SciterGetAttributeCount: extern "stdcall" fn (he: HELEMENT, p_count: LPUINT) -> SCDOM_RESULT,
-	pub SciterGetNthAttributeNameCB: extern "stdcall" fn (he: HELEMENT, n: UINT, rcv: * mut LPCSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
-	pub SciterGetNthAttributeValueCB: extern "stdcall" fn (he: HELEMENT, n: UINT, rcv: * mut LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
-	pub SciterGetAttributeByNameCB: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, rcv: * mut LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetNthAttributeNameCB: extern "stdcall" fn (he: HELEMENT, n: UINT, rcv: LPCSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetNthAttributeValueCB: extern "stdcall" fn (he: HELEMENT, n: UINT, rcv: LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetAttributeByNameCB: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, rcv: LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
 	pub SciterSetAttributeByName: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, value: LPCWSTR) -> SCDOM_RESULT,
 	pub SciterClearAttributes: extern "stdcall" fn (he: HELEMENT) -> SCDOM_RESULT,
 	pub SciterGetElementIndex: extern "stdcall" fn (he: HELEMENT, p_index: LPUINT) -> SCDOM_RESULT,
 	pub SciterGetElementType: extern "stdcall" fn (he: HELEMENT, p_type: * mut LPCSTR) -> SCDOM_RESULT,
-	pub SciterGetElementTypeCB: extern "stdcall" fn (he: HELEMENT, rcv: * mut LPCSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
-	pub SciterGetStyleAttributeCB: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, rcv: * mut LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetElementTypeCB: extern "stdcall" fn (he: HELEMENT, rcv: LPCSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
+	pub SciterGetStyleAttributeCB: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, rcv: LPCWSTR_RECEIVER, rcv_param: LPVOID) -> SCDOM_RESULT,
 	pub SciterSetStyleAttribute: extern "stdcall" fn (he: HELEMENT, name: LPCSTR, value: LPCWSTR) -> SCDOM_RESULT,
 	pub SciterGetElementLocation: extern "stdcall" fn (he: HELEMENT, p_location: LPRECT, areas: UINT /*ELEMENT_AREAS*/) -> SCDOM_RESULT,
 	pub SciterScrollToView: extern "stdcall" fn (he: HELEMENT, SciterScrollFlags: UINT) -> SCDOM_RESULT,
@@ -112,8 +112,8 @@ pub struct ISciterAPI
 	pub SciterReleaseCapture: extern "stdcall" fn (he: HELEMENT) -> SCDOM_RESULT,
 	pub SciterGetElementHwnd: extern "stdcall" fn (he: HELEMENT, p_hwnd: * mut HWINDOW, rootWindow: BOOL) -> SCDOM_RESULT,
 	pub SciterCombineURL: extern "stdcall" fn (he: HELEMENT, szUrlBuffer: LPWSTR, UrlBufferSize: UINT) -> SCDOM_RESULT,
-	pub SciterSelectElements: extern "stdcall" fn (he: HELEMENT, CSS_selectors: LPCSTR, callback: * mut SciterElementCallback, param: LPVOID) -> SCDOM_RESULT,
-	pub SciterSelectElementsW: extern "stdcall" fn (he: HELEMENT, CSS_selectors: LPCWSTR, callback: * mut SciterElementCallback, param: LPVOID) -> SCDOM_RESULT,
+	pub SciterSelectElements: extern "stdcall" fn (he: HELEMENT, CSS_selectors: LPCSTR, callback: SciterElementCallback, param: LPVOID) -> SCDOM_RESULT,
+	pub SciterSelectElementsW: extern "stdcall" fn (he: HELEMENT, CSS_selectors: LPCWSTR, callback: SciterElementCallback, param: LPVOID) -> SCDOM_RESULT,
 	pub SciterSelectParent: extern "stdcall" fn (he: HELEMENT, selector: LPCSTR, depth: UINT, heFound: * mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterSelectParentW: extern "stdcall" fn (he: HELEMENT, selector: LPCWSTR, depth: UINT, heFound: * mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterSetElementHtml: extern "stdcall" fn (he: HELEMENT, html: * const BYTE, htmlLength: UINT, how: UINT) -> SCDOM_RESULT,
@@ -204,13 +204,13 @@ pub struct ISciterAPI
 	pub ValueNthElementValue: extern "stdcall" fn (pval: * const VALUE, n: INT, pretval: * mut VALUE) -> VALUE_RESULT,
 	pub ValueNthElementValueSet: extern "stdcall" fn (pval: * mut VALUE, n: INT, pval_to_set: * const VALUE) -> VALUE_RESULT,
 	pub ValueNthElementKey: extern "stdcall" fn (pval: * const VALUE, n: INT, pretval: * mut VALUE) -> VALUE_RESULT,
-	pub ValueEnumElements: extern "stdcall" fn (pval: * mut VALUE, penum: * mut KeyValueCallback, param: LPVOID) -> VALUE_RESULT,
+	pub ValueEnumElements: extern "stdcall" fn (pval: * const VALUE, penum: KeyValueCallback, param: LPVOID) -> VALUE_RESULT,
 	pub ValueSetValueToKey: extern "stdcall" fn (pval: * mut VALUE, pkey: * const VALUE, pval_to_set: * const VALUE) -> VALUE_RESULT,
 	pub ValueGetValueOfKey: extern "stdcall" fn (pval: * const VALUE, pkey: * const VALUE, pretval: * mut VALUE) -> VALUE_RESULT,
 	pub ValueToString: extern "stdcall" fn (pval: * mut VALUE, how: VALUE_STRING_CVT_TYPE) -> VALUE_RESULT,
 	pub ValueFromString: extern "stdcall" fn (pval: * mut VALUE, str: LPCWSTR, strLength: UINT, how: VALUE_STRING_CVT_TYPE) -> UINT,
-	pub ValueInvoke: extern "stdcall" fn (pval: * mut VALUE, pthis: * mut VALUE, argc: UINT, argv: * const VALUE, pretval: * mut VALUE, url: LPCWSTR) -> VALUE_RESULT,
-	pub ValueNativeFunctorSet: extern "stdcall" fn (pval: * mut VALUE, pinvoke: * mut NATIVE_FUNCTOR_INVOKE, prelease: * mut NATIVE_FUNCTOR_RELEASE, tag: * mut VOID) -> VALUE_RESULT,
+	pub ValueInvoke: extern "stdcall" fn (pval: * const VALUE, pthis: * mut VALUE, argc: UINT, argv: * const VALUE, pretval: * mut VALUE, url: LPCWSTR) -> VALUE_RESULT,
+	pub ValueNativeFunctorSet: extern "stdcall" fn (pval: * mut VALUE, pinvoke: NATIVE_FUNCTOR_INVOKE, prelease: NATIVE_FUNCTOR_RELEASE, tag: LPVOID) -> VALUE_RESULT,
 	pub ValueIsNativeFunctor: extern "stdcall" fn (pval: * const VALUE) -> BOOL,
 
 	  // tiscript VM API

@@ -9,7 +9,7 @@
 #![allow(dead_code)]
 
 use std::ffi::{CStr, CString};
-use sctypes::{LPCSTR, LPCWSTR};
+use sctypes::{LPCSTR, LPCWSTR, LPCBYTE};
 
 
 /// UTF-8 to UTF-16* converter.
@@ -149,6 +149,14 @@ pub fn u2s(sz: LPCSTR) -> String
 	let cs = unsafe { CStr::from_ptr(sz) };
 	let cow = cs.to_string_lossy();
 	return cow.into_owned();
+}
+
+/// UTF8 to rust string conversion. See also `s2u!`.
+pub fn u2sn(sz: LPCSTR, len: usize) -> String
+{
+	let chars = unsafe { ::std::slice::from_raw_parts(sz as LPCBYTE, len) };
+	let s = String::from_utf8_lossy(chars).into_owned();
+	return s;
 }
 
 /// UTF-16 to rust string conversion. See also `s2w!`.
