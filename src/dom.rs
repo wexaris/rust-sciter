@@ -1,4 +1,140 @@
 //! DOM access methods.
+//!
+/*!
+
+## DOM access methods.
+
+Let’s assume you already integrated Sciter in your application and so you have Sciter window with loaded content.
+
+From Sciter point of view loaded document is a tree of DOM elements (elements of Document Object Model).
+Sciter builds this tree while loading/parsing of input HTML.
+As a rule each tag in source HTML gets matching DOM element (there are exceptions, see below).
+
+You can change text, attributes, state flags of DOM elements;
+add new or remove existing DOM elements.
+You also can attach your own DOM event handlers to DOM elements to receive events and notifications.
+
+Therefore your UI in Sciter is a collection of uniform DOM elements that can be styled by CSS and manipulated by native or script code.
+
+## Basic operations
+
+To access the DOM tree we need to get reference of its root element
+(root element is an element representing <html> tag in HTML source).
+
+```
+let root = Element::from_window(hwnd);
+assert_eq(root.get_tag(), "html");
+```
+
+By having root element reference we are able to access any other element in the tree
+using various access and search functions like SciterGetNthChild, SciterSelectElements, …
+All of them are wrapped into methods of `dom::Element`.
+Here is how you would get reference to first <div> element with class "sidebar" using CSS selectors:
+
+```
+let sidebar = root.find_first("div.sidebar").unwrap();
+```
+
+The same in script:
+
+```ignore
+var sidebar = self.select("div.sidebar"); // or
+var sidebar = self.$(div.sidebar); // using stringizer select variant
+```
+
+## DOM element operations
+
+You can change *text* or HTML of DOM element:
+
+```
+if let Some(el) = root.find_first("#cancel") {
+	el.set_text("Abort!");
+	el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
+}
+```
+
+The same but in script:
+
+```ignore
+var el = ...;
+el.text = "Hello world"; // text
+el.html = "Hello <b>wrold</b>!"; // inner html
+```
+
+You can get or set DOM *attributes* of any DOM element:
+
+```
+let val = el.get_attribute("class").unwrap();
+el.set_attribute("class", "new-class");
+```
+
+To *remove* existing DOM element (detach it from the DOM) you will do this:
+
+```
+el.detach();
+```
+
+and when code will live scope where the `el` variable is defined the DOM element will be destroyed.
+
+Creation and population of DOM elements looks like this:
+
+```
+let p = Element::with_text("p", "Hello"); // create <p> element
+el.append(p); // append it to existing element, or insert() ...
+```
+
+And in script:
+
+```ignore
+var p = new Element("p", "Hello");
+el.append(p);
+```
+
+To change runtime state flags of DOM element we do something like this:
+
+```
+el.set_state(STATE_VISITED);
+```
+
+And in script:
+
+```ignore
+el.state.visited = true;
+```
+
+(after such call the element will match `:visited` CSS selector)
+
+## Getting and setting values of DOM elements.
+
+By default value of DOM element is its text but some DOM elements may have so called behaviors
+attached to them (see below).
+`<input>`’s elements for example are plain DOM elements but each input type has its own behavior assigned to the element.
+The behavior, among other things, is responsible for providing and setting value of the element.
+For example value of `input type=checkbox>` is boolean – _true_ or _false_,
+and value of `<form>` element is a collection (name/value map) of all inputs on the form.
+
+In native code values are represented by `sciter::Value` objects.
+`sciter::Value` is a structure that can hold different types of values: numbers, strings, arrays, objects, etc
+(see [documentation](http://sciter.com/docs/content/script/language/Types.htm)).
+
+Here is how to set numeric value of DOM element in native code:
+
+```
+if let Some(num) = root.find_first("input[type=number]") {
+	num.set_value( sciter::Value::from(12) );
+}
+```
+
+In script the same will look like:
+
+```ignore
+if (var num = self.select("input[type=number]")) {
+	num.value = 12;
+}
+```
+
+.
+*/
 
 use ::{_API};
 use scdom::*;
@@ -78,7 +214,7 @@ pub struct Element {
 
 impl Element {
 
-	///\name Creation
+	//\name Creation
 
 	/// Construct Element object from HELEMENT handle.
 	pub fn from(he: HELEMENT) -> Element {
@@ -104,7 +240,7 @@ impl Element {
 		ok.map(|_| e)
 	}
 
-	/// Create new element, it is disconnected initially from the DOM.
+	/// Create new element with specified `text`, it is disconnected initially from the DOM.
 	pub fn with_text(tag: &str, text: &str) -> Element {
 		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
@@ -158,7 +294,7 @@ impl Element {
 	}
 
 
-	///\name Common methods
+	//\name Common methods
 
 	/// Access element pointer.
 	pub fn as_ptr(&self) -> HELEMENT {
@@ -258,7 +394,7 @@ impl Element {
 	}
 
 
-	///\name Attributes
+	//\name Attributes
 	/// Get number of the attributes.
 	pub fn attribute_count(&self) -> usize {
 		let mut n = 0u32;
@@ -273,7 +409,14 @@ impl Element {
 		return s;
 	}
 
-	/// Get attribute value by its.
+	/// Get attribute value by its index.
+	pub fn attribute(&self, index: usize) -> String {
+		let mut s = String::new();
+		(_API.SciterGetNthAttributeValueCB)(self.he, index as UINT, store_wstr, &mut s as *mut String as LPVOID);
+		return s;
+	}
+
+	/// Get attribute value by its name.
 	pub fn get_attribute(&self, name: &str) -> Option<String> {
 		let mut s = String::new();
 		let (name,_) = s2u!(name);
@@ -283,13 +426,6 @@ impl Element {
 			SCDOM_RESULT::OK_NOT_HANDLED => None,
 			_ => None,
 		}
-	}
-
-	/// Get attribute value by its index.
-	pub fn attribute(&self, index: usize) -> String {
-		let mut s = String::new();
-		(_API.SciterGetNthAttributeValueCB)(self.he, index as UINT, store_wstr, &mut s as *mut String as LPVOID);
-		return s;
 	}
 
 	/// Add or replace attribute.
@@ -321,9 +457,9 @@ impl Element {
 	}
 
 
-	///\name Style Attributes
+	//\name Style Attributes
 
-	/// Get style attribute of the element by its name.
+	/// Get [style attribute](http://sciter.com/docs/content/sciter/Style.htm) of the element by its name.
 	pub fn get_style_attribute(&self, name: &str) -> String {
 		let mut s = String::new();
 		let (name,_) = s2u!(name);
@@ -331,17 +467,17 @@ impl Element {
 		return s;
 	}
 
-	/// Set style attribute.
+	/// Set [style attribute](http://sciter.com/docs/content/sciter/Style.htm).
 	pub fn set_style_attribute(&mut self, name: &str, value: &str) {
 		let (name,_) = s2u!(name);
 		let (value,_) = s2w!(value);
 		(_API.SciterSetStyleAttribute)(self.he, name.as_ptr(), value.as_ptr());
 	}
 
-	///\name State methods
+	//\name State methods
 
 
-	///\name DOM tree access
+	//\name DOM tree access
 
 	/// Get index of this element in its parent collection.
 	pub fn index(&self) -> usize {
@@ -416,10 +552,12 @@ impl Element {
 		None
 	}
 
+	/// Get first child element.
 	pub fn first_child(&self) -> Option<Element> {
 		return self.child(0);
 	}
 
+	/// Get last child element.
 	pub fn last_child(&self) -> Option<Element> {
 		let count = self.len();
 		if count > 0 {
@@ -523,7 +661,7 @@ impl Element {
 		ok_or!((), ok)
 	}
 
-	///\name Selectors
+	//\name Selectors
 
 	/// Test this element against CSS selector(s).
 	pub fn test(&self, selector: &str) -> bool {
@@ -578,9 +716,9 @@ impl Element {
 		all.ok()
 	}
 
-	///\name Scroll methods:
+	//\name Scroll methods:
 
-	///\name Other methods:
+	//\name Other methods:
 
 	/// Apply changes and refresh element area in its window.
 	pub fn update(&self, render_now: bool) -> Result<()> {
@@ -605,16 +743,16 @@ impl Element {
 	}
 }
 
+/// Release element pointer.
 impl Drop for Element {
-	/// Release element pointer.
 	fn drop(&mut self) {
 		(_API.Sciter_UnuseElement)(self.he);
 		self.he = HELEMENT!();
 	}
 }
 
+/// Increment reference count of the dom element.
 impl Clone for Element {
-	/// Increment reference count of the dom element.
 	fn clone(&self) -> Self {
 		Element::from(self.he)
 	}
@@ -622,8 +760,6 @@ impl Clone for Element {
 
 /// Human element representation.
 impl ::std::fmt::Display for Element {
-
-	/// Human element representation.
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		if self.he.is_null() {
 			return f.write_str("None");
@@ -651,8 +787,6 @@ impl ::std::fmt::Display for Element {
 
 /// Machine-like element visualization.
 impl ::std::fmt::Debug for Element {
-
-	/// Machine-like element visualization.
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		// "tag#id.class(name):0xdfdfdf"
 		write!(f, "{{{}:{:?}}}", self, self.he)

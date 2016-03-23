@@ -1,9 +1,90 @@
-//! Rust interface to sciter::value.
+/*! Rust interface to [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.h).
+
+Sciter `Value` holds superset of JSON objects.
+
+It can contain as pure JSON objects (numbers, strings, maps and arrays) as internal objects like DOM elements,
+proxies of script functions, objects and arrays.
+
+
+## Basic usage
+
+You can create an empty (undefined) sciter `Value` with `new()`:
+
+```
+let v = Value::new();
+assert!(v.is_undefined());
+assert!(!v.is_null());
+```
+
+Or explicitly create `Value` for specified type:
+
+```
+	let v = Value::null();
+assert!(v.is_null());
+
+let v = Value::symbol("hello");
+assert!(v.is_symbol());
+assert!(v.is_string());
+
+let mut v = Value::error("hello");
+assert!(v.is_error_string());
+assert!(v.is_string());
+```
+
+Also there is conversion from Rust types:
+
+```
+let v = Value::from(true);
+assert!(v.is_bool());
+
+let v = Value::from(1);
+assert!(v.is_int());
+
+let v = Value::from(1.0);
+assert!(v.is_float());
+
+let v = Value::from("hello");
+assert!(v.is_string());
+
+let v = Value::from(&b"123");
+assert!(v.is_bytes());
+```
+
+And from sequence of objects:
+
+```
+let v: Value = ["1","2","3"].iter().cloned().collect();
+assert!(v.is_array());
+assert_eq!(v.len(), 3);
+
+assert_eq!(v[0], Value::from("1"));
+```
+
+To access its contents you should use one of `to_` methods:
+
+```
+let v = Value::from(4);
+assert_eq!(v.to_int(), Some(4));
+```
+
+Note that there is two functions that converts `Value` to JSON and back:
+
+```
+let mut v: Value = "[1, 2, 3, 4]".parse().unwrap();
+let json_str = v.into_string();
+```
+
+Map access: TBD
+
+.
+*/
 
 use ::{_API};
 use scvalue::*;
 use sctypes::*;
 
+
+// TODO: map keys/values/items
 
 /// sciter::value wrapper.
 pub struct Value
@@ -14,26 +95,26 @@ pub struct Value
 
 impl Value {
 
-	/// Return a new sciter value object (undefined).
+	/// Return a new sciter value object ([undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined)).
 	pub fn new() -> Value {
 		Value { data: VALUE::default(), tmp: ::std::ptr::null_mut() }
 	}
 
-	/// Make explicit json null value.
+	/// Make explicit json [null](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null) value.
 	pub fn null() -> Value {
 		let mut me = Value::new();
 		me.data.t = VALUE_TYPE::T_NULL;
 		return me;
 	}
 
-	/// Make sciter symbol value.
+	/// Make sciter [symbol](http://sciter.com/docs/content/script/language/Syntax.htm#symbol-literals) value.
 	pub fn symbol(val: &str) -> Value {
 		let mut me = Value::new();
 		me.assign_str(val, VALUE_UNIT_TYPE_STRING::SYMBOL);
 		return me;
 	}
 
-	/// Make sciter error value.
+	/// Make sciter [error](http://sciter.com/docs/content/script/Error.htm) value.
 	pub fn error(val: &str) -> Value {
 		let mut me = Value::new();
 		me.assign_str(val, VALUE_UNIT_TYPE_STRING::ERROR);
@@ -81,6 +162,7 @@ impl Value {
 		return self.data.t;
 	}
 
+	/// Get inner value type and its subtype (e.g. units).
 	pub fn full_type(&self) -> (VALUE_TYPE, UINT) {
 		return (self.data.t, self.data.u);
 	}
@@ -150,7 +232,7 @@ impl Value {
 		}
 	}
 
-	/// Value to json string (converted in-place).
+	/// Value to json string (converted in-place). _Subject to change._
 	pub fn into_string(&mut self) -> String {
 		(_API.ValueToString)(self.as_ptr(), VALUE_STRING_CVT_TYPE::JSON_LITERAL);
 		return self.as_string().unwrap();
@@ -174,7 +256,11 @@ impl Value {
 		}
 	}
 
-	/// Function invokation for T_OBJECT/UT_OBJECT_FUNCTION.
+	/// Function invocation for T_OBJECT/UT_OBJECT_FUNCTION.
+	///
+	/// Calls the tiscript function or method holded at `Value` with context of `this` object
+	/// that will be known as _this_ inside that function (it is optional for global functions).
+	/// `name` here is an url or name of the script - used for error reporting in the script.
 	pub fn call(&self, this: Option<Value>, args: &[Value], name: Option<&str>) -> Result<Value, VALUE_RESULT> {
 		let mut rv = Value::new();
 		let argv = Value::pack_args(args);
@@ -290,6 +376,8 @@ impl Value {
 	}
 }
 
+
+/// Print `Value` as json string
 impl ::std::fmt::Display for Value {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		let mut copy = self.clone();
@@ -298,7 +386,7 @@ impl ::std::fmt::Display for Value {
 	}
 }
 
-
+/// Print `Value` as json string with explicit type showed.
 impl ::std::fmt::Debug for Value {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		let mut tname = format!("{:?}", self.data.t);
@@ -316,8 +404,8 @@ impl ::std::fmt::Debug for Value {
 	}
 }
 
+/// Destroy pointed value.
 impl Drop for Value {
-	/// Destroy pointed value.
 	fn drop(&mut self) {
 		if !self.tmp.is_null() {
 			unsafe { Box::from_raw(self.tmp) };
@@ -326,12 +414,16 @@ impl Drop for Value {
 	}
 }
 
+/// Return default value (_undefined_).
 impl Default for Value {
 	fn default() -> Self {
 		return Value::new();
 	}
 }
 
+/// Copies value.
+///
+/// All allocated objects are reference counted so copying is just a matter of increasing reference counts.
 impl Clone for Value {
 	fn clone(&self) -> Self {
 		let mut dst = Value::new();
@@ -340,6 +432,7 @@ impl Clone for Value {
 	}
 }
 
+/// Compare two values.
 impl ::std::cmp::PartialEq for Value {
 	fn eq(&self, other: &Self) -> bool {
 		match (_API.ValueCompare)(self.as_cptr(), other.as_cptr()) {
