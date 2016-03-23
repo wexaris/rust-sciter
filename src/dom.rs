@@ -5,6 +5,7 @@ use scdom::*;
 use sctypes::*;
 use value::Value;
 
+pub type Result<T> = ::std::result::Result<T, SCDOM_RESULT>;
 
 /// Initialize HELEMENT by nullptr.
 macro_rules! HELEMENT {
@@ -84,48 +85,67 @@ impl Element {
 		Element { he: Element::use_or(he) }
 	}
 
-	/// Create new element, the element is disconnected initially from the DOM.
-	pub fn create(tag: &str, text: Option<&str>) -> Element {
-		let mut p = HELEMENT!();
+	/// Create new element, it is disconnected initially from the DOM.
+	pub fn create(tag: &str) -> Element {
+		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
-		let text = ::utf::s2vec(text.unwrap_or(""));
-		(_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut p);
-		Element::from(p)
+		let text = 0 as LPCWSTR;
+		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
+		return e;
+	}
+
+	/// Create new element as child of `parent`.
+	pub fn create_at(tag: &str, parent: &mut Element) -> Result<Element> {
+		let mut e = Element { he: HELEMENT!() };
+		let (tag,_) = s2u!(tag);
+		let text = 0 as LPCWSTR;
+		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
+		let ok = parent.append(&e);
+		ok.map(|_| e)
+	}
+
+	/// Create new element, it is disconnected initially from the DOM.
+	pub fn with_text(tag: &str, text: &str) -> Element {
+		let mut e = Element { he: HELEMENT!() };
+		let (tag,_) = s2u!(tag);
+		let (text,_) = s2w!(text);
+		(_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut e.he);
+		return e;
 	}
 
 	/// Get root DOM element of the Sciter document.
-	pub fn from_window(hwnd: HWINDOW) -> Element {
+	pub fn from_window(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
-		(_API.SciterGetRootElement)(hwnd, &mut p);
-		Element::from(p)
+		let ok = (_API.SciterGetRootElement)(hwnd, &mut p);
+		ok_or!(Element::from(p), ok)
 	}
 
 	/// Get focus DOM element of the Sciter document.
-	pub fn from_focus(hwnd: HWINDOW) -> Element {
+	pub fn from_focus(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
-		(_API.SciterGetFocusElement)(hwnd, &mut p);
-		Element::from(p)
+		let ok = (_API.SciterGetFocusElement)(hwnd, &mut p);
+		ok_or!(Element::from(p), ok)
 	}
 
 	/// Get highlighted element.
-	pub fn from_highlighted(hwnd: HWINDOW) -> Element {
+	pub fn from_highlighted(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
-		(_API.SciterGetHighlightedElement)(hwnd, &mut p);
-		Element::from(p)
+		let ok = (_API.SciterGetHighlightedElement)(hwnd, &mut p);
+		ok_or!(Element::from(p), ok)
 	}
 
 	/// Find DOM element of the Sciter document by coordinates.
-	pub fn from_point(hwnd: HWINDOW, pt: POINT) -> Element {
+	pub fn from_point(hwnd: HWINDOW, pt: POINT) -> Result<Element> {
 		let mut p = HELEMENT!();
-		(_API.SciterFindElement)(hwnd, pt, &mut p);
-		Element::from(p)
+		let ok = (_API.SciterFindElement)(hwnd, pt, &mut p);
+		ok_or!(Element::from(p), ok)
 	}
 
 	/// Get element handle by its UID.
-	pub fn from_uid(hwnd: HWINDOW, uid: u32) -> Element {
+	pub fn from_uid(hwnd: HWINDOW, uid: u32) -> Result<Element> {
 		let mut p = HELEMENT!();
-		(_API.SciterGetElementByUID)(hwnd, uid, &mut p);
-		Element::from(p)
+		let ok = (_API.SciterGetElementByUID)(hwnd, uid, &mut p);
+		ok_or!(Element::from(p), ok)
 	}
 
 	fn use_or(he: HELEMENT) -> HELEMENT {
@@ -212,7 +232,7 @@ impl Element {
 	// TODO: send_event, post_event, fire_event
 
 	/// Evaluate script in element context.
-	pub fn eval_script(&self, script: &str) -> Result<Value, SCDOM_RESULT> {
+	pub fn eval_script(&self, script: &str) -> Result<Value> {
 		let mut rv = Value::new();
 		let (s,n) = s2w!(script);
 		let ok = (_API.SciterEvalElementScript)(self.he, s.as_ptr(), n, rv.as_ptr());
@@ -220,7 +240,7 @@ impl Element {
 	}
 
 	/// Call scripting function defined in the namespace of the element (a.k.a. global function).
-	pub fn call_function(&self, name: &str, args: &[Value]) -> Result<Value, SCDOM_RESULT> {
+	pub fn call_function(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
 		let (name,_) = s2u!(name);
 		let argv = Value::pack_args(args);
@@ -229,7 +249,7 @@ impl Element {
 	}
 
 	/// Call scripting method defined for the element.
-	pub fn call_method(&self, name: &str, args: &[Value]) -> Result<Value, SCDOM_RESULT> {
+	pub fn call_method(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
 		let (name,_) = s2u!(name);
 		let argv = Value::pack_args(args);
@@ -304,7 +324,7 @@ impl Element {
 	///\name Style Attributes
 
 	/// Get style attribute of the element by its name.
-	pub fn style_attribute(&self, name: &str) -> String {
+	pub fn get_style_attribute(&self, name: &str) -> String {
 		let mut s = String::new();
 		let (name,_) = s2u!(name);
 		(_API.SciterGetStyleAttributeCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
@@ -396,6 +416,18 @@ impl Element {
 		None
 	}
 
+	pub fn first_child(&self) -> Option<Element> {
+		return self.child(0);
+	}
+
+	pub fn last_child(&self) -> Option<Element> {
+		let count = self.len();
+		if count > 0 {
+			return self.child(count - 1);
+		}
+		None
+	}
+
 	/// Get element child at specified index.
 	pub fn get(&self, index: usize) -> Option<Element> {
 		return self.child(index);
@@ -439,21 +471,27 @@ impl Element {
 	}
 
 	/// Insert element at `index` position of this element.
-	pub fn insert(&mut self, index: usize, child: Element) {
-		(_API.SciterInsertElement)(self.he, child.he, index as UINT);
+	///
+	/// Note that we cannot follow Rust semantic here
+	/// because the newly created `Element` is unusable before it will be inserted at DOM.
+	pub fn insert(&mut self, index: usize, child: &Element) -> Result<()> {
+		let ok = (_API.SciterInsertElement)(child.he, self.he, index as UINT);
+		ok_or!((), ok)
 	}
 
 	/// Append element as last child of this element.
-	pub fn append(&mut self, child: Element) {
-		self.insert(0x7FFFFFFF, child);
+	pub fn append(&mut self, child: &Element) -> Result<()> {
+		self.insert(0x7FFFFFFF, child)
 	}
 
 	/// Append element as last child of this element.
+	#[allow(unused_must_use)]
 	pub fn push(&mut self, element: Element) {
-		return self.append(element);
+		self.append(&element);
 	}
 
 	/// Remove the last child from this element and returns it, or `None` if this element is empty.
+	#[allow(unused_must_use)]
 	pub fn pop(&mut self) -> Option<Element> {
 		let count = self.len();
 		if count > 0 {
@@ -466,20 +504,23 @@ impl Element {
 	}
 
 	/// Take element out of its container (and DOM tree).
-	pub fn detach(&mut self) {
-		(_API.SciterDetachElement)(self.he);
+	pub fn detach(&mut self) -> Result<()> {
+		let ok = (_API.SciterDetachElement)(self.he);
+		ok_or!((), ok)
 	}
 
 	/// Take element out of its container (and DOM tree) and force destruction of all behaviors.
-	pub fn destroy(&mut self) {
+	pub fn destroy(&mut self) -> Result<()> {
 		let mut p = HELEMENT!();
 		::std::mem::swap(&mut self.he, &mut p);
-		(_API.SciterDeleteElement)(p);
+		let ok = (_API.SciterDeleteElement)(p);
+		ok_or!((), ok)
 	}
 
 	/// Swap element positions.
-	pub fn swap(&mut self, other: &mut Element) {
-		(_API.SciterSwapElements)(self.he, other.he);
+	pub fn swap(&mut self, other: &mut Element) -> Result<()> {
+		let ok = (_API.SciterSwapElements)(self.he, other.he);
+		ok_or!((), ok)
 	}
 
 	///\name Selectors
@@ -493,7 +534,7 @@ impl Element {
 	}
 
 	/// Call specified function for every element in a DOM that meets specified CSS selectors.
-	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Vec<Element> {
+	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Result<Vec<Element>> {
 		extern "stdcall" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
 			let handler = ::schandler::NativeHandler::from_mut_ptr3(param);
 			let mut obj = handler.as_mut::<T>();
@@ -503,10 +544,12 @@ impl Element {
 		}
 		let (s,_) = s2u!(selector);
 		let handler = ::schandler::NativeHandler::from(callback);
-		(_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
-
+		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
+		if ok != SCDOM_RESULT::OK {
+			return Err(ok);
+		}
 		let obj = handler.as_ref::<T>();
-		return obj.result();
+		return Ok(obj.result());
 	}
 
 	/// Will find first parent element starting from this satisfying given css selector(s).
@@ -520,15 +563,19 @@ impl Element {
 	/// Will find first element starting from this satisfying given css selector(s).
 	pub fn find_first(&self, selector: &str) -> Option<Element> {
 		let cb = FindFirstElement::default();
-		let mut all = self.select_elements(selector, cb);
-		return all.pop();
+		let all = self.select_elements(selector, cb);
+		if let Ok(mut all) = all {
+			all.pop()
+		} else {
+			None
+		}
 	}
 
 	/// Will find all elements starting from this satisfying given css selector(s).
 	pub fn find_all(&self, selector: &str) -> Option<Vec<Element>> {
 		let cb = FindFirstElement::default();
 		let all = self.select_elements(selector, cb);
-		return Some(all);
+		all.ok()
 	}
 
 	///\name Scroll methods:
@@ -536,19 +583,24 @@ impl Element {
 	///\name Other methods:
 
 	/// Apply changes and refresh element area in its window.
-	pub fn update(&self, render_now: bool) {
-		(_API.SciterUpdateElement)(self.he, render_now as BOOL);
+	pub fn update(&self, render_now: bool) -> Result<()> {
+		let ok = (_API.SciterUpdateElement)(self.he, render_now as BOOL);
+		ok_or!((), ok)
 	}
 
 	/// Start Timer for the element. Element will receive on_timer event.
-	pub fn start_timer(&self, period_ms: u32, timer_id: usize) {
-		(_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::sctypes::UINT_PTR);
+	pub fn start_timer(&self, period_ms: u32, timer_id: usize) -> Result<()> {
+		let ok = (_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::sctypes::UINT_PTR);
+		ok_or!((), ok)
 	}
 
 	/// Stop Timer for the element.
-	pub fn stop_timer(&self, timer_id: usize) {
+	pub fn stop_timer(&self, timer_id: usize) -> Result<()> {
 		if !self.he.is_null() {
-			(_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::sctypes::UINT_PTR);
+			let ok = (_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::sctypes::UINT_PTR);
+			ok_or!((), ok)
+		} else {
+			Ok(())
 		}
 	}
 }
@@ -607,7 +659,7 @@ impl ::std::fmt::Debug for Element {
 	}
 }
 
-// TODO: PartialEq
+
 
 use ::utf;
 
