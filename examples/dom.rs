@@ -3,12 +3,88 @@
 
 extern crate sciter;
 
-use sciter::Element;
-use sciter::Value;
+use sciter::{Value, Element, HELEMENT};
+use sciter::dom::event::*;
 
-struct Handler;
+#[derive(Default)]
+struct Handler {
+	progress: Option<Element>,
+	state: bool,
+}
 
 impl sciter::EventHandler for Handler {
+
+	fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
+		return Some(default_events() | EVENT_GROUPS::HANDLE_TIMER);
+	}
+
+	fn attached(&mut self, root: sciter::HELEMENT) {
+		let root = Element::from(root);
+		println!("attached to {}", root);
+		if root.test("progress") {
+			self.progress = Some(root.clone());
+			self.state = false;
+		}
+	}
+
+	fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
+		if phase != PHASE_MASK::BUBBLING {
+			return false;
+		}
+
+		match code {
+			sciter::dom::event::BEHAVIOR_EVENTS::BUTTON_CLICK => {
+
+				let source = Element::from(source);
+				let mut target = Element::from(target);
+
+				println!("button click on target {}", target);
+
+				if self.progress.is_some() && *self.progress.as_ref().unwrap() == target {
+					self.state = !self.state;
+
+					if self.state == true {
+						println!("starting timer");
+						target.set_value(Value::from(0));
+						target.start_timer(1000, 1).ok();
+					} else {
+						println!("stopping timer");
+						target.stop_timer(1);
+
+						let cur = target.get_value();
+						target.set_attribute("title", &format!("Current value is {}. Click to start timer again.", cur));
+					}
+				}
+
+				true
+			}
+			_ => false
+		}
+	}
+
+	fn on_timer(&mut self, root: HELEMENT, timer_id: u64) -> bool {
+		println!("timer {} tick on {}", timer_id, Element::from(root));
+		if timer_id == 1 && self.progress.is_some() {
+			let e = self.progress.as_mut().unwrap();
+			let max_attr = e.get_attribute("max").unwrap();
+			let max: f64 = max_attr.parse().unwrap();
+
+			let v = e.get_value();
+			let next = v.to_float().unwrap() + 5.0;
+
+			if next > max {
+				println!("that's enough, finish.");
+				self.state = false;
+				e.stop_timer(1);
+			}
+
+			e.set_value(Value::from(next));
+			e.set_attribute("title", &format!("Current value is {}. Click to stop timer, if need.", next));
+
+			return true;
+		}
+		return false;
+	}
 
 	fn document_complete(&mut self, root: sciter::HELEMENT, source: sciter::HELEMENT) {
 
@@ -92,23 +168,32 @@ impl sciter::EventHandler for Handler {
 
 			let mut progress = Element::create("progress").unwrap();
 			progress.set_attribute("max", "100");
-			progress.set_attribute("name", "progress");
+			progress.set_attribute("id", "id1");
+			progress.set_attribute("title", "Click to start timer.");
 
 			div.append(&progress).expect("wtf?");
 
 			// after attaching Element to DOM, we can set its styles, text, html or value.
 			progress.set_value(Value::from(42));
+			progress.set_style_attribute("behavior", "progress clickable");
+
+			// attach custom handler to this element
+			// since timers are not sinking/bubbling, we need to attach our handler to the target element directly.
+			let handler = Handler::default();
+			progress.attach_handler(handler).expect("can't attach?");
+
+			let mut e = Element::with_text("span", " <-- check tooltip").unwrap();
+			div.append(&e);
+
+			e.set_style_attribute("font-style", "italic");
 		}
-
-
-
 	}
-
 }
 
 fn testing_dom() {
 	let mut frame = sciter::Window::new();
-	frame.event_handler(Handler);
+	let handler = Handler::default();
+	frame.event_handler(handler);
 	frame.set_title("DOM sample");
 	frame.load_file("http://httpbin.org/html");
 	frame.run_app(true);
