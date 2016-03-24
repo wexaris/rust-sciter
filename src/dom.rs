@@ -1,8 +1,6 @@
-//! DOM access methods.
-//!
-/*!
+/*! DOM access methods.
 
-## DOM access methods.
+## Introduction.
 
 Let’s assume you already integrated Sciter in your application and so you have Sciter window with loaded content.
 
@@ -19,7 +17,7 @@ Therefore your UI in Sciter is a collection of uniform DOM elements that can be 
 ## Basic operations
 
 To access the DOM tree we need to get reference of its root element
-(root element is an element representing <html> tag in HTML source).
+(root element is an element representing `<html>` tag in HTML source).
 
 ```no-run
 let root = Element::from_window(hwnd);
@@ -29,7 +27,7 @@ assert_eq(root.get_tag(), "html");
 By having root element reference we are able to access any other element in the tree
 using various access and search functions like SciterGetNthChild, SciterSelectElements, …
 All of them are wrapped into methods of `dom::Element`.
-Here is how you would get reference to first <div> element with class "sidebar" using CSS selectors:
+Here is how you would get reference to first `<div>` element with class "sidebar" using CSS selectors:
 
 ```no-run
 let sidebar = root.find_first("div.sidebar").unwrap();
@@ -752,20 +750,39 @@ impl Element {
 		ok_or!((), ok)
 	}
 
-	/// Start Timer for the element. Element will receive on_timer event.
-	pub fn start_timer(&self, period_ms: u32, timer_id: usize) -> Result<()> {
+	/// Start Timer for the element. Element will receive `on_timer` event.
+	///
+	/// Note that timer events are not bubbling, so you need attach handler to the target element directly.
+	pub fn start_timer(&self, period_ms: u32, timer_id: u64) -> Result<()> {
 		let ok = (_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::sctypes::UINT_PTR);
 		ok_or!((), ok)
 	}
 
 	/// Stop Timer for the element.
-	pub fn stop_timer(&self, timer_id: usize) -> Result<()> {
+	pub fn stop_timer(&self, timer_id: u64) -> Result<()> {
 		if !self.he.is_null() {
 			let ok = (_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::sctypes::UINT_PTR);
 			ok_or!((), ok)
 		} else {
 			Ok(())
 		}
+	}
+
+	/// Attach the native event handler to this element.
+	pub fn attach_handler<T: ::dom::EventHandler>(&mut self, handler: T) -> Result<u64> {
+		// make native handler
+		let boxed = Box::new(handler);
+		let ptr = Box::into_raw(boxed);
+		let token = ptr as usize as u64;
+		let ok = (_API.SciterAttachEventHandler)(self.he, ::eventhandler::_event_handler_proc::<T>, ptr as LPVOID);
+		ok_or!(token, ok)
+	}
+
+	/// Detach your handler from the element. Handlers identified by `token` from `attach_handler()` result.
+	pub fn detach_handler<T: ::dom::EventHandler>(&mut self, token: u64) -> Result<()> {
+		let ptr = token as usize as *mut T;
+		let ok = (_API.SciterDetachEventHandler)(self.he, ::eventhandler::_event_handler_proc::<T>, ptr as LPVOID);
+		ok_or!((), ok)
 	}
 }
 
@@ -930,7 +947,7 @@ You can override any of these methods in order to receive events you are interes
 To attach native event handler to DOM element or to the window you can do one of these:
 
 * "Manually", to Sciter window: `sciter::Window.event_handler(your_event_handler)`
-* "Manually", to arbitrary DOM element: sciter::dom::Element.event_handler(your_event_handler_ptr)`
+* "Manually", to arbitrary DOM element: `sciter::dom::Element.attach_handler(your_event_handler)`
 * To group of DOM elements by declaration in CSS: `selector { behavior:your-behavior-name }`
 
 You also can assign events handlers defined in script code:
@@ -1004,15 +1021,15 @@ Behaviors, Prototypes and Aspects of Sciter CSS behavior assignment.
 		/// Return list of event groups this event_handler is subscribed to.
 		///
 		/// Default is ``.
-		fn get_subscription(&mut self, event_groups: &mut EVENT_GROUPS) -> bool {
-			*event_groups = default_events();
-			return true;
+		fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
+			return Some(default_events());
 		}
 
-		/// Called when handler was attached to element.
+		/// Called when handler was attached to element or window.
+		/// `root` is NULL if attaching to window without loaded document.
 		fn attached(&mut self, root: HELEMENT) {}
 
-		/// Called when handler was detached from element.
+		/// Called when handler was detached from element or window.
 		fn detached(&mut self, root: HELEMENT) {}
 
 		/// Notification that document finishes its loading - all requests for external resources are finished
@@ -1030,6 +1047,10 @@ Behaviors, Prototypes and Aspects of Sciter CSS behavior assignment.
 		fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
 			return false;
 		}
+
+		/// Timer event from attached element.
+		fn on_timer(&mut self, root: HELEMENT, timer_id: u64) -> bool { return false; }
+
 	}
 
 }

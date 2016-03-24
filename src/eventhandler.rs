@@ -70,7 +70,12 @@ pub extern "stdcall" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HE
 
 		EVENT_GROUPS::SUBSCRIPTIONS_REQUEST => {
 			let scnm = params as *mut EVENT_GROUPS;
-			me.get_subscription(unsafe {&mut *scnm})
+			let nm = unsafe {&mut *scnm};
+			let handled = me.get_subscription();
+			if let Some(needed) = handled {
+				*nm = needed;
+			}
+			handled.is_some()
 		},
 
 		EVENT_GROUPS::HANDLE_INITIALIZATION => {
@@ -144,7 +149,14 @@ pub extern "stdcall" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HE
 				false
 			};
 			handled
-		}
+		},
+
+		EVENT_GROUPS::HANDLE_TIMER => {
+			let scnm = params as *const TIMER_PARAMS;
+			let nm = unsafe { & *scnm };
+			let handled = me.on_timer(he, nm.timerId as u64);
+			handled
+		},
 
 		_ => false
 	};

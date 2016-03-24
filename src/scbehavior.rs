@@ -45,6 +45,11 @@ pub struct SCRIPTING_METHOD_PARAMS
 	pub result: VALUE,
 }
 
+#[repr(C)]
+pub struct TIMER_PARAMS
+{
+	pub timerId: UINT_PTR,
+}
 
 #[repr(C)]
 #[derive(Copy, Clone)]
