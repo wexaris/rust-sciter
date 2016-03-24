@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>Rust-sciter sample</title>
+    <style>
+
+      html {
+        background: radial-gradient(75% 75%, circle farthest-side, white, orange, rgb(0,0,204));
+        color:#fff;
+      }
+
+      html:rtl {
+        mapping: left-to-right(background);
+      }
+
+    </style>
+    <script type="text/tiscript">
+
+      view.caption = $(head > title).value;
+
+      $(#machine).text = Sciter.machineName();
+
+      var counter = 0;
+
+      $(button#append).on("click", function(){
+        $(body).$append(<h1#test>{++counter }</h1>);
+      });
+
+      $(button#open).on("click", function(){
+
+        var fn = view.selectFile(#open,
+          "HTML Files (*.htm,*.html)|*.HTM;*.HTML|All Files (*.*)|*.*" , "html" );
+
+        stdout.println("selected file: " + fn);
+        $(body).$append(<h1#test>{fn}</h1>);
+      });
+
+      $(button#ti2py).on("click", function() {
+        var answer = view.NativeCall(view.caption);
+        $(body).$append(<h1#test>script -&gt; native: {answer}</h1>);
+      })
+
+      $(button#py2ti).on("click", function() {
+        var answer = view.ScriptCallTest("call arg");
+      })
+
+      function hello(who) {
+      	$(body).$append(<h1#test>native -&gt; script: {who}</h1>);
+      	return "its working!";
+      }
+
+      function raise_error(arg) {
+      	throw new Error(String.$(Unexpected type of input {typeof arg}.));
+      }
+
+      self.timer(2000, function() {
+
+        if(!view.api)
+          view.api = view.GetNativeApi();
+          // {add: function(a,b) { return a + b; }};
+
+        stdout.println(String.printf("2 + 3 = %d", view.api.add(2, 3)));
+        stdout.println(String.printf("2 * 3 = %d", view.api.mul(2, 3)));
+        stdout.println(String.printf("2 - 3 = %d", view.api.sub(2, 3, 4)));
+      });
+
+    </script>
+  </head>
+<body>
+
+  <h1>Rust Sciter Application</h1>
+  <p>Running on <em #machine /> machine</p>
+
+  <button #append>Append</button>
+  <button #open>Open</button>
+  <button #ti2py>Call native</button>
+  <button #py2ti>Call script</button>
+  <select>
+    <option>First</option>
+    <option>Second</option>
+    <option>Third</option>
+  </select>
+
+</body>
+</html>
