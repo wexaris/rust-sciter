@@ -10,7 +10,7 @@ proxies of script functions, objects and arrays.
 
 You can create an empty (undefined) sciter `Value` with `new()`:
 
-```no-run
+```
 use sciter::Value;
 
 let v = Value::new();
@@ -20,7 +20,9 @@ assert!(!v.is_null());
 
 Or explicitly create `Value` for specified type:
 
-```no-run
+```
+use sciter::Value;
+
 let v = Value::null();
 assert!(v.is_null());
 
@@ -35,7 +37,9 @@ assert!(v.is_string());
 
 Also there is conversion from Rust types:
 
-```no-run
+```
+use sciter::Value;
+
 let v = Value::from(true);
 assert!(v.is_bool());
 
@@ -48,13 +52,15 @@ assert!(v.is_float());
 let v = Value::from("hello");
 assert!(v.is_string());
 
-let v = Value::from(&b"123");
+let v = Value::from(b"123".as_ref());
 assert!(v.is_bytes());
 ```
 
 And from sequence of objects:
 
-```no-run
+```
+use sciter::Value;
+
 let v: Value = ["1","2","3"].iter().cloned().collect();
 assert!(v.is_array());
 assert_eq!(v.len(), 3);
@@ -64,19 +70,48 @@ assert_eq!(v[0], Value::from("1"));
 
 To access its contents you should use one of `to_` methods:
 
-```no-run
+```
+use sciter::Value;
+
 let v = Value::from(4);
 assert_eq!(v.to_int(), Some(4));
 ```
 
 Note that there is two functions that converts `Value` to JSON and back:
 
-```no-run
+```
+use sciter::Value;
+
 let mut v: Value = "[1, 2, 3, 4]".parse().unwrap();
 let json_str = v.into_string();
 ```
 
-Map access: TBD
+Array access:
+
+```
+use sciter::Value;
+
+let mut v: Value = "[10, 20]".parse().unwrap();
+assert_eq!(v[0], Value::from(10));
+
+v.set(1, Value::from(21));
+v.set(2, Value::from(22));
+assert_eq!(v.len(), 3);
+
+assert!(v.get(0).is_int());
+```
+
+Map access:
+
+```
+use sciter::Value;
+
+let mut v: Value = "{one: 1, two: 2}".parse().unwrap();
+assert_eq!(v[Value::from("one")], Value::from(1));
+
+v.set_item(Value::from("three"), Value::from(3));
+assert!(v.get_item(Value::from("one")).is_int());
+```
 
 .
 */
