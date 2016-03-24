@@ -1,46 +1,50 @@
 //! High level window wrapper.
 
+use ::{_API};
 use scdef::*;
 use sctypes::*;
 
 use platform::{BaseWindow, OsWindow};
 use host::{Host, HostHandler};
-
+use dom::event::{EventHandler};
+use eventhandler::*;
 
 /// Sciter window.
 pub struct Window
 {
 	base: OsWindow,
 	host: Host,
-	// event: EventHandler,
 }
 
 impl Window {
 
 	/// Create a new window and setup the sciter and dom callbacks.
 	pub fn new() -> Window {
-		let mut wnd = Window { base: OsWindow::new(), host: Host::new() };
-		
 		let flags = SCITER_CREATE_WINDOW_FLAGS::SW_MAIN
 							 | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS
 							 | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR
 							 | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
-		wnd.base.create(flags as UINT, 0 as HWINDOW);
 
-		let hwnd = wnd.base.get_hwnd();
-		if !hwnd.is_null() {
-			wnd.host = Host::from(hwnd);
-			// wnd.host.setup_debug();
-			// wnd.host.setup_callback(hwnd);
-			// wnd.event.attach(hwnd);
-		}
+		let mut base = OsWindow::new();
+		let hwnd = base.create(flags as UINT, 0 as HWINDOW);
+		assert!(!hwnd.is_null());
+
+		let wnd = Window { base: base, host: Host::from(hwnd)};
 		return wnd;
 	}
 
 	/// Set callback for sciter engine events.
-	pub fn sciter_handler<T: HostHandler>(&mut self, handler: T) {
-		println!("set custom sciter handler");
+	pub fn sciter_handler<T: HostHandler + Sized>(&mut self, handler: T) {
 		self.host.setup_callback(self.base.get_hwnd(), handler);
+	}
+
+	/// Attach `dom::EventHandler` to the Sciter window.
+	///
+	/// You can install Window EventHandler only once - it will survive all document reloads.
+	pub fn event_handler<T: EventHandler>(&mut self, handler: T) {
+		let boxed = Box::new( WindowHandler { hwnd: self.base.get_hwnd(), handler: handler } );
+		let ptr = Box::into_raw(boxed);
+		(_API.SciterWindowAttachEventHandler)(self.base.get_hwnd(), _event_handler_window_proc::<T>, ptr as LPVOID, ::dom::event::default_events() as UINT);
 	}
 
 	/// Load HTML document from file.
@@ -57,7 +61,7 @@ impl Window {
 	pub fn get_hwnd(&self) -> HWINDOW {
 		self.base.get_hwnd()
 	}
-	
+
 	/// Minimize or hide window.
 	pub fn collapse(&self, hide: bool) {
 		self.base.collapse(hide)

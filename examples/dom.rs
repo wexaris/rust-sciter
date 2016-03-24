@@ -1,4 +1,5 @@
 #![allow(unused_variables)]
+#![allow(unused_must_use)]
 
 extern crate sciter;
 
@@ -9,7 +10,7 @@ struct Handler;
 
 impl sciter::EventHandler for Handler {
 
-	fn document_complete(&self, root: sciter::HELEMENT) {
+	fn document_complete(&mut self, root: sciter::HELEMENT, source: sciter::HELEMENT) {
 
 		let root = Element::from(root);
 		assert_eq!(root.get_tag(), "html");
@@ -71,10 +72,10 @@ impl sciter::EventHandler for Handler {
 			div.set_style_attribute("width", "max-content");
 			div.set_style_attribute("padding", "5dip");
 
-			let mut lb = Element::with_text("label", "Output: ");
+			let mut lb = Element::with_text("label", "Output: ").unwrap();
 			div.append(&lb).expect("wtf?");	// push as reference, we can access this `lb` still.
 
-			let mut date = Element::with_type("input", "date");
+			let mut date = Element::with_type("input", "date").unwrap();
 			date.set_attribute("id", "mydate");
 			date.set_attribute("value", "now");
 
@@ -89,7 +90,7 @@ impl sciter::EventHandler for Handler {
 			lb.set_style_attribute("color", "lightblue");
 			lb.set_style_attribute("vertical-align", "middle");
 
-			let mut progress = Element::create("progress");
+			let mut progress = Element::create("progress").unwrap();
 			progress.set_attribute("max", "100");
 			progress.set_attribute("name", "progress");
 

@@ -55,6 +55,10 @@ impl NativeHandler {
 		unsafe { &*obj}
 	}
 
+	pub fn from_mut_ptr3<'a>(ptr: LPVOID) -> &'a mut NativeHandler {
+		let obj = ptr as *mut NativeHandler;
+		unsafe { &mut *obj}
+	}
 	/// Return a native pointer to handler wrapper.
 	pub fn as_ptr(&self) -> LPCVOID {
 		self as *const NativeHandler as LPCVOID

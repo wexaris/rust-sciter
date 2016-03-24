@@ -17,14 +17,27 @@ pub enum IDXGISurface {}
 
 
 #[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
+
+/// SCN_LOAD_DATA (`HostHandler::on_data_load()`) result code.
+///
+/// This notification gives application a chance to override built-in loader and
+/// implement loading of resources in its own way (for example images can be loaded from
+/// database or other resource).
 pub enum LOAD_RESULT {
-  LOAD_OK,
+	/// Do default loading if data not set.
+  LOAD_DEFAULT,
+  /// Discard request completely (data will not be loaded at document).
   LOAD_DISCARD,
+  /// Data will be delivered later by the host application.
   LOAD_DELAYED,
+  /// You return this result to indicate that your (the host) application took or
+  /// will take care about `HREQUEST` in your code completely.
   LOAD_MYSELF,
 }
 
 #[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum SCITER_RT_OPTIONS
 {
   SCITER_SMOOTH_SCROLL = 1,      // value:TRUE - enable, value:FALSE - disable, enabled by default
@@ -71,7 +84,7 @@ impl ::std::ops::BitOr for SCITER_CREATE_WINDOW_FLAGS {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum SCITER_NOTIFICATION {
   SC_LOAD_DATA = 1,
   SC_DATA_LOADED = 2,
@@ -81,43 +94,95 @@ pub enum SCITER_NOTIFICATION {
   SC_GRAPHICS_CRITICAL_FAILURE = 7,
 }
 
+#[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
+/// Sciter resource type identifiers.
+pub enum SCITER_RESOURCE_TYPE
+{
+  RT_DATA_HTML = 0,
+  RT_DATA_IMAGE = 1,
+  RT_DATA_STYLE = 2,
+  RT_DATA_CURSOR = 3,
+  RT_DATA_SCRIPT = 4,
+  RT_DATA_RAW = 5,
+  RT_DATA_FONT,
+  RT_DATA_SOUND,    // wav bytes
+  RT_DATA_FORCE_DWORD = 0xffffffff
+}
+
+
+#[repr(C)]
+#[derive(Debug)]
+/// Notifies that Sciter is about to download a referred resource.
 pub struct SCN_LOAD_DATA
 {
+	/// `SC_LOAD_DATA` here.
   pub code: UINT,
+  /// `HWINDOW` of the window this callback was attached to.
   pub hwnd: HWINDOW,
 
+  /// [in] Zero terminated string, fully qualified uri, for example "http://server/folder/file.ext".
   pub uri: LPCWSTR,
 
+  /// [in,out] pointer to loaded data to return. If data exists in the cache then this field contain pointer to it.
   pub outData: LPCBYTE,
+  /// [in,out] loaded data size to return.
   pub outDataSize: UINT,
-  pub dataType: UINT,
+  /// [in] resource type category
+  pub dataType: SCITER_RESOURCE_TYPE,
 
-  pub requestId: HREQUEST,
+  /// [in] request handle that can be used with sciter request API.
+  pub request_id: HREQUEST,
 
+  /// [in] destination element for request.
   pub principal: HELEMENT,
+  /// [in] source element for request.
   pub initiator: HELEMENT,
 }
 
+#[repr(C)]
+#[derive(Debug)]
+/// This notification indicates that external data (for example image) download process completed.
 pub struct SCN_DATA_LOADED
 {
+	/// `SC_DATA_LOADED` here.
   pub code: UINT,
+  /// `HWINDOW` of the window this callback was attached to.
   pub hwnd: HWINDOW,
+  /// [in] zero terminated string, fully qualified uri, for example "http://server/folder/file.ext".
   pub uri: LPCWSTR,
+  /// [in] pointer to loaded data.
   pub data: LPCBYTE,
+  /// [in] loaded data size (in bytes).
   pub dataSize: UINT,
+  /// [in] resource type category
   pub dataType: UINT,
+  /// Download status code:
+  ///
+  /// * status = 0 and `dataSize == 0` - unknown error.
+  /// * status = 100..505 - http response status, note: 200 - OK!
+  /// * status > 12000 - wininet error code, see `ERROR_INTERNET_***` in wininet.h
   pub status: UINT,
 }
 
+#[repr(C)]
+#[derive(Debug)]
+/// This notification is sent on parsing the document and while processing elements
+/// having non empty `style.behavior` attribute value.
 pub struct SCN_ATTACH_BEHAVIOR
 {
+	/// `SC_ATTACH_BEHAVIOR` here.
   pub code: UINT,
+  /// `HWINDOW` of the window this callback was attached to.
   pub hwnd: HWINDOW,
 
+  /// [in] target DOM element handle
   pub element: HELEMENT,
+  /// [in] zero terminated string, string appears as value of CSS `behavior: ` attribute.
   pub behaviorName: LPCSTR,
-
+  /// [out] pointer to ElementEventProc function.
   pub elementProc: *mut ElementEventProc,
+  /// [out] tag value, passed as is into pointer ElementEventProc function.
   pub elementTag: LPVOID,
 }
 
@@ -137,7 +202,7 @@ pub type SciterWindowDelegate = extern "stdcall" fn (hwnd: HWINDOW, msg: UINT, w
 pub type ElementEventProc = extern "stdcall" fn (tag: LPVOID, he: HELEMENT, evtg: UINT, prms: LPVOID) -> BOOL;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum OUTPUT_SUBSYTEMS
 {
   DOM = 0,       // html parser & runtime
@@ -147,7 +212,7 @@ pub enum OUTPUT_SUBSYTEMS
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum OUTPUT_SEVERITY
 {
   INFO,
@@ -173,4 +238,3 @@ pub struct REQUEST_PARAM {
 }
 
 pub type KeyValueCallback = extern "stdcall" fn (param: LPVOID, pkey: *const VALUE, pval: *const VALUE) -> BOOL;
-

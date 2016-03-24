@@ -137,11 +137,17 @@ if (var num = self.select("input[type=number]")) {
 */
 
 use ::{_API};
-use scdom::*;
 use sctypes::*;
 use value::Value;
 
+pub use scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML};
+
+pub use dom::event::EventHandler;
+pub use dom::event::EventReason;
+
+/// A specialized `Result` type for DOM operations.
 pub type Result<T> = ::std::result::Result<T, SCDOM_RESULT>;
+
 
 /// Initialize HELEMENT by nullptr.
 macro_rules! HELEMENT {
@@ -206,7 +212,7 @@ impl ElementVisitor for FindAllElements {
 }
 
 
-/// DOM element wrapper.
+/// DOM element wrapper. See the module-level documentation also.
 #[derive(PartialEq)]
 pub struct Element {
 	he: HELEMENT,
@@ -222,12 +228,12 @@ impl Element {
 	}
 
 	/// Create new element, it is disconnected initially from the DOM.
-	pub fn create(tag: &str) -> Element {
+	pub fn create(tag: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
 		let text = 0 as LPCWSTR;
-		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
-		return e;
+		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
+		ok_or!(e, ok)
 	}
 
 	/// Create new element as child of `parent`.
@@ -241,23 +247,26 @@ impl Element {
 	}
 
 	/// Create new element with specified `text`, it is disconnected initially from the DOM.
-	pub fn with_text(tag: &str, text: &str) -> Element {
+	pub fn with_text(tag: &str, text: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
 		let (text,_) = s2w!(text);
-		(_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut e.he);
-		return e;
+		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut e.he);
+		ok_or!(e, ok)
 	}
 
-	/// Create new element with specified `type`, which is useful for controls and widgets.
-	pub fn with_type(tag: &str, el_type: &str) -> Element {
+	/// Create new element with specified `type`, which is useful for controls and widgets (initially disconnected).
+	pub fn with_type(tag: &str, el_type: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
 		let text = 0 as LPCWSTR;
-		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
-
-		e.set_attribute("type", el_type);
-		return e;
+		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
+		if ok == SCDOM_RESULT::OK {
+			let r = e.set_attribute("type", el_type);
+			r.map(|_| e)
+		} else {
+			Err(ok)
+		}
 	}
 	/// Get root DOM element of the Sciter document.
 	pub fn from_window(hwnd: HWINDOW) -> Result<Element> {
@@ -333,9 +342,10 @@ impl Element {
 	}
 
 	/// Set inner text of the element.
-	pub fn set_text(&mut self, text: &str) {
+	pub fn set_text(&mut self, text: &str) -> Result<()> {
 		let (s,n) = s2w!(text);
-		(_API.SciterSetElementText)(self.he, s.as_ptr(), n);
+		let ok = (_API.SciterSetElementText)(self.he, s.as_ptr(), n);
+		ok_or!((), ok)
 	}
 
 	/// Get html representation of the element as utf-8 bytes.
@@ -346,11 +356,12 @@ impl Element {
 	}
 
 	/// Set inner or outer html of the element.
-	pub fn set_html(&mut self, html: &[u8], how: Option<SET_ELEMENT_HTML>) {
+	pub fn set_html(&mut self, html: &[u8], how: Option<SET_ELEMENT_HTML>) -> Result<()> {
 		if html.len() == 0 {
 			return self.clear();
 		}
-		(_API.SciterSetElementHtml)(self.he, html.as_ptr(), html.len() as UINT, how.unwrap_or(SET_ELEMENT_HTML::SIH_REPLACE_CONTENT) as UINT);
+		let ok = (_API.SciterSetElementHtml)(self.he, html.as_ptr(), html.len() as UINT, how.unwrap_or(SET_ELEMENT_HTML::SIH_REPLACE_CONTENT) as UINT);
+		ok_or!((), ok)
 	}
 
 	/// Get value of the element.
@@ -361,8 +372,9 @@ impl Element {
 	}
 
 	/// Set value of the element.
-	pub fn set_value(&mut self, val: Value) {
-		(_API.SciterSetValue)(self.he, val.as_cptr());
+	pub fn set_value(&mut self, val: Value) -> Result<()> {
+		let ok = (_API.SciterSetValue)(self.he, val.as_cptr());
+		ok_or!((), ok)
 	}
 
 	/// Get HWINDOW of containing window.
@@ -439,31 +451,34 @@ impl Element {
 	}
 
 	/// Add or replace attribute.
-	pub fn set_attribute(&mut self, name: &str, value: &str) {
+	pub fn set_attribute(&mut self, name: &str, value: &str) -> Result<()> {
 		let (name,_) = s2u!(name);
 		let (value,_) = s2w!(value);
-		(_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value.as_ptr());
+		let ok = (_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value.as_ptr());
+		ok_or!((), ok)
 	}
 
 	/// Remove attribute.
-	pub fn remove_attribute(&mut self, name: &str) {
+	pub fn remove_attribute(&mut self, name: &str) -> Result<()> {
 		let (name,_) = s2u!(name);
 		let value = ::std::ptr::null();
-		(_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value);
+		let ok = (_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value);
+		ok_or!((), ok)
 	}
 
 	/// Toggle attribute.
-	pub fn toggle_attribute(&mut self, name: &str, isset: bool, value: Option<&str>) {
+	pub fn toggle_attribute(&mut self, name: &str, isset: bool, value: Option<&str>) -> Result<()> {
 		if isset {
-			self.set_attribute(name, value.unwrap());
+			self.set_attribute(name, value.unwrap())
 		} else {
-			self.remove_attribute(name);
+			self.remove_attribute(name)
 		}
 	}
 
 	/// Remove all attributes from the element.
-	pub fn clear_attributes(&mut self) {
-		(_API.SciterClearAttributes)(self.he);
+	pub fn clear_attributes(&mut self) -> Result<()> {
+		let ok = (_API.SciterClearAttributes)(self.he);
+		ok_or!((), ok)
 	}
 
 
@@ -478,10 +493,11 @@ impl Element {
 	}
 
 	/// Set [style attribute](http://sciter.com/docs/content/sciter/Style.htm).
-	pub fn set_style_attribute(&mut self, name: &str, value: &str) {
+	pub fn set_style_attribute(&mut self, name: &str, value: &str) -> Result<()> {
 		let (name,_) = s2u!(name);
 		let (value,_) = s2w!(value);
-		(_API.SciterSetStyleAttribute)(self.he, name.as_ptr(), value.as_ptr());
+		let ok = (_API.SciterSetStyleAttribute)(self.he, name.as_ptr(), value.as_ptr());
+		ok_or!((), ok)
 	}
 
 	//\name State methods
@@ -604,8 +620,9 @@ impl Element {
 	}
 
 	/// Clear content of the element.
-	pub fn clear(&mut self) {
-		(_API.SciterSetElementText)(self.he, ::std::ptr::null(), 0);
+	pub fn clear(&mut self) -> Result<()> {
+		let ok = (_API.SciterSetElementText)(self.he, ::std::ptr::null(), 0);
+		ok_or!((), ok)
 	}
 
 	/// Create new element as copy of existing element.
@@ -886,3 +903,133 @@ SciterNodeSetText
 SciterNodeType
 
 */
+
+pub mod event {
+	//!
+	//! Behaviors support (a.k.a windowless controls).
+	//!
+	/*!
+
+## Behaviors and event handling.
+
+Primary goal of User Interface (UI) as a subsystem is to present some information to the user
+and generate some events according to user’s actions.
+Your application handles UI events and acts accordingly executing its functions.
+
+To be able to handle events in native code you will need to attach instance of `sciter::EventHandler`
+to existing DOM element or to the window itself. In the `EventHandler` you will receive all events
+dispatched to the element and its children as before children (in `PHASE_MASK::SINKING` phase)
+as after them (`PHASE_MASK::BUBBLING` event phase), see [Events Propagation](http://sciter.com/developers/for-native-gui-programmers/#events-propagation).
+
+`EventHandler` attached to the window will receive all DOM events no matter which element they are targeted to.
+
+`EventHandler` contains various methods – receivers of events of various types.
+You can override any of these methods in order to receive events you are interested in your implementation of `sciter::EventHandler` class.
+
+
+To attach native event handler to DOM element or to the window you can do one of these:
+
+* "Manually", to Sciter window: `sciter::Window.event_handler(your_event_handler)`
+* "Manually", to arbitrary DOM element: sciter::dom::Element.event_handler(your_event_handler_ptr)`
+* To group of DOM elements by declaration in CSS: `selector { behavior:your-behavior-name }`
+
+You also can assign events handlers defined in script code:
+
+* "Manually", individual events: if you have reference `el` of some element then to handle mouse events you can do this for example:
+
+```javascript
+el.onMouse = function(evt) { ... }
+```
+
+* "Manually", by assigning behavior class to the [Element](http://sciter.com/docs/content/sciter/Element.htm):
+
+```javascript
+class MyEventsHandler: Element { ... }  // your behavior class which inherits sciter's Element class
+el.prototype = MyEventsHandler; // "sub-class" the element.
+```
+
+* By declaration in CSS to all elements satisfying some CSS selector:
+
+```css
+selector { prototype: MyEventsHandler; }
+```
+
+In this case `MyEventsHandler` class should be defined in one of script files loaded by your HTML.
+
+See the **Behavior attributes** section of [Sciter CSS property map](http://sciter.com/docs/content/css/cssmap.html)
+and [this blog article](http://www.terrainformatica.com/2014/07/sciter-declarative-behavior-assignment-by-css-prototype-and-aspect-properties/) which covers
+Behaviors, Prototypes and Aspects of Sciter CSS behavior assignment.
+
+
+*/
+
+	pub use scbehavior::{EVENT_REASON, EVENT_GROUPS, EDIT_CHANGED_REASON, BEHAVIOR_EVENTS, PHASE_MASK};
+
+	use sctypes::*;
+	use scdom::HELEMENT;
+	use value::Value;
+
+	/// Default subscription events
+	///
+	/// Default is `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL` which covers behavior events
+	/// (like `document_complete` or `button_click`) and script calls to native window.
+	pub fn default_events() -> EVENT_GROUPS {
+		return EVENT_GROUPS::HANDLE_BEHAVIOR_EVENT | EVENT_GROUPS::HANDLE_SCRIPTING_METHOD_CALL;
+	}
+
+	/// UI action causing change.
+	pub enum EventReason {
+		/// General event source triggers (by mouse, key or synthesized).
+	  General(EVENT_REASON),
+	  /// Edit control change trigger.
+	  EditChanged(EDIT_CHANGED_REASON),
+	  /// `<video>` request for frame source binding (*unsupported yet*).
+	  VideoBind(LPVOID),
+	}
+
+
+	/// DOM event handler which can be attached to any DOM element.
+	///
+	/// In notifications:
+	///
+	/// * `root` means the DOM element to which we attached (`<html>` for `Window` event handler).
+	/// * `target` contains reference to the notification target DOM element.
+	/// * `source` element e.g. in `SELECTION_CHANGED` it is new selected `<option>`, in `MENU_ITEM_CLICK` it is menu item (`<li>`) element.
+	///
+	/// For example, if we attached to `<body>` element, we will receive `document_complete` with `target` set to `<html>`.
+	///
+	#[allow(unused_variables)]
+	pub trait EventHandler {
+
+		/// Return list of event groups this event_handler is subscribed to.
+		///
+		/// Default is ``.
+		fn get_subscription(&mut self, event_groups: &mut EVENT_GROUPS) -> bool {
+			*event_groups = default_events();
+			return true;
+		}
+
+		/// Called when handler was attached to element.
+		fn attached(&mut self, root: HELEMENT) {}
+
+		/// Called when handler was detached from element.
+		fn detached(&mut self, root: HELEMENT) {}
+
+		/// Notification that document finishes its loading - all requests for external resources are finished
+		fn document_complete(&mut self, root: HELEMENT, target: HELEMENT) {}
+
+		/// The last notification before document removal from the DOM.
+		fn document_close(&mut self, root: HELEMENT, target: HELEMENT) {}
+
+		/// Script calls from CSSS! script and TIScript.
+		fn on_script_call(&mut self, root: HELEMENT, name: &str, args: &[Value]) -> Option<Value> {
+			return None;
+		}
+
+		/// Notification event from builtin behaviors.
+		fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
+			return false;
+		}
+	}
+
+}

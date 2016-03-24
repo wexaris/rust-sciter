@@ -1,4 +1,8 @@
-//#![allow(non_camel_case_types, non_snake_case)]
+//!
+//! # Rust bindings library for Sciter engine.
+//!
+//! Check more information at https://github.com/pravic/rust-sciter.
+//!
 
 
 /* Macros */
@@ -22,16 +26,23 @@ mod scvalue;
 mod schandler;
 
 pub use scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
+pub use scdom::{HELEMENT};
 
 /* Rust interface */
-pub mod utf;
 mod platform;
+mod eventhandler;
 
 pub mod window;
 pub mod host;
 pub mod value;
+pub mod utf;
+pub mod dom;
 
-pub type Window = window::Window;
+pub use window::Window;
+pub use dom::Element;
+pub use value::Value;
+pub use dom::event::EventHandler;
+pub use host::HostHandler;
 
 /* Loader */
 

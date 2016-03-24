@@ -9,13 +9,21 @@ MAKE_HANDLE!(HNODE, _HNODE);
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
+/// Type of the result value for Sciter DOM functions.
 pub enum SCDOM_RESULT {
+	/// Function completed successfully.
 	OK = 0,
+	/// Invalid `HWINDOW`.
 	INVALID_HWND = 1,
+	/// Invalid `HELEMENT`.
 	INVALID_HANDLE = 2,
+	/// Attempt to use `HELEMENT` which is not attached to document.
 	PASSIVE_HANDLE = 3,
+	/// Parameter is invalid, e.g. pointer is null.
 	INVALID_PARAMETER = 4,
+	/// Operation failed, e.g. invalid html passed.
 	OPERATION_FAILED = 5,
+	/// Function completed successfully, but no result (e.g. no such attribute at element).
 	OK_NOT_HANDLED = -1,
 }
 
