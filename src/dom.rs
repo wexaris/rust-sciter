@@ -21,7 +21,7 @@ Therefore your UI in Sciter is a collection of uniform DOM elements that can be 
 To access the DOM tree we need to get reference of its root element
 (root element is an element representing <html> tag in HTML source).
 
-```
+```no-run
 let root = Element::from_window(hwnd);
 assert_eq(root.get_tag(), "html");
 ```
@@ -31,13 +31,13 @@ using various access and search functions like SciterGetNthChild, SciterSelectEl
 All of them are wrapped into methods of `dom::Element`.
 Here is how you would get reference to first <div> element with class "sidebar" using CSS selectors:
 
-```
+```no-run
 let sidebar = root.find_first("div.sidebar").unwrap();
 ```
 
 The same in script:
 
-```ignore
+```javascript
 var sidebar = self.select("div.sidebar"); // or
 var sidebar = self.$(div.sidebar); // using stringizer select variant
 ```
@@ -46,7 +46,7 @@ var sidebar = self.$(div.sidebar); // using stringizer select variant
 
 You can change *text* or HTML of DOM element:
 
-```
+```no-run
 if let Some(el) = root.find_first("#cancel") {
 	el.set_text("Abort!");
 	el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
@@ -55,7 +55,7 @@ if let Some(el) = root.find_first("#cancel") {
 
 The same but in script:
 
-```ignore
+```javascript
 var el = ...;
 el.text = "Hello world"; // text
 el.html = "Hello <b>wrold</b>!"; // inner html
@@ -63,14 +63,14 @@ el.html = "Hello <b>wrold</b>!"; // inner html
 
 You can get or set DOM *attributes* of any DOM element:
 
-```
+```no-run
 let val = el.get_attribute("class").unwrap();
 el.set_attribute("class", "new-class");
 ```
 
 To *remove* existing DOM element (detach it from the DOM) you will do this:
 
-```
+```no-run
 el.detach();
 ```
 
@@ -78,27 +78,27 @@ and when code will live scope where the `el` variable is defined the DOM element
 
 Creation and population of DOM elements looks like this:
 
-```
+```no-run
 let p = Element::with_text("p", "Hello"); // create <p> element
 el.append(p); // append it to existing element, or insert() ...
 ```
 
 And in script:
 
-```ignore
+```javascript
 var p = new Element("p", "Hello");
 el.append(p);
 ```
 
 To change runtime state flags of DOM element we do something like this:
 
-```
+```no-run
 el.set_state(STATE_VISITED);
 ```
 
 And in script:
 
-```ignore
+```javascript
 el.state.visited = true;
 ```
 
@@ -119,7 +119,7 @@ In native code values are represented by `sciter::Value` objects.
 
 Here is how to set numeric value of DOM element in native code:
 
-```
+```no-run
 if let Some(num) = root.find_first("input[type=number]") {
 	num.set_value( sciter::Value::from(12) );
 }
@@ -127,7 +127,7 @@ if let Some(num) = root.find_first("input[type=number]") {
 
 In script the same will look like:
 
-```ignore
+```javascript
 if (var num = self.select("input[type=number]")) {
 	num.value = 12;
 }
@@ -249,6 +249,16 @@ impl Element {
 		return e;
 	}
 
+	/// Create new element with specified `type`, which is useful for controls and widgets.
+	pub fn with_type(tag: &str, el_type: &str) -> Element {
+		let mut e = Element { he: HELEMENT!() };
+		let (tag,_) = s2u!(tag);
+		let text = 0 as LPCWSTR;
+		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
+
+		e.set_attribute("type", el_type);
+		return e;
+	}
 	/// Get root DOM element of the Sciter document.
 	pub fn from_window(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
@@ -691,29 +701,28 @@ impl Element {
 	}
 
 	/// Will find first parent element starting from this satisfying given css selector(s).
-	pub fn find_nearest_parent(&self, selector: &str) -> Option<Element> {
+	pub fn find_nearest_parent(&self, selector: &str) -> Result<Option<Element>> {
 		let mut p = HELEMENT!();
 		let (s,_) = s2u!(selector);
-		(_API.SciterSelectParent)(self.he, s.as_ptr(), 0, &mut p);
-		if p.is_null() { None } else { Some(Element::from(p)) }
+		let ok = (_API.SciterSelectParent)(self.he, s.as_ptr(), 0, &mut p);
+		if ok != SCDOM_RESULT::OK {
+			return Err(ok);
+		}
+		if p.is_null() { Ok(None) } else { Ok(Some(Element::from(p))) }
 	}
 
 	/// Will find first element starting from this satisfying given css selector(s).
-	pub fn find_first(&self, selector: &str) -> Option<Element> {
+	pub fn find_first(&self, selector: &str) -> Result<Option<Element>> {
 		let cb = FindFirstElement::default();
 		let all = self.select_elements(selector, cb);
-		if let Ok(mut all) = all {
-			all.pop()
-		} else {
-			None
-		}
+		all.map(|mut x| { x.pop() })
 	}
 
 	/// Will find all elements starting from this satisfying given css selector(s).
-	pub fn find_all(&self, selector: &str) -> Option<Vec<Element>> {
+	pub fn find_all(&self, selector: &str) -> Result<Option<Vec<Element>>> {
 		let cb = FindFirstElement::default();
 		let all = self.select_elements(selector, cb);
-		all.ok()
+		all.map(|x| Some(x))
 	}
 
 	//\name Scroll methods:

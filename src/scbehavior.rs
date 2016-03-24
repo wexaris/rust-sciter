@@ -21,6 +21,7 @@ pub struct BEHAVIOR_EVENT_PARAMS
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum INITIALIZATION_EVENTS
 {
 	BEHAVIOR_DETACH = 0,
@@ -45,6 +46,7 @@ pub struct SCRIPTING_METHOD_PARAMS
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum EVENT_GROUPS
 {
 	HANDLE_INITIALIZATION = 0x0000, /** attached/detached */
@@ -67,22 +69,25 @@ pub enum EVENT_GROUPS
 	HANDLE_GESTURE               = 0x2000, /** touch input events */
 
 	HANDLE_ALL                   = 0xFFFF, /* all of them */
-		
+
 		/** special value for getting subscription flags */
 	SUBSCRIPTIONS_REQUEST        = -1,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum PHASE_MASK
 {
-	BUBBLING = 0,      // bubbling (emersion) phase
-	SINKING  = 0x8000,  // capture (immersion) phase, this flag is or'ed with EVENTS codes below
-	HANDLED  = 0x10000
+	BUBBLING 				= 0,	      // bubbling (emersion) phase
+	SINKING  				= 0x08000,  // capture (immersion) phase
+	HANDLED  				= 0x10000,
+	SINKING_HANDLED = 0x18000,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum EVENT_REASON
 {
 	BY_MOUSE_CLICK,
@@ -92,6 +97,7 @@ pub enum EVENT_REASON
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum EDIT_CHANGED_REASON
 {
 	BY_INS_CHAR,  // single char insertion
@@ -102,6 +108,7 @@ pub enum EDIT_CHANGED_REASON
 
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 pub enum BEHAVIOR_EVENTS
 {
 	BUTTON_CLICK = 0,              // click on button
@@ -174,16 +181,16 @@ pub enum BEHAVIOR_EVENTS
 	                               // is sent for example by behavior:richtext when caret position/selection has changed.
 
 	FORM_SUBMIT,                   // behavior:form detected submission event. BEHAVIOR_EVENT_PARAMS::data field contains data to be posted.
-	                               // BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about 
+	                               // BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about
 	                               // to be submitted. You can modify the data or discard submission by returning true from the handler.
 	FORM_RESET,                    // behavior:form detected reset event (from button type=reset). BEHAVIOR_EVENT_PARAMS::data field contains data to be reset.
-	                               // BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about 
+	                               // BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about
 	                               // to be rest. You can modify the data or discard reset by returning true from the handler.
 
 	DOCUMENT_COMPLETE,             // document in behavior:frame or root document is complete.
 
 	HISTORY_PUSH,                  // requests to behavior:history (commands)
-	HISTORY_DROP,                     
+	HISTORY_DROP,
 	HISTORY_PRIOR,
 	HISTORY_NEXT,
 	HISTORY_STATE_CHANGED,         // behavior:history notification - history stack has changed
@@ -196,14 +203,14 @@ pub enum BEHAVIOR_EVENTS
 	DOCUMENT_CREATED  = 0xC0,      // document created, script namespace initialized. target -> the document
 	DOCUMENT_CLOSE_REQUEST = 0xC1, // document is about to be closed, to cancel closing do: evt.data = sciter::value("cancel");
 	DOCUMENT_CLOSE    = 0xC2,      // last notification before document removal from the DOM
-	DOCUMENT_READY    = 0xC3,      // document has got DOM structure, styles and behaviors of DOM elements. Script loading run is complete at this moment. 
+	DOCUMENT_READY    = 0xC3,      // document has got DOM structure, styles and behaviors of DOM elements. Script loading run is complete at this moment.
 
-	VIDEO_INITIALIZED = 0xD1,      // <video> "ready" notification   
-	VIDEO_STARTED     = 0xD2,      // <video> playback started notification   
-	VIDEO_STOPPED     = 0xD3,      // <video> playback stoped/paused notification   
-	VIDEO_BIND_RQ     = 0xD4,      // <video> request for frame source binding, 
+	VIDEO_INITIALIZED = 0xD1,      // <video> "ready" notification
+	VIDEO_STARTED     = 0xD2,      // <video> playback started notification
+	VIDEO_STOPPED     = 0xD3,      // <video> playback stoped/paused notification
+	VIDEO_BIND_RQ     = 0xD4,      // <video> request for frame source binding,
 	                               //   If you want to provide your own video frames source for the given target <video> element do the following:
-	                               //   1. Handle and consume this VIDEO_BIND_RQ request 
+	                               //   1. Handle and consume this VIDEO_BIND_RQ request
 	                               //   2. You will receive second VIDEO_BIND_RQ request/event for the same <video> element
 	                               //      but this time with the 'reason' field set to an instance of sciter::video_destination interface.
 	                               //   3. add_ref() it and store it for example in worker thread producing video frames.

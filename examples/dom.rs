@@ -29,8 +29,8 @@ impl sciter::EventHandler for Handler {
 		assert_eq!(body.last_sibling().expect("must be body"), body);
 
 
-		if let Some(h1) = body.find_first("body > h1") {
-			println!("{:?}", h1);
+		if let Ok(Some(h1)) = body.find_first("body > h1") {
+			println!("h1 {:?}", h1);
 
 			let h1_parent = h1.parent().expect("come on!");
 			assert_eq!(h1_parent, body);
@@ -53,34 +53,41 @@ impl sciter::EventHandler for Handler {
 			h1.set_attribute("title", "yellow!");
 		}
 
-		let mut all = body.find_all("div > p").unwrap();
+		let mut all = body.find_all("div > p").unwrap().expect("must be at least one div > p");
 		assert!(all.is_empty() == false);
 		assert_eq!(all.len(), 1);
 
 		all.clear();
 
-		if let Some(mut body) = root.find_first("html > body") {
+		if let Ok(Some(mut body)) = root.find_first("html > body") {
 
 			println!("creating some elments");
 
 			// DOM manipulation.
 			// After creating the new Element, we can set only attributes for it until we'll attach it to the DOM.
 			//
-			let mut div = Element::create("div");
-
-			let mut el = Element::create("output");
-			el.set_attribute("type", "date");
-			el.set_attribute("id", "mydate");
+			let mut div = Element::create_at("div", &mut body).unwrap();
+			div.set_style_attribute("outline", "1px solid orange");
+			div.set_style_attribute("width", "max-content");
+			div.set_style_attribute("padding", "5dip");
 
 			let mut lb = Element::with_text("label", "Output: ");
-
-			body.append(&div).expect("wtf?");
 			div.append(&lb).expect("wtf?");	// push as reference, we can access this `lb` still.
 
-			lb.push(el);			// push like `Vec.push()` - i.e. forgot about `el`.
+			let mut date = Element::with_type("input", "date");
+			date.set_attribute("id", "mydate");
+			date.set_attribute("value", "now");
+
+			lb.append(&date).expect("wtf?");
+
+			date.set_style_attribute("width", "100px");
+			date.set_style_attribute("outline", "1px dotted gray");
+			date.set_style_attribute("margin", "10px");
+
 
 			lb.set_attribute("accesskey", "o");
 			lb.set_style_attribute("color", "lightblue");
+			lb.set_style_attribute("vertical-align", "middle");
 
 			let mut progress = Element::create("progress");
 			progress.set_attribute("max", "100");
@@ -97,8 +104,6 @@ impl sciter::EventHandler for Handler {
 	}
 
 }
-
-impl sciter::event::WindowEventHandler for Handler {}
 
 fn testing_dom() {
 	let mut frame = sciter::Window::new();
