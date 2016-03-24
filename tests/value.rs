@@ -221,8 +221,20 @@ fn index_works() {
 	v.push(Value::from(2));
 	v.push(Value::from(3));
 
+	println!("v {:?}", v);
 	assert_eq!(v.len(), 3);
 	assert_eq!(v[0], Value::from(1));
+
+	v.set(1, Value::from(17));
+	println!("v {:?}", v);
+	assert_eq!(v[1], Value::from(17));
+
+	let mut v: Value = r##"{"5": 5, "6": 6, seven: "seven"}"##.parse().unwrap();
+	let key = Value::from("seven");
+	v.set_item(key.clone(), Value::from(7.0));
+	println!("map {:?}", v);
+	assert_eq!(v.get_item(key), Value::from(7.0));
+
 }
 
 #[test]

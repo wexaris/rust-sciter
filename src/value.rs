@@ -81,6 +81,8 @@ Map access: TBD
 .
 */
 
+#![allow(dead_code)]
+
 use ::{_API};
 use scvalue::*;
 use sctypes::*;
@@ -193,8 +195,38 @@ impl Value {
 	}
 
 	/// Insert or set value at given `index` of T_ARRAY, T_MAP, T_FUNCTION and T_OBJECT sciter::value.
-	pub fn insert(&mut self, index: usize, src: Value) {
+	pub fn set(&mut self, index: usize, src: Value) {
 		(_API.ValueNthElementValueSet)(self.as_ptr(), index as INT, src.as_cptr());
+	}
+
+	/// Retreive value of sub-element at `index`
+	///
+	/// * T_ARRAY - nth element of the array;
+	/// * T_MAP - value of nth key/value pair in the map;
+	/// * T_FUNCTION - value of nth argument of the function.
+	///
+	pub fn get(&self, index: usize) -> Value {
+		let mut v = Value::new();
+		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, v.as_ptr());
+		return v;
+	}
+
+	/// Insert or set value of sub-element by key.
+	///
+	/// * if it is a map - sets named value in the map;
+	/// * if it is a function - sets named argument of the function;
+	/// * if it is a object - sets value of property of the object;
+	/// * otherwise it converts this to map and adds key/v to it.
+	///
+	pub fn set_item(&mut self, key: Value, value: Value) {
+		(_API.ValueSetValueToKey)(self.as_ptr(), key.as_cptr(), value.as_cptr());
+	}
+
+	/// Retrieve value of sub-element by key.
+	pub fn get_item(&self, key: Value) -> Value {
+		let mut v = Value::new();
+		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), v.as_ptr());
+		return v;
 	}
 
 	/// Value to integer.
@@ -455,7 +487,8 @@ impl ::std::ops::Index<usize> for Value {
 	}
 }
 
-/// Get item by index for array type.
+/// Set item by index for array type.
+#[cfg(notworking)]
 impl ::std::ops::IndexMut<usize> for Value {
 	fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut Value {
 		let tmp = self.ensure_tmp_mut();
@@ -467,18 +500,20 @@ impl ::std::ops::IndexMut<usize> for Value {
 /// Get item by key for map type.
 impl ::std::ops::Index<Value> for Value {
 	type Output = Value;
-	fn index<'a>(&'a self, index: Value) -> &'a Self::Output {
+	fn index<'a>(&'a self, key: Value) -> &'a Self::Output {
 		let tmp = self.ensure_tmp_mut();
-		(_API.ValueGetValueOfKey)(self.as_cptr(), index.as_cptr(), tmp.as_mut_ptr());
+		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), tmp.as_mut_ptr());
 		return tmp;
 	}
 }
 
-/// Get item by key for map type.
+/// Set item by key for map type.
+#[cfg(notworking)]
 impl ::std::ops::IndexMut<Value> for Value {
-	fn index_mut<'a>(&'a mut self, index: Value) -> &'a mut Value {
-		let tmp = self.ensure_tmp_mut();
-		(_API.ValueGetValueOfKey)(self.as_cptr(), index.as_cptr(), tmp.as_mut_ptr());
+	fn index_mut<'a>(&'a mut self, key: Value) -> &'a mut Value {
+		let ptr = self.as_ptr();
+		let tmp = self.ensure_tmp();
+		(_API.ValueSetValueToKey)(ptr, key.as_cptr(), tmp.as_ptr());
 		return tmp;
 	}
 }
@@ -547,7 +582,7 @@ impl<'a> From<&'a [u8]> for Value {
 	}
 }
 
-/// Value from sequence of i32.
+/// Value from sequence of `i32`.
 impl ::std::iter::FromIterator<i32> for Value {
 	fn from_iter<I: IntoIterator<Item=i32>>(iterator: I) -> Self {
 		let mut v = Value::new();
@@ -558,7 +593,7 @@ impl ::std::iter::FromIterator<i32> for Value {
 	}
 }
 
-/// Value from sequence of f64.
+/// Value from sequence of `f64`.
 impl ::std::iter::FromIterator<f64> for Value {
 	fn from_iter<I: IntoIterator<Item=f64>>(iterator: I) -> Self {
 		let mut v = Value::new();
@@ -569,7 +604,7 @@ impl ::std::iter::FromIterator<f64> for Value {
 	}
 }
 
-/// Value from sequence of &str.
+/// Value from sequence of `&str`.
 impl<'a> ::std::iter::FromIterator<&'a str> for Value {
 	fn from_iter<I: IntoIterator<Item=&'a str>>(iterator: I) -> Self {
 		let mut v = Value::new();
@@ -580,7 +615,7 @@ impl<'a> ::std::iter::FromIterator<&'a str> for Value {
 	}
 }
 
-/// Value from sequence of String.
+/// Value from sequence of `String`.
 impl ::std::iter::FromIterator<String> for Value {
 	fn from_iter<I: IntoIterator<Item=String>>(iterator: I) -> Self {
 		let mut v = Value::new();
@@ -590,6 +625,38 @@ impl ::std::iter::FromIterator<String> for Value {
 		return v;
 	}
 }
+
+/// Value from function.
+impl<F> From<F> for Value where F: Fn(&[Value]) -> Value {
+	fn from(f: F) -> Value {
+		let mut v = Value::new();
+		let boxed = Box::new(f);
+		let ptr = Box::into_raw(boxed);
+		(_API.ValueNativeFunctorSet)(v.as_ptr(), _functor_invoke::<F>, _functor_release::<F>, ptr as LPVOID);
+		return v;
+	}
+}
+
+extern "C" fn _functor_release<F>(tag: LPVOID)
+{
+	// reconstruct handler from pointer
+	let ptr = tag as *mut F;
+	let boxed = unsafe { Box::from_raw(ptr) };
+	// and forget it
+	drop(boxed);
+}
+
+extern "C" fn _functor_invoke<F>(tag: LPVOID, argc: UINT, argv: *const VALUE, retval: *mut VALUE) where F: Fn(&[Value]) -> Value
+{
+	// reconstruct handler from pointer
+	let ptr = tag as *mut F;
+	let me = unsafe { &mut *ptr };
+	let retval = unsafe { &mut *retval };
+	let args = Value::unpack_from(argv, argc);
+	let rv = me(&args);
+	rv.pack_to(retval)
+}
+
 
 
 mod tests {

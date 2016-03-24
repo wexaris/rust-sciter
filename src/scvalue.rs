@@ -71,5 +71,5 @@ pub enum VALUE_UNIT_TYPE_STRING
 }
 
 
-pub type NATIVE_FUNCTOR_INVOKE = extern "C" fn (tag: * mut VOID, argc: UINT, argv: *const VALUE, retval: * mut VALUE) -> VOID;
-pub type NATIVE_FUNCTOR_RELEASE = extern "C" fn (tag: * mut VOID) -> VOID;
+pub type NATIVE_FUNCTOR_INVOKE = extern "C" fn (tag: LPVOID, argc: UINT, argv: *const VALUE, retval: * mut VALUE);
+pub type NATIVE_FUNCTOR_RELEASE = extern "C" fn (tag: LPVOID);
