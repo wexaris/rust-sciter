@@ -4,8 +4,8 @@
 ///
 /// # Example:
 ///
-/// ```ignore
-/// let (cstr, len) = s2u("hello"); // ffi::CString
+/// ```macros
+/// let (cstr, len) = s2u!("hello"); // ffi::CString
 /// libc::printf("%.*hs", len, cstr.as_ptr());
 /// ```
 ///
@@ -19,8 +19,8 @@ macro_rules! s2u {
 ///
 /// # Example:
 ///
-/// ```ignore
-/// let (cwstr, len) = s2w("hello"); // Vec<u16>
+/// ```macros
+/// let (cwstr, len) = s2w!("hello"); // Vec<u16>
 /// libc::printf("%.*ws", len, cwstr.as_ptr());
 /// ```
 ///

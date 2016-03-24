@@ -10,7 +10,9 @@ proxies of script functions, objects and arrays.
 
 You can create an empty (undefined) sciter `Value` with `new()`:
 
-```
+```no-run
+use sciter::Value;
+
 let v = Value::new();
 assert!(v.is_undefined());
 assert!(!v.is_null());
@@ -18,8 +20,8 @@ assert!(!v.is_null());
 
 Or explicitly create `Value` for specified type:
 
-```
-	let v = Value::null();
+```no-run
+let v = Value::null();
 assert!(v.is_null());
 
 let v = Value::symbol("hello");
@@ -33,7 +35,7 @@ assert!(v.is_string());
 
 Also there is conversion from Rust types:
 
-```
+```no-run
 let v = Value::from(true);
 assert!(v.is_bool());
 
@@ -52,7 +54,7 @@ assert!(v.is_bytes());
 
 And from sequence of objects:
 
-```
+```no-run
 let v: Value = ["1","2","3"].iter().cloned().collect();
 assert!(v.is_array());
 assert_eq!(v.len(), 3);
@@ -62,14 +64,14 @@ assert_eq!(v[0], Value::from("1"));
 
 To access its contents you should use one of `to_` methods:
 
-```
+```no-run
 let v = Value::from(4);
 assert_eq!(v.to_int(), Some(4));
 ```
 
 Note that there is two functions that converts `Value` to JSON and back:
 
-```
+```no-run
 let mut v: Value = "[1, 2, 3, 4]".parse().unwrap();
 let json_str = v.into_string();
 ```
@@ -86,7 +88,7 @@ use sctypes::*;
 
 // TODO: map keys/values/items
 
-/// sciter::value wrapper.
+/// sciter::value wrapper. See the module-level documentation.
 pub struct Value
 {
 	data: VALUE,

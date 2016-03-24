@@ -1,9 +1,20 @@
-//!
-//! # Rust bindings library for Sciter engine.
-//!
-//! Check more information at https://github.com/pravic/rust-sciter.
-//!
+/*!
+# Rust bindings library for Sciter engine.
 
+Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/) HTML/CSS/script engine
+with GPU accelerated rendering designed to render modern desktop application UI.
+It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
+
+Sciter supports all standard elements defined in HTML5 specification [with some additions](http://sciter.com/developers/for-web-programmers/).
+CSS extended to better support Desktop UI development, e.g. flow and flex units, vertical and horizontal alignment, OS theming.
+
+[Sciter SDK](http://sciter.com/download/) comes with demo "browser" with builtin DOM inspector, script debugger and documentation browser:
+
+![Sciter tools](http://sciter.com/images/sciter-tools.png)
+
+Check <http://sciter.com> website and its [documentation resources](http://sciter.com/developers/) for engine principles, architecture and more.
+.
+*/
 
 /* Macros */
 

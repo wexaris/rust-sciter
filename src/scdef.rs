@@ -107,7 +107,6 @@ pub enum SCITER_RESOURCE_TYPE
   RT_DATA_RAW = 5,
   RT_DATA_FONT,
   RT_DATA_SOUND,    // wav bytes
-  RT_DATA_FORCE_DWORD = 0xffffffff
 }
 
 
