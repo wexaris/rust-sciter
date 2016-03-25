@@ -9,11 +9,13 @@ use host::{Host, HostHandler};
 use dom::event::{EventHandler};
 use eventhandler::*;
 
+use std::rc::Rc;
+
 /// Sciter window.
 pub struct Window
 {
 	base: OsWindow,
-	host: Host,
+	host: Rc<Host>,
 }
 
 impl Window {
@@ -31,6 +33,11 @@ impl Window {
 
 		let wnd = Window { base: base, host: Host::from(hwnd)};
 		return wnd;
+	}
+
+	/// Obtain reference to `Host` which allows you to control sciter engine and windows.
+	pub fn get_host(&self) -> Rc<Host> {
+		self.host.clone()
 	}
 
 	/// Set callback for sciter engine events.

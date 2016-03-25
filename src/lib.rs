@@ -49,11 +49,13 @@ pub mod value;
 pub mod utf;
 pub mod dom;
 
-pub use window::Window;
 pub use dom::Element;
-pub use value::{Value, FromValue};
 pub use dom::event::EventHandler;
-pub use host::HostHandler;
+pub use host::{Host, HostHandler};
+pub use value::{Value, FromValue};
+pub use window::Window;
+
+
 
 /* Loader */
 
