@@ -87,3 +87,66 @@ macro_rules! MAKE_HANDLE {
 		pub type $name = *mut $inner;
 	};
 }
+
+/// Dispatch script calls
+///
+/// This macro generates new function which dispatchs incoming script call to native function
+/// with arguments unpacking and type checking.
+///
+#[macro_export]
+macro_rules! dispatch_script_call {
+
+	(
+		$(
+			fn $name:ident ( $( $argt:ident ),* );
+		 )*
+	) => {
+
+		fn dispatch_script_call(&mut self, root: sciter::HELEMENT, name: &str, argv: &[$crate::Value]) -> Option<$crate::Value>
+		{
+			match name {
+				$(
+					stringify!($name) => {
+
+						// args count
+						let mut _i = 0;
+						$(
+							let _: $argt;
+							_i += 1;
+						)*
+						let argc = _i;
+
+						if argv.len() != argc {
+							return Some($crate::Value::error(&format!("{} error: {} of {} arguments provided.", stringify!($name), argv.len(), argc)));
+						}
+
+						// call function
+						let mut _i = 0;
+						let rv = self.$name(
+							$(
+								{
+									match $crate::FromValue::from_value(&argv[_i]) {
+										Some(arg) => { _i += 1; arg },
+										None => {
+											// invalid type
+											return Some($crate::Value::error(&format!("{} error: invalid type of {} argument ({} expected, {:?} provided).",
+												stringify!($name), _i, stringify!($argt), argv[_i])));
+										},
+									}
+								}
+							 ),*
+						);
+
+						// return result value
+						return Some($crate::Value::from(rv));
+					},
+				 )*
+
+				_ => ()
+			};
+
+			// script call not handled
+			return None;
+		}
+	};
+}
