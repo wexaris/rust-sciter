@@ -5,10 +5,10 @@ use sctypes::*;
 
 pub trait BaseWindow {
 
-	fn create(&mut self, flags: UINT, parent: HWINDOW) -> HWINDOW;
+	fn create(&mut self, rect: (i32,i32,i32,i32), flags: UINT, parent: HWINDOW) -> HWINDOW;
 
 	fn get_hwnd(&self) -> HWINDOW;
-	
+
 	fn collapse(&self, hide: bool);
 	fn expand(&self, maximize: bool);
 	fn dismiss(&self);
@@ -73,13 +73,15 @@ mod windows {
 		}
 
 		/// Create a new native window.
-		fn create(&mut self, flags: UINT, parent: HWINDOW) -> HWINDOW {
+		fn create(&mut self, rect: (i32,i32,i32,i32), flags: UINT, parent: HWINDOW) -> HWINDOW {
 
 			if (flags & SCITER_CREATE_WINDOW_FLAGS::SW_MAIN as u32) != 0 {
 				OsWindow::init_app();
 			}
 
-			let rc = RECT::default();
+			let (x,y,w,h) = rect;
+			let rc = RECT { left: x, top: y, right: x + w, bottom: y + h };
+
 			let cb = 0 as *const SciterWindowDelegate;
 			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
 			if self.hwnd.is_null() {
@@ -87,7 +89,7 @@ mod windows {
 			}
 			return self.hwnd;
 		}
-		
+
 		/// Minimize or hide window.
 		fn collapse(&self, hide: bool) {
 			let n: INT = if hide { 0 } else { 6 };

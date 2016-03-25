@@ -1,5 +1,30 @@
-//! High level window wrapper.
+/*! High level window wrapper.
 
+To create instance of Sciter you will need either to create new Sciter window or to attach (mix-in) Sciter engine to existing window.
+
+Handle of the Sciter engine is defined as `HWINDOW` type which is:
+
+* `HWND` handle on Microsoft Windows.
+* `NSView*` – pointer to [NSView](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSView_Class/) instance that is a contentView of Sciter window on OS X.
+* `GtkWidget*` – pointer to [GtkWidget](https://developer.gnome.org/gtk3/stable/GtkWidget.html) instance
+that is a root widget of Sciter window on Linux/GTK.
+
+## Creation of new window
+
+```
+extern crate sciter;
+
+fn main() {
+	let mut frame = sciter::Window::new();
+	frame.load_file("minimal.htm");
+	frame.run_app(true);
+}
+```
+
+Also you can register the [host](../host/trait.HostHandler.html) and [DOM](../dom/event/index.html) event handlers.
+
+.
+*/
 use ::{_API};
 use scdef::*;
 use sctypes::*;
@@ -11,6 +36,9 @@ use eventhandler::*;
 
 use std::rc::Rc;
 
+/// Window flags.
+pub type Flags = SCITER_CREATE_WINDOW_FLAGS;
+
 /// Sciter window.
 pub struct Window
 {
@@ -20,18 +48,30 @@ pub struct Window
 
 impl Window {
 
-	/// Create a new window and setup the sciter and dom callbacks.
+	/// Create a new main window.
 	pub fn new() -> Window {
-		let flags = SCITER_CREATE_WINDOW_FLAGS::SW_MAIN
-							 | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS
-							 | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR
-							 | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
+		let flags = SCITER_CREATE_WINDOW_FLAGS::main_window(true);
+		Window::create((0,0,0,0), flags, None)
+	}
 
+	/// Create new window with specified `size(width, height)` and flags.
+	pub fn with_size(size: (i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS) -> Window {
+		let (w, h) = size;
+		Window::create((0,0,w,h), flags, None)
+	}
+
+	/// Create new window with specified position as `rect(x, y, width, height)` and flags.
+	pub fn with_rect(rect: (i32, i32, i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS) -> Window {
+		Window::create(rect, flags, None)
+	}
+
+	/// Create new window with specified position as `rect(x, y, width, height)`, flags and optional parent window.
+	pub fn create(rect: (i32, i32, i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS, parent: Option<HWINDOW>) -> Window {
 		let mut base = OsWindow::new();
-		let hwnd = base.create(flags as UINT, 0 as HWINDOW);
+		let hwnd = base.create(rect, flags as UINT, parent.unwrap_or(0 as HWINDOW));
 		assert!(!hwnd.is_null());
 
-		let wnd = Window { base: base, host: Host::from(hwnd)};
+		let wnd = Window { base: base, host: Rc::new(Host::from(hwnd))};
 		return wnd;
 	}
 
@@ -84,7 +124,7 @@ impl Window {
 		self.base.dismiss()
 	}
 
-	/// Set native window title.
+	/// Set title of native window.
 	pub fn set_title(&mut self, title: &str) {
 		self.base.set_title(title)
 	}
