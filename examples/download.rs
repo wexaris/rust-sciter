@@ -6,19 +6,53 @@ extern crate sciter;
 
 use sciter::host::HostHandler;
 use sciter::utf;
+use std::rc::{Rc, Weak};
 
-struct Handler;
+// struct Handler;
+
+struct Handler {
+	host: Weak<sciter::Host>,
+}
 
 impl HostHandler for Handler {
-	fn on_data_loaded(&self, pnm: & sciter::SCN_DATA_LOADED) -> u32 {
+	fn on_data_loaded(&mut self, pnm: &sciter::SCN_DATA_LOADED) {
 		println!("data loaded, uri: `{}`, {} bytes.", utf::w2s(pnm.uri), pnm.dataSize);
-		return 0;
+	}
+
+	fn on_attach_behavior(&mut self, pnm: &mut sciter::SCN_ATTACH_BEHAVIOR) -> bool {
+		let el = sciter::Element::from(pnm.element);
+		let name = utf::u2s(pnm.name);
+		println!("{}: behavior {}", el, name);
+
+		if let Some(host) = self.host.upgrade() {
+			let result = host.eval_script("[Sciter.userName(), Sciter.machineName(true)].join(`@`)");
+			match result {
+				Ok(mut name) => {
+					name.isolate();
+					println!("running on {:?}", name);
+				},
+				Err(e) => {
+					println!("error! {}", e.as_string().unwrap_or("?".to_string()));
+				},
+			}
+		}
+
+		return false;
+	}
+
+}
+
+impl Drop for Handler {
+	fn drop(&mut self) {
+		println!("Good bye, window");
 	}
 }
 
 fn main() {
-	let mut frame = sciter::Window::new();
-	frame.sciter_handler(Handler);
+	use sciter::window;
+	let mut frame = window::Window::with_size((1024,768), window::Flags::main_window(true));
+	let handler = Handler { host: Rc::downgrade(&frame.get_host()) };
+	frame.sciter_handler(handler);
 	frame.set_title("Download sample");
 	frame.load_file("http://httpbin.org/html");
 	frame.run_app(true);
