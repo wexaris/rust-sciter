@@ -1,6 +1,6 @@
 # Rust bindings for Sciter
 
-_Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another languages._
+_Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another language bindings._
 
 ----
 
@@ -86,6 +86,9 @@ stdout.printf("2 + 3 = %d\n", view.calc_sum(2, 3));
 ```
 
 _Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/examples) folder for more complex usage_.
+
+
+## [Library documentation](http://pravic.github.io/rust-sciter/).
 
 
 ## What supported right now:
