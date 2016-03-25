@@ -243,10 +243,3 @@ pub struct ISciterAPI
 	pub SciterRenderOnDirectXTexture: extern "stdcall" fn (hwnd: HWINDOW, elementToRenderOrNull: HELEMENT, surface: * mut IDXGISurface) -> BOOL,
   // #endif
 }
-
-impl ISciterAPI {
-	/// Return the class name of sciter native windows.
-	pub fn SciterClassName(&self) -> String {
-		return w2s((self.SciterClassName)());
-	}
-}

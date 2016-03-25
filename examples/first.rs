@@ -10,7 +10,9 @@ fn main() {
 	let abi_version = scapi.version;
 	println!("sciter abi version: {:?}", abi_version);
 
-	let class_name = scapi.SciterClassName();
+	// let class_name = scapi.SciterClassName(); // this doesn't work with rust 1.7
+
+	let class_name = sciter::utf::w2s((scapi.SciterClassName)());
 	println!("sciter class name: {}", class_name);
 
 	let v1 = (scapi.SciterVersion)(true);
