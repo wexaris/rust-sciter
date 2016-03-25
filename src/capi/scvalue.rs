@@ -3,7 +3,7 @@
 #![allow(non_snake_case, non_camel_case_types)]
 #![allow(dead_code)]
 
-use sctypes::*;
+use capi::sctypes::*;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

@@ -135,10 +135,10 @@ if (var num = self.select("input[type=number]")) {
 */
 
 use ::{_API};
-use sctypes::*;
+use capi::sctypes::*;
 use value::Value;
 
-pub use scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML};
+pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML};
 
 pub use dom::event::EventHandler;
 pub use dom::event::EventReason;
@@ -703,14 +703,14 @@ impl Element {
 	/// Call specified function for every element in a DOM that meets specified CSS selectors.
 	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Result<Vec<Element>> {
 		extern "stdcall" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
-			let handler = ::schandler::NativeHandler::from_mut_ptr3(param);
+			let handler = ::capi::schandler::NativeHandler::from_mut_ptr3(param);
 			let mut obj = handler.as_mut::<T>();
 			let e = Element::from(he);
 			let stop = obj.on_element(e);
 			return stop as BOOL;
 		}
 		let (s,_) = s2u!(selector);
-		let handler = ::schandler::NativeHandler::from(callback);
+		let handler = ::capi::schandler::NativeHandler::from(callback);
 		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
 		if ok != SCDOM_RESULT::OK {
 			return Err(ok);
@@ -758,14 +758,14 @@ impl Element {
 	///
 	/// Note that timer events are not bubbling, so you need attach handler to the target element directly.
 	pub fn start_timer(&self, period_ms: u32, timer_id: u64) -> Result<()> {
-		let ok = (_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::sctypes::UINT_PTR);
+		let ok = (_API.SciterSetTimer)(self.he, period_ms as UINT, timer_id as ::capi::sctypes::UINT_PTR);
 		ok_or!((), ok)
 	}
 
 	/// Stop Timer for the element.
 	pub fn stop_timer(&self, timer_id: u64) -> Result<()> {
 		if !self.he.is_null() {
-			let ok = (_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::sctypes::UINT_PTR);
+			let ok = (_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::capi::sctypes::UINT_PTR);
 			ok_or!((), ok)
 		} else {
 			Ok(())
@@ -1034,10 +1034,10 @@ This way you can establish interaction between scipt and native code inside your
 
 */
 
-	pub use scbehavior::{EVENT_REASON, EVENT_GROUPS, EDIT_CHANGED_REASON, BEHAVIOR_EVENTS, PHASE_MASK};
+	pub use capi::scbehavior::{EVENT_REASON, EVENT_GROUPS, EDIT_CHANGED_REASON, BEHAVIOR_EVENTS, PHASE_MASK};
 
-	use sctypes::*;
-	use scdom::HELEMENT;
+	use capi::sctypes::*;
+	use capi::scdom::HELEMENT;
 	use value::Value;
 
 	/// Default subscription events

@@ -3,9 +3,9 @@
 #![allow(non_camel_case_types, non_snake_case)]
 #![allow(dead_code)]
 
-use sctypes::*;
-use scdom::*;
-use scvalue::{VALUE};
+use capi::sctypes::*;
+use capi::scdom::*;
+use capi::scvalue::{VALUE};
 
 
 #[repr(C)]

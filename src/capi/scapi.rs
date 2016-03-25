@@ -2,15 +2,15 @@
 
 #![allow(non_snake_case, non_camel_case_types)]
 
-use sctypes::*;
-use scdef::*;
-use scdom::*;
-use scvalue::*;
-use sctiscript::{HVM, tiscript_value, tiscript_native_interface};
-use scbehavior::*;
-use scgraphics::{SciterGraphicsAPI};
-use screquest::{SciterRequestAPI, HREQUEST};
-use utf::*;
+use capi::sctypes::*;
+use capi::scdef::*;
+use capi::scdom::*;
+use capi::scvalue::*;
+use capi::sctiscript::{HVM, tiscript_value, tiscript_native_interface};
+use capi::scbehavior::*;
+use capi::scgraphics::{SciterGraphicsAPI};
+use capi::screquest::{SciterRequestAPI, HREQUEST};
+
 
 /// Sciter API functions.
 #[repr(C)]

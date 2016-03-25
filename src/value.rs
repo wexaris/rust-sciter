@@ -119,9 +119,9 @@ assert!(v.get_item(Value::from("one")).is_int());
 #![allow(dead_code)]
 
 use ::{_API};
-use sctypes::*;
-use scvalue::{VALUE, VALUE_UNIT_TYPE_STRING};
-pub use scvalue::{VALUE_RESULT, VALUE_STRING_CVT_TYPE, VALUE_TYPE};
+use capi::sctypes::*;
+use capi::scvalue::{VALUE, VALUE_UNIT_TYPE_STRING};
+pub use capi::scvalue::{VALUE_RESULT, VALUE_STRING_CVT_TYPE, VALUE_TYPE};
 
 // TODO: map keys/values/items
 
@@ -757,7 +757,7 @@ mod tests {
 	#![allow(unused_imports, unused_variables, unused_mut)]
 
 	use super::{Value, FromValue};
-	use ::scvalue::*;
+	use capi::scvalue::*;
 	use std::mem;
 	use ::{_API};
 

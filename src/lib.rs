@@ -26,20 +26,8 @@ Check <http://sciter.com> website and its [documentation resources](http://scite
 #[macro_use]
 mod macros;
 
-
-/* C interface headers */
-mod scapi;
-mod scbehavior;
-mod scdef;
-mod scdom;
-mod scgraphics;
-mod screquest;
-mod sctiscript;
-mod sctypes;
-mod scvalue;
-mod schandler;
-
-pub use scdom::{HELEMENT};
+mod capi;
+pub use capi::scdom::{HELEMENT};
 
 /* Rust interface */
 mod platform;
@@ -60,25 +48,27 @@ pub use window::Window;
 
 
 /* Loader */
+use capi::scapi::{ISciterAPI};
 
-use self::scapi::{ISciterAPI};
 
 #[cfg(all(windows, target_arch="x86"))]
 mod ext {
+	use capi::scapi::{ISciterAPI};
 	#[link(name="sciter32")]
-	extern "stdcall" { pub fn SciterAPI() -> *const ::scapi::ISciterAPI;	}
+	extern "stdcall" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
 #[cfg(all(windows, target_arch="x86_64"))]
 mod ext {
+	use capi::scapi::{ISciterAPI};
 	#[link(name="sciter64")]
-	extern "stdcall" { pub fn SciterAPI() -> *const ::scapi::ISciterAPI;	}
+	extern "stdcall" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
 #[allow(non_snake_case)]
 #[doc(hidden)]
 /// Getting ISciterAPI reference, can be used for manual API calling.
-pub fn SciterAPI<'a>() -> &'a ::scapi::ISciterAPI {
+pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 	let ap = unsafe {
 		let p = ext::SciterAPI();
 		&*p

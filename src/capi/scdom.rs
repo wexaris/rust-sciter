@@ -2,7 +2,7 @@
 
 #![allow(non_camel_case_types, non_snake_case)]
 
-use sctypes::*;
+use capi::sctypes::*;
 
 MAKE_HANDLE!(HELEMENT, _HELEMENT);
 MAKE_HANDLE!(HNODE, _HNODE);

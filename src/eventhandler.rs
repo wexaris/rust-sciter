@@ -1,6 +1,6 @@
-use sctypes::*;
-use scbehavior::*;
-use scdom::{HELEMENT};
+use capi::sctypes::*;
+use capi::scbehavior::*;
+use capi::scdom::{HELEMENT};
 use value::Value;
 use dom::event::{EventHandler, EventReason};
 
@@ -11,10 +11,10 @@ pub struct WindowHandler<T>
 	pub handler: T,
 }
 
-pub extern "stdcall" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, _he: ::scdom::HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
+pub extern "stdcall" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, _he: ::capi::scdom::HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
-	use scbehavior::*;
-	use scdom::HELEMENT;
+	use capi::scbehavior::*;
+	use capi::scdom::HELEMENT;
 
 	let boxed = tag as *mut WindowHandler<T>;
 	let mut tuple: &mut WindowHandler<T> = unsafe { &mut *boxed };

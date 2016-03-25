@@ -3,10 +3,10 @@
 #![allow(non_camel_case_types, non_snake_case)]
 #![allow(dead_code)]
 
-use sctypes::*;
-use scvalue::{VALUE};
-use screquest::{HREQUEST};
-use scdom::{HELEMENT};
+use capi::sctypes::*;
+use capi::scvalue::{VALUE};
+use capi::screquest::{HREQUEST};
+use capi::scdom::{HELEMENT};
 
 //////////////////////////////////////////////////////////////////////////////////
 pub enum ID2D1RenderTarget {}
@@ -65,13 +65,13 @@ pub enum GFX_LAYER
 /// Various sciter engine options.
 pub enum SCITER_RT_OPTIONS
 {
-	/// value:TRUE - enable, value:FALSE - disable, enabled by default
+	/// value:TRUE - enable, value:FALSE - disable, enabled by default.
   SCITER_SMOOTH_SCROLL = 1,
-  /// value: milliseconds, connection timeout of http client
+  /// value: milliseconds, connection timeout of http client.
   SCITER_CONNECTION_TIMEOUT = 2,
-  /// value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently
+  /// value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently.
   SCITER_HTTPS_ERROR = 3,
-  /// value: 0 - system default, 1 - no smoothing, 2 - std smoothing, 3 - clear type
+  /// value: 0 - system default, 1 - no smoothing, 2 - std smoothing, 3 - clear type.
   SCITER_FONT_SMOOTHING = 4,
 	/// Windows Aero support, value:
 	/// 0 - normal drawing,
@@ -79,9 +79,9 @@ pub enum SCITER_RT_OPTIONS
   SCITER_TRANSPARENT_WINDOW = 6,
   /// value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
   SCITER_SET_GPU_BLACKLIST  = 7,
-  /// value - combination of SCRIPT_RUNTIME_FEATURES flags.
+  /// value - combination of [SCRIPT_RUNTIME_FEATURES](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
   SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8,
-  /// value - GFX_LAYER
+  /// value - [GFX_LAYER](enum.GFX_LAYER.html).
   SCITER_SET_GFX_LAYER = 9,
   /// value - TRUE/FALSE
   SCITER_SET_DEBUG_MODE = 10,
@@ -89,7 +89,7 @@ pub enum SCITER_RT_OPTIONS
   /// That UX theme is not using OS primitives for rendering input elements.
   /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
   SCITER_SET_UX_THEMING = 11,
-  ///value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window)
+  ///value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window).
   SCITER_ALPHA_WINDOW  = 12,
 }
 

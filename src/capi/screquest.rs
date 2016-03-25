@@ -2,7 +2,7 @@
 
 #![allow(non_camel_case_types, non_snake_case)]
 
-use sctypes::{LPVOID};
+use capi::sctypes::{LPVOID};
 
 MAKE_HANDLE!(HREQUEST, _HREQUEST);
 

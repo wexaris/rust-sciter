@@ -1,6 +1,6 @@
 //! Platform-dependent windows support.
 
-use sctypes::*;
+use capi::sctypes::*;
 
 
 pub trait BaseWindow {
@@ -24,8 +24,8 @@ pub trait BaseWindow {
 mod windows {
 
 	use ::{_API};
-	use sctypes::*;
-	use scdef::*;
+	use capi::sctypes::*;
+	use capi::scdef::*;
 
 
 	#[link(name="user32")]

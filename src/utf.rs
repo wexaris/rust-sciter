@@ -1,6 +1,6 @@
 //! UTF-8 <> UTF-16 conversion support.
 
-// Since Rust haven't stable support of UTF-16, I've ported this code 
+// Since Rust haven't stable support of UTF-16, I've ported this code
 // from Sciter SDK (aux-cvt.h)
 
 // (C) 2003-2015, Andrew Fedoniouk (andrew@terrainformatica.com)
@@ -9,7 +9,7 @@
 #![allow(dead_code)]
 
 use std::ffi::{CStr, CString};
-use sctypes::{LPCSTR, LPCWSTR, LPCBYTE};
+use capi::sctypes::{LPCSTR, LPCWSTR, LPCBYTE};
 
 
 /// UTF-8 to UTF-16* converter.
@@ -98,16 +98,16 @@ fn fromwcs(wcs: &[u16], outbuf: &mut Vec<u8>) -> bool
 		let c: u32 = wcs[pc] as u32;
 		if (c < (1 << 7)) {
 			outbuf.push(c as u8);
-		
+
 		} else if (c < (1 << 11)) {
 			outbuf.push(((c >> 6) | 0xc0) as u8);
 			outbuf.push(((c & 0x3f) | 0x80) as u8);
-		
+
 		} else if (c < (1 << 16)) {
 			outbuf.push(((c >> 12) | 0xe0) as u8);
 			outbuf.push((((c >> 6) & 0x3f) | 0x80) as u8);
 			outbuf.push(((c & 0x3f) | 0x80) as u8);
-		
+
 		} else if (c < (1 << 21)) {
 			outbuf.push(((c >> 18) | 0xf0) as u8);
 			outbuf.push((((c >> 12) & 0x3f) | 0x80) as u8);
@@ -212,9 +212,9 @@ mod tests {
 	#![allow(unused_imports)]
 
 	use std::ffi::{CStr, CString};
-	use sctypes::{LPCWSTR, LPCSTR};
+	use capi::sctypes::{LPCWSTR, LPCSTR};
 	use super::{wcslen, u2s, w2s, s2vec};
-	
+
 	#[test]
 	fn test_wcslen() {
 		let nullptr: LPCWSTR = ::std::ptr::null();

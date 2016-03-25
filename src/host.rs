@@ -1,13 +1,13 @@
 //! Sciter host application helpers.
 
 use ::{_API};
-use sctypes::*;
-use screquest::HREQUEST;
-use schandler::NativeHandler;
+use capi::sctypes::*;
+use capi::screquest::HREQUEST;
+use capi::schandler::NativeHandler;
 use value::{Value};
 
-pub use scdef::{SCITER_RT_OPTIONS, SCRIPT_RUNTIME_FEATURES, GFX_LAYER};
-pub use scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
+pub use capi::scdef::{SCITER_RT_OPTIONS, SCRIPT_RUNTIME_FEATURES, GFX_LAYER};
+pub use capi::scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
 
 
 /// A specialized `Result` type for sciter host operations.
@@ -275,9 +275,9 @@ impl Host {
 
 // Sciter notification handler.
 // This comes as free function due to https://github.com/rust-lang/rust/issues/32364
-extern "stdcall" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::scdef::SCITER_CALLBACK_NOTIFICATION, param: LPVOID) -> UINT
+extern "stdcall" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scdef::SCITER_CALLBACK_NOTIFICATION, param: LPVOID) -> UINT
 {
-	use scdef::{SCITER_NOTIFICATION, SCITER_CALLBACK_NOTIFICATION};
+	use capi::scdef::{SCITER_NOTIFICATION, SCITER_CALLBACK_NOTIFICATION};
 
 	// reconstruct pointer to Handler
 	let mut boxed = NativeHandler::from_mut_ptr3(param);
