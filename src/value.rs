@@ -693,14 +693,65 @@ extern "C" fn _functor_invoke<F>(tag: LPVOID, argc: UINT, argv: *const VALUE, re
 }
 
 
+/// Helper trait
+pub trait FromValue {
+	fn from_value(v: &Value) -> Option<Self> where Self: Sized;
+}
+
+impl FromValue for bool {
+	fn from_value(v: &Value) -> Option<Self> {
+		v.to_bool()
+	}
+}
+
+impl FromValue for i32 {
+	fn from_value(v: &Value) -> Option<Self> {
+		v.to_int()
+	}
+}
+
+impl FromValue for f64 {
+	fn from_value(v: &Value) -> Option<Self> {
+		v.to_float()
+	}
+}
+
+impl FromValue for Vec<u8> {
+	fn from_value(v: &Value) -> Option<Self> {
+		v.to_bytes()
+	}
+}
+
+impl FromValue for String {
+	fn from_value(v: &Value) -> Option<Self> {
+		v.as_string()
+	}
+}
+
+
 
 mod tests {
 	#![allow(unused_imports, unused_variables, unused_mut)]
 
-	use super::{Value};
+	use super::{Value, FromValue};
 	use ::scvalue::*;
 	use std::mem;
 	use ::{_API};
+
+	fn check1(a: i32) {
+		assert_eq!(a, 12);
+	}
+
+	#[test]
+	fn test_from_value() {
+		let v = Value::from(12);
+		check1(
+			match FromValue::from_value(&v) {
+				Some(x) => { x },
+				None => { return; }
+			}
+		);
+	}
 
 	#[test]
 	fn test_value_layout() {
@@ -719,47 +770,5 @@ mod tests {
 
 		(_API.ValueClear)(&mut data);
 		assert_eq!(data.t, VALUE_TYPE::T_UNDEFINED);
-
-		let mut v = Value::new();
-		// println!("value {:?}", v);
-
-		// let p1 = v.as_ptr();
-		// let p2 = &mut v.data as *mut VALUE;
-		// println!("p1 {:?} p2 {:?} ", p1, p2);
-		// assert!(p1 == p2);
 	}
-
-	#[test]
-	fn test_value_new() {
-
-		let mut v = Value::new();
-		println!("value {:?}", v);
-		println!("value {:?}", v);
-
-		assert_eq!(v.data.t, VALUE_TYPE::T_UNDEFINED);
-		assert!(v.is_undefined());
-
-		v.clear();
-		assert_eq!(v.data.t, VALUE_TYPE::T_UNDEFINED);
-	}
-
-	#[test]
-	fn test_value_clear() {
-		let mut v = Value::null();
-
-		println!("value {:?}", v);
-		println!("value {:?}", v);
-
-		assert_eq!(v.data.t, VALUE_TYPE::T_NULL);
-		assert!(v.is_null());
-
-		v.clear();
-		v.clear().clear().clear();
-
-		println!("clear {:?}", v);
-		assert!(v.is_undefined());
-		assert!(!v.is_null());
-		assert_eq!(v.data.t, VALUE_TYPE::T_UNDEFINED);
-	}
-
 }

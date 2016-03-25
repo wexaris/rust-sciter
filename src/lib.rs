@@ -51,7 +51,7 @@ pub mod dom;
 
 pub use window::Window;
 pub use dom::Element;
-pub use value::Value;
+pub use value::{Value, FromValue};
 pub use dom::event::EventHandler;
 pub use host::HostHandler;
 
