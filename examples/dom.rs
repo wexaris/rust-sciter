@@ -27,6 +27,11 @@ impl sciter::EventHandler for Handler {
 		}
 	}
 
+	fn detached(&mut self, root: sciter::HELEMENT) {
+		let root = Element::from(root);
+		println!("detaching from {}", root);
+	}
+
 	fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
 		if phase != PHASE_MASK::BUBBLING {
 			return false;
@@ -190,8 +195,10 @@ impl sciter::EventHandler for Handler {
 	}
 }
 
+
 fn testing_dom() {
-	let mut frame = sciter::Window::new();
+	use sciter::window;
+	let mut frame = window::Window::with_size((750,750), window::Flags::main_window(true));
 	let handler = Handler::default();
 	frame.event_handler(handler);
 	frame.set_title("DOM sample");
