@@ -43,6 +43,10 @@
         var answer = view.ScriptCallTest("call arg");
       })
 
+      $(button#sum).on("click", function() {
+        stdout.printf("2 + 3 = %d\n", view.calc_sum("1", "2"));
+      })
+
       function hello(who) {
       	$(body).$append(<h1#test>native -&gt; script: {who}</h1>);
       	return "its working!";
@@ -58,9 +62,9 @@
           view.api = view.GetNativeApi();
           // {add: function(a,b) { return a + b; }};
 
-        stdout.println(String.printf("2 + 3 = %d", view.api.add(2, 3)));
-        stdout.println(String.printf("2 * 3 = %d", view.api.mul(2, 3)));
-        stdout.println(String.printf("2 - 3 = %d", view.api.sub(2, 3, 4)));
+        stdout.printf("2 + 3 = %d\n", view.api.add(2, 3));
+        stdout.printf("2 * 3 = %d\n", view.api.mul(2, 3));
+        stdout.printf("2 - 3 = %d\n", view.api.sub(2, 3, 4));
       });
 
     </script>
@@ -74,11 +78,7 @@
   <button #open>Open</button>
   <button #ti2py>Call native</button>
   <button #py2ti>Call script</button>
-  <select>
-    <option>First</option>
-    <option>Second</option>
-    <option>Third</option>
-  </select>
+  <button #sum>Calc sum</button>
 
 </body>
 </html>
