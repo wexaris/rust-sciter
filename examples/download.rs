@@ -4,7 +4,7 @@
 
 extern crate sciter;
 
-use sciter::host::HostHandler;
+use sciter::host::{self, HostHandler};
 use sciter::utf;
 use std::rc::{Rc, Weak};
 
@@ -15,11 +15,11 @@ struct Handler {
 }
 
 impl HostHandler for Handler {
-	fn on_data_loaded(&mut self, pnm: &sciter::SCN_DATA_LOADED) {
+	fn on_data_loaded(&mut self, pnm: &host::SCN_DATA_LOADED) {
 		println!("data loaded, uri: `{}`, {} bytes.", utf::w2s(pnm.uri), pnm.dataSize);
 	}
 
-	fn on_attach_behavior(&mut self, pnm: &mut sciter::SCN_ATTACH_BEHAVIOR) -> bool {
+	fn on_attach_behavior(&mut self, pnm: &mut host::SCN_ATTACH_BEHAVIOR) -> bool {
 		let el = sciter::Element::from(pnm.element);
 		let name = utf::u2s(pnm.name);
 		println!("{}: behavior {}", el, name);

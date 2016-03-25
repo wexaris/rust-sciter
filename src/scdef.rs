@@ -19,7 +19,7 @@ pub enum IDXGISurface {}
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
 
-/// SCN_LOAD_DATA (`HostHandler::on_data_load()`) result code.
+/// `HostHandler::on_data_load()` result code.
 ///
 /// This notification gives application a chance to override built-in loader and
 /// implement loading of resources in its own way (for example images can be loaded from
@@ -38,6 +38,8 @@ pub enum LOAD_RESULT {
 
 #[repr(C)]
 #[derive(Debug)]
+#[allow(missing_docs)]
+/// Script runtime options.
 pub enum SCRIPT_RUNTIME_FEATURES
 {
   ALLOW_FILE_IO = 0x00000001,
@@ -48,6 +50,8 @@ pub enum SCRIPT_RUNTIME_FEATURES
 
 #[repr(C)]
 #[derive(Debug)]
+#[allow(missing_docs)]
+/// Explicitly set sciter graphics layer (Windows only).
 pub enum GFX_LAYER
 {
   GFX_LAYER_GDI      = 1,
@@ -303,6 +307,7 @@ pub enum OUTPUT_SUBSYTEMS
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
 #[allow(missing_docs)]
+/// Debug output severity.
 pub enum OUTPUT_SEVERITY
 {
   INFO,

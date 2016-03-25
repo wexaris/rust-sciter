@@ -119,9 +119,9 @@ assert!(v.get_item(Value::from("one")).is_int());
 #![allow(dead_code)]
 
 use ::{_API};
-use scvalue::*;
 use sctypes::*;
-
+use scvalue::{VALUE, VALUE_UNIT_TYPE_STRING};
+pub use scvalue::{VALUE_RESULT, VALUE_STRING_CVT_TYPE, VALUE_TYPE};
 
 // TODO: map keys/values/items
 

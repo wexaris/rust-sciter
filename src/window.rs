@@ -26,7 +26,6 @@ Also you can register the [host](../host/trait.HostHandler.html) and [DOM](../do
 .
 */
 use ::{_API};
-use scdef::*;
 use sctypes::*;
 
 use platform::{BaseWindow, OsWindow};
@@ -36,8 +35,10 @@ use eventhandler::*;
 
 use std::rc::Rc;
 
-/// Window flags.
+/// `SCITER_CREATE_WINDOW_FLAGS` alias.
 pub type Flags = SCITER_CREATE_WINDOW_FLAGS;
+
+pub use scdef::{SCITER_CREATE_WINDOW_FLAGS};
 
 /// Sciter window.
 pub struct Window

@@ -11,7 +11,6 @@ license = "MIT"
 
 [lib]
 name = "sciter"
-#crate-type = ["dylib", "rlib"]
 crate-type = ["rlib"]
 
 [dependencies]

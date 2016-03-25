@@ -45,6 +45,7 @@ macro_rules! u2s {
 
 
 /// Pack arguments to call the sciter script function.
+#[doc(hidden)]
 #[macro_export]
 macro_rules! pack_args {
 	() => { $crate::value::Value::pack_args(&[]) };
@@ -61,7 +62,7 @@ macro_rules! pack_args {
 	};
 }
 
-/// Make `[Value]` sequence to call the sciter script function.
+/// Make `[Value]` sequence to call the sciter script function. Used in `call_function()` and `call_method()` calls.
 #[macro_export]
 macro_rules! make_args {
 	() => { { let args : [$crate::value::Value; 0] = []; args } };
@@ -79,6 +80,7 @@ macro_rules! make_args {
 }
 
 /// Declare handle type (native pointer).
+#[doc(hidden)]
 #[macro_export]
 macro_rules! MAKE_HANDLE {
 	($name:ident, $inner:ident) => {
@@ -88,11 +90,12 @@ macro_rules! MAKE_HANDLE {
 	};
 }
 
-/// Dispatch script calls
+/// Dispatch script calls to native code. Used in [dom::EventHandler](dom/event/trait.EventHandler.html) implementations.
 ///
 /// This macro generates new function which dispatchs incoming script call to native function
 /// with arguments unpacking and type checking.
 ///
+/// Note: unstable, will be improved.
 #[macro_export]
 macro_rules! dispatch_script_call {
 

@@ -39,7 +39,6 @@ mod sctypes;
 mod scvalue;
 mod schandler;
 
-pub use scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
 pub use scdom::{HELEMENT};
 
 /* Rust interface */
@@ -77,7 +76,8 @@ mod ext {
 }
 
 #[allow(non_snake_case)]
-/// Getting ISciterAPI reference
+#[doc(hidden)]
+/// Getting ISciterAPI reference, can be used for manual API calling.
 pub fn SciterAPI<'a>() -> &'a ::scapi::ISciterAPI {
 	let ap = unsafe {
 		let p = ext::SciterAPI();

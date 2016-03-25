@@ -29,6 +29,7 @@ pub enum SCDOM_RESULT {
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
+/// `dom::Element.set_html()` options.
 pub enum SET_ELEMENT_HTML
 {
   SIH_REPLACE_CONTENT     = 0,
