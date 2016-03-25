@@ -14,6 +14,7 @@ use utf::*;
 
 /// Sciter API functions.
 #[repr(C)]
+#[allow(missing_docs)]
 pub struct ISciterAPI
 {
 	pub version: UINT,
@@ -244,6 +245,7 @@ pub struct ISciterAPI
 }
 
 impl ISciterAPI {
+	/// Return the class name of sciter native windows.
 	pub fn SciterClassName(&self) -> String {
 		return w2s((self.SciterClassName)());
 	}

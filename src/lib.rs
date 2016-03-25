@@ -16,6 +16,9 @@ Check <http://sciter.com> website and its [documentation resources](http://scite
 .
 */
 
+// documentation test:
+// #![warn(missing_docs)]
+
 /* Macros */
 
 #[macro_use] extern crate lazy_static;
@@ -59,7 +62,7 @@ pub use window::Window;
 
 /* Loader */
 
-pub use self::scapi::{ISciterAPI};
+use self::scapi::{ISciterAPI};
 
 #[cfg(all(windows, target_arch="x86"))]
 mod ext {
@@ -74,6 +77,7 @@ mod ext {
 }
 
 #[allow(non_snake_case)]
+/// Getting ISciterAPI reference
 pub fn SciterAPI<'a>() -> &'a ::scapi::ISciterAPI {
 	let ap = unsafe {
 		let p = ext::SciterAPI();

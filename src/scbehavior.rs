@@ -117,6 +117,7 @@ pub enum PHASE_MASK
 #[repr(C)]
 #[derive(Copy, Clone)]
 #[derive(Debug, PartialOrd, PartialEq)]
+#[allow(missing_docs)]
 /// General event source triggers
 pub enum EVENT_REASON
 {

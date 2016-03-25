@@ -37,44 +37,129 @@ pub enum LOAD_RESULT {
 }
 
 #[repr(C)]
-#[derive(Debug, PartialOrd, PartialEq)]
-pub enum SCITER_RT_OPTIONS
+#[derive(Debug)]
+pub enum SCRIPT_RUNTIME_FEATURES
 {
-  SCITER_SMOOTH_SCROLL = 1,      // value:TRUE - enable, value:FALSE - disable, enabled by default
-  SCITER_CONNECTION_TIMEOUT = 2, // value: milliseconds, connection timeout of http client
-  SCITER_HTTPS_ERROR = 3,        // value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently
-  SCITER_FONT_SMOOTHING = 4,     // value: 0 - system default, 1 - no smoothing, 2 - std smoothing, 3 - clear type
-
-  SCITER_TRANSPARENT_WINDOW = 6, // Windows Aero support, value:
-                                // 0 - normal drawing,
-                                // 1 - window has transparent background after calls DwmExtendFrameIntoClientArea() or DwmEnableBlurBehindWindow().
-  SCITER_SET_GPU_BLACKLIST  = 7, // hWnd = NULL,
-                                // value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
-  SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8, // value - combination of SCRIPT_RUNTIME_FEATURES flags.
-  SCITER_SET_GFX_LAYER = 9,      // hWnd = NULL, value - GFX_LAYER
-  SCITER_SET_DEBUG_MODE = 10,    // hWnd, value - TRUE/FALSE
-  SCITER_SET_UX_THEMING = 11,    // hWnd = NULL, value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
-                                // That UX theme is not using OS primitives for rendering input elements. Use it if you want exactly
-                                // the same (modulo fonts) look-n-feel on all platforms.
-
-  SCITER_ALPHA_WINDOW  = 12,     //  hWnd, value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window)
+  ALLOW_FILE_IO = 0x00000001,
+  ALLOW_SOCKET_IO = 0x00000002,
+  ALLOW_EVAL = 0x00000004,
+  ALLOW_SYSINFO = 0x00000008
 }
 
 #[repr(C)]
-pub enum SCITER_CREATE_WINDOW_FLAGS {
-  SW_CHILD      = (1 << 0), // child window only, if this flag is set all other flags ignored
-  SW_TITLEBAR   = (1 << 1), // toplevel window, has titlebar
-  SW_RESIZEABLE = (1 << 2), // has resizeable frame
-  SW_TOOL       = (1 << 3), // is tool window
-  SW_CONTROLS   = (1 << 4), // has minimize / maximize buttons
-  SW_GLASSY     = (1 << 5), // glassy window ( DwmExtendFrameIntoClientArea on windows )
-  SW_ALPHA      = (1 << 6), // transparent window ( e.g. WS_EX_LAYERED on Windows )
-  SW_MAIN       = (1 << 7), // main window of the app, will terminate the app on close
-  SW_POPUP      = (1 << 8), // the window is created as topmost window.
-  SW_ENABLE_DEBUG = (1 << 9), // make this window inspector ready
-  SW_OWNS_VM      = (1 << 10), // it has its own script VM
+#[derive(Debug)]
+pub enum GFX_LAYER
+{
+  GFX_LAYER_GDI      = 1,
+  GFX_LAYER_WARP     = 2,
+  GFX_LAYER_D2D      = 3,
+  GFX_LAYER_AUTO     = 0xFFFF,
 }
 
+#[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
+/// Various sciter engine options.
+pub enum SCITER_RT_OPTIONS
+{
+	/// value:TRUE - enable, value:FALSE - disable, enabled by default
+  SCITER_SMOOTH_SCROLL = 1,
+  /// value: milliseconds, connection timeout of http client
+  SCITER_CONNECTION_TIMEOUT = 2,
+  /// value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently
+  SCITER_HTTPS_ERROR = 3,
+  /// value: 0 - system default, 1 - no smoothing, 2 - std smoothing, 3 - clear type
+  SCITER_FONT_SMOOTHING = 4,
+	/// Windows Aero support, value:
+	/// 0 - normal drawing,
+	/// 1 - window has transparent background after calls DwmExtendFrameIntoClientArea() or DwmEnableBlurBehindWindow().
+  SCITER_TRANSPARENT_WINDOW = 6,
+  /// value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
+  SCITER_SET_GPU_BLACKLIST  = 7,
+  /// value - combination of SCRIPT_RUNTIME_FEATURES flags.
+  SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8,
+  /// value - GFX_LAYER
+  SCITER_SET_GFX_LAYER = 9,
+  /// value - TRUE/FALSE
+  SCITER_SET_DEBUG_MODE = 10,
+  /// value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
+  /// That UX theme is not using OS primitives for rendering input elements.
+  /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
+  SCITER_SET_UX_THEMING = 11,
+  ///value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window)
+  SCITER_ALPHA_WINDOW  = 12,
+}
+
+#[repr(C)]
+/// Window flags
+pub enum SCITER_CREATE_WINDOW_FLAGS {
+	/// child window only, if this flag is set all other flags ignored
+  SW_CHILD      = (1 << 0),
+  /// toplevel window, has titlebar
+  SW_TITLEBAR   = (1 << 1),
+  /// has resizeable frame
+  SW_RESIZEABLE = (1 << 2),
+  /// is tool window
+  SW_TOOL       = (1 << 3),
+  /// has minimize / maximize buttons
+  SW_CONTROLS   = (1 << 4),
+  /// glassy window ( DwmExtendFrameIntoClientArea on windows )
+  SW_GLASSY     = (1 << 5),
+  /// transparent window ( e.g. WS_EX_LAYERED on Windows )
+  SW_ALPHA      = (1 << 6),
+  /// main window of the app, will terminate the app on close
+  SW_MAIN       = (1 << 7),
+  /// the window is created as topmost window.
+  SW_POPUP      = (1 << 8),
+  /// make this window inspector ready
+  SW_ENABLE_DEBUG = (1 << 9),
+  /// it has its own script VM
+  SW_OWNS_VM      = (1 << 10),
+}
+
+impl SCITER_CREATE_WINDOW_FLAGS {
+	/// Main application window.
+	pub fn main_window(resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
+		let flags = SCITER_CREATE_WINDOW_FLAGS::SW_MAIN
+							 | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS
+							 | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR;
+		if resizeable {
+			flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE
+		} else {
+			flags
+		}
+	}
+
+	/// Child window.
+	pub fn child_window() -> SCITER_CREATE_WINDOW_FLAGS {
+		SCITER_CREATE_WINDOW_FLAGS::SW_CHILD
+	}
+
+	/// Popup window.
+	pub fn popup_window(title: bool, minmaxclose: bool, resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
+		let mut flags = SCITER_CREATE_WINDOW_FLAGS::SW_POPUP;
+		if title {
+			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR;
+		}
+		if minmaxclose {
+			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS;
+		}
+		if resizeable {
+			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
+		}
+		return flags;
+	}
+
+	/// Tool window.
+	pub fn tool_window(resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
+		let mut flags = SCITER_CREATE_WINDOW_FLAGS::SW_TOOL;
+		if resizeable {
+			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
+		}
+		return flags;
+	}
+}
+
+/// Flags can be OR'ed as `SW_MAIN|SW_ALPHA`.
 impl ::std::ops::BitOr for SCITER_CREATE_WINDOW_FLAGS {
   type Output = SCITER_CREATE_WINDOW_FLAGS;
   fn bitor(self, rhs: Self::Output) -> Self::Output {
@@ -178,7 +263,7 @@ pub struct SCN_ATTACH_BEHAVIOR
   /// [in] target DOM element handle
   pub element: HELEMENT,
   /// [in] zero terminated string, string appears as value of CSS `behavior: ` attribute.
-  pub behaviorName: LPCSTR,
+  pub name: LPCSTR,
   /// [out] pointer to ElementEventProc function.
   pub elementProc: *mut ElementEventProc,
   /// [out] tag value, passed as is into pointer ElementEventProc function.
@@ -202,16 +287,22 @@ pub type ElementEventProc = extern "stdcall" fn (tag: LPVOID, he: HELEMENT, evtg
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
+/// Debug output categories.
 pub enum OUTPUT_SUBSYTEMS
 {
-  DOM = 0,       // html parser & runtime
-  CSSS,          // csss! parser & runtime
-  CSS,           // css parser
-  TIS,           // TIS parser & runtime
+	/// html parser & runtime
+  DOM = 0,
+  /// csss! parser & runtime
+  CSSS,
+  /// css parser
+  CSS,
+  /// TIS parser & runtime
+  TIS,
 }
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
+#[allow(missing_docs)]
 pub enum OUTPUT_SEVERITY
 {
   INFO,

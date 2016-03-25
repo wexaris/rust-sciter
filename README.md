@@ -52,15 +52,50 @@ It looks similar like this:
 
 ### Interoperability
 
-TDB.
+In respect of [tiscript](http://www.codeproject.com/Articles/33662/TIScript-language-a-gentle-extension-of-JavaScript) functions calling:
+```rust
+use sciter::{Element, Value};
+
+let root = Element::from_window(hwnd);
+let result: Value = root.call_function("namespace.name", &make_args!(1,"2",3));
+```
+
+Calling rust from script can be implemented as following:
+```rust
+struct Handler;
+
+impl Handler {
+  fn calc_sum(&self, a: i32, b: i32) -> i32 {
+    a + b
+  }
+}
+
+impl sciter::EventHandler for Handler {
+  dispatch_script_call! {
+    fn calc_sum(i32, i32);
+  }
+}
+```
+
+And we can access this function from script:
+```js
+// `view` represents window where script is runnung.
+// `stdout` stream is a standard output stream (shell or debugger console, for example)
+
+stdout.printf("2 + 3 = %d\n", view.calc_sum(2, 3));
+```
+
+_Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/examples) folder for more complex usage_.
+
 
 ## What supported right now:
 
 * [x] [sciter::window](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-window.hpp) which brings together window creation, host and event handlers
-* [x] [sciter::host](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) extensible implementation with transparent script calls from python code
-* [ ] [sciter::event_handler](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-behavior.h) with basic event handling (attached, document_complete, on_script_call), additional handlers will come
+* [ ] [sciter::host](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) with basic event handling, needs to be redesigned
+* [x] [sciter::event_handler](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-behavior.h) with event handling and auto dispatching script calls to naive code
 * [x] [sciter::dom](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-dom.hpp) for HTML DOM access and manipulation methods
-* [x] [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.hpp) pythonic wrapper with sciter::script_error and sciter::native_function support
+* [x] [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.hpp) Rust wrapper with sciter::script_error and sciter::native_function support
+* [ ] [sciter::behavior_factory](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-behavior.h) - global factory for native behaviors
 * [ ] [sciter::graphics](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-graphics.hpp) - platform independent graphics native interface (can be used in native behaviors)
 * [ ] [sciter::request](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-request.hpp) - resource request object, used for custom resource downloading and handling
 * [ ] [sciter::video](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-video-api.h) - custom video rendering

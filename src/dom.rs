@@ -396,6 +396,8 @@ impl Element {
 	}
 
 	/// Call scripting function defined in the namespace of the element (a.k.a. global function).
+	///
+	/// You can use the `make_args!(a,b,c)` macro which help you construct script arguments from Rust types.
 	pub fn call_function(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
 		let (name,_) = s2u!(name);
@@ -405,6 +407,8 @@ impl Element {
 	}
 
 	/// Call scripting method defined for the element.
+	///
+	/// You can use the `make_args!(a,b,c)` macro which help you construct script arguments from Rust types.
 	pub fn call_method(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
 		let (name,_) = s2u!(name);

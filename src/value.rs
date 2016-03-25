@@ -184,14 +184,17 @@ impl Value {
 		Value::parse(val).or(Err(VALUE_RESULT::BAD_PARAMETER))
 	}
 
+	#[doc(hidden)]
 	pub fn as_ptr(&mut self) -> *mut VALUE {
 		&mut self.data as *mut VALUE
 	}
 
+	#[doc(hidden)]
 	pub fn as_cptr(&self) -> *const VALUE {
 		&self.data as *const VALUE
 	}
 
+	#[doc(hidden)]
 	pub fn as_mut_ptr(&self) -> * mut VALUE {
 		unsafe { ::std::mem::transmute(self.as_cptr()) }
 	}
@@ -330,6 +333,7 @@ impl Value {
 	/// Calls the tiscript function or method holded at `Value` with context of `this` object
 	/// that will be known as _this_ inside that function (it is optional for global functions).
 	/// `name` here is an url or name of the script - used for error reporting in the script.
+	/// You can use the `make_args!(a,b,c)` macro which help you construct script arguments from Rust types.
 	pub fn call(&self, this: Option<Value>, args: &[Value], name: Option<&str>) -> Result<Value, VALUE_RESULT> {
 		let mut rv = Value::new();
 		let argv = Value::pack_args(args);
@@ -342,10 +346,12 @@ impl Value {
 		}
 	}
 
+	#[doc(hidden)]
 	pub fn pack_to(&self, dst: &mut VALUE) {
 		(_API.ValueCopy)(dst, self.as_cptr());
 	}
 
+	#[doc(hidden)]
 	pub fn pack_args(args: &[Value]) -> Vec<VALUE> {
 		let argc = args.len();
 		let mut argv: Vec<VALUE> = Vec::with_capacity(argc);
@@ -356,6 +362,7 @@ impl Value {
 		return argv;
 	}
 
+	#[doc(hidden)]
 	pub fn unpack_from(args: * const VALUE, count: UINT) -> Vec<Value> {
 		let argc = count as usize;
 		let args = unsafe { ::std::slice::from_raw_parts(args, argc) };
@@ -383,58 +390,73 @@ impl Value {
 		return unsafe { &mut *self.tmp };
 	}
 
-	// TODO: get_item, set_item
 	// TODO: keys, values, items
-	// TODO: call
 
+	#[allow(missing_docs)]
 	pub fn is_undefined(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_UNDEFINED
 	}
+	#[allow(missing_docs)]
 	pub fn is_null(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_NULL
 	}
+	#[allow(missing_docs)]
 	pub fn is_bool(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_BOOL
 	}
+	#[allow(missing_docs)]
 	pub fn is_int(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_INT
 	}
+	#[allow(missing_docs)]
 	pub fn is_float(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_FLOAT
 	}
+	#[allow(missing_docs)]
 	pub fn is_bytes(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_BYTES
 	}
+	#[allow(missing_docs)]
 	pub fn is_string(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_STRING
 	}
+	#[allow(missing_docs)]
 	pub fn is_symbol(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::SYMBOL as UINT
 	}
+	#[allow(missing_docs)]
 	pub fn is_error_string(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_STRING && self.data.u == VALUE_UNIT_TYPE_STRING::ERROR as UINT
 	}
+	#[allow(missing_docs)]
 	pub fn is_date(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_DATE
 	}
+	#[allow(missing_docs)]
 	pub fn is_currency(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_CURRENCY
 	}
+	#[allow(missing_docs)]
 	pub fn is_map(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_MAP
 	}
+	#[allow(missing_docs)]
 	pub fn is_array(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_ARRAY
 	}
+	#[allow(missing_docs)]
 	pub fn is_function(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_FUNCTION
 	}
+	#[allow(missing_docs)]
 	pub fn is_native_function(&self) -> bool {
 		(_API.ValueIsNativeFunctor)(self.as_cptr()) != 0
 	}
+	#[allow(missing_docs)]
 	pub fn is_object(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_OBJECT
 	}
+	#[allow(missing_docs)]
 	pub fn is_dom_element(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_DOM_OBJECT
 	}
@@ -695,6 +717,7 @@ extern "C" fn _functor_invoke<F>(tag: LPVOID, argc: UINT, argv: *const VALUE, re
 
 /// Helper trait
 pub trait FromValue {
+	/// Converts value to specified type.
 	fn from_value(v: &Value) -> Option<Self> where Self: Sized;
 }
 
