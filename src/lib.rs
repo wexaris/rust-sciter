@@ -68,7 +68,7 @@ mod ext {
 #[cfg(all(target_os="linux", target_arch="x86_64"))]
 mod ext {
 	use capi::scapi::{ISciterAPI};
-	#[link(name="libsciter-gtk-64")]
+	#[link(name="sciter-gtk-64")]
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 

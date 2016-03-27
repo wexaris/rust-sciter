@@ -150,17 +150,19 @@ mod windows {
 	use ::{_API};
 	use capi::sctypes::*;
 	use capi::scdef::*;
+	use super::BaseWindow;
 
 	use ::std::ptr;
 
-	extern "system"
+	#[link(name="gtk-3")]
+	extern "C"
 	{
 		fn gtk_init(argc: *const i32, argv: *const *const LPCSTR);
 		fn gtk_main();
 		fn gtk_main_quit();
 		fn gtk_widget_get_toplevel(view: HWINDOW) -> HWINDOW;
 		fn gtk_window_present(hwnd: HWINDOW);
-		fn gtk_windget_hide(hwnd: HWINDOW);
+		fn gtk_widget_hide(hwnd: HWINDOW);
 		fn gtk_window_maximize(hwnd: HWINDOW);
 		fn gtk_window_iconify(hwnd: HWINDOW);
 		fn gtk_window_close(hwnd: HWINDOW);

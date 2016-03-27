@@ -68,12 +68,12 @@ pub struct ISciterAPI
 	pub SciterSetHomeURL: extern "system" fn (hWndSciter: HWINDOW, baseUrl: LPCWSTR) -> BOOL,
 
   // #if defined(OSX)
-  #[cfg(osx)]
+  #[cfg(target_os="macos")]
 	pub SciterCreateNSView: extern "system" fn (frame: LPRECT) -> HWINDOW, // returns NSView*
   // #endif
 
   // #if defined(LINUX)
-  #[cfg(linux)]
+  #[cfg(target_os="linux")]
 	pub SciterCreateWidget: extern "system" fn (frame: LPRECT) -> HWINDOW, // returns GtkWidget
   // #endif
 
