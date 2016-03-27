@@ -11,7 +11,7 @@ pub struct WindowHandler<T>
 	pub handler: T,
 }
 
-pub extern "stdcall" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, _he: ::capi::scdom::HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
+pub extern "system" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, _he: ::capi::scdom::HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
 	use capi::scbehavior::*;
 	use capi::scdom::HELEMENT;
@@ -57,7 +57,7 @@ pub extern "stdcall" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID,
 }
 
 
-pub extern "stdcall" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
+pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
 	// reconstruct pointer to Handler
 	let boxed = tag as *mut T;

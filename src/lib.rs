@@ -62,7 +62,7 @@ mod ext {
 mod ext {
 	use capi::scapi::{ISciterAPI};
 	#[link(name="sciter64")]
-	extern "stdcall" { pub fn SciterAPI() -> *const ISciterAPI;	}
+	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
 #[allow(non_snake_case)]

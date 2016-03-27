@@ -702,7 +702,7 @@ impl Element {
 
 	/// Call specified function for every element in a DOM that meets specified CSS selectors.
 	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Result<Vec<Element>> {
-		extern "stdcall" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
+		extern "system" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
 			let handler = ::capi::schandler::NativeHandler::from_mut_ptr3(param);
 			let mut obj = handler.as_mut::<T>();
 			let e = Element::from(he);
@@ -845,21 +845,21 @@ impl ::std::fmt::Debug for Element {
 use ::utf;
 
 /// Convert an incoming UTF-16 to `String`.
-extern "stdcall" fn store_wstr(szstr: LPCWSTR, str_length: UINT, param: LPVOID) {
+extern "system" fn store_wstr(szstr: LPCWSTR, str_length: UINT, param: LPVOID) {
 	let s = utf::w2sn(szstr, str_length as usize);
 	let out = param as *mut String;
 	unsafe { *out = s };
 }
 
 /// Convert an incoming UTF-8 to `String`.
-extern "stdcall" fn store_astr(szstr: LPCSTR,  str_length: UINT, param: LPVOID) {
+extern "system" fn store_astr(szstr: LPCSTR,  str_length: UINT, param: LPVOID) {
 	let s = utf::u2sn(szstr, str_length as usize);
 	let out = param as *mut String;
 	unsafe { *out = s };
 }
 
 /// Convert an incoming html string (UTF-8 in fact) to `String`.
-extern "stdcall" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
+extern "system" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
 	let s = unsafe { ::std::slice::from_raw_parts(szstr, str_length as usize) };
 	let pout = param as *mut Vec<u8>;
 	let out = unsafe {&mut *pout};

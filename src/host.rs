@@ -275,7 +275,7 @@ impl Host {
 
 // Sciter notification handler.
 // This comes as free function due to https://github.com/rust-lang/rust/issues/32364
-extern "stdcall" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scdef::SCITER_CALLBACK_NOTIFICATION, param: LPVOID) -> UINT
+extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scdef::SCITER_CALLBACK_NOTIFICATION, param: LPVOID) -> UINT
 {
 	use capi::scdef::{SCITER_NOTIFICATION, SCITER_CALLBACK_NOTIFICATION};
 
@@ -326,7 +326,7 @@ extern "stdcall" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::sc
 }
 
 // Sciter debug output handler.
-extern "stdcall" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY,
+extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY,
 	text: LPCWSTR, _text_length: UINT)
 {
 	// reconstruct pointer to Handler

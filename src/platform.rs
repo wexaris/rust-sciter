@@ -29,7 +29,7 @@ mod windows {
 
 
 	#[link(name="user32")]
-	extern "stdcall"
+	extern "system"
 	{
 		fn ShowWindow(hwnd: HWINDOW, show: INT) -> BOOL;
 		fn PostMessageW(hwnd: HWINDOW, msg: UINT, w: WPARAM, l: LPARAM) -> BOOL;
@@ -43,7 +43,7 @@ mod windows {
 	}
 
 	#[link(name="ole32")]
-	extern "stdcall"
+	extern "system"
 	{
 		fn OleInitialize(pv: LPCVOID) -> i32;	// HRESULT
 	}

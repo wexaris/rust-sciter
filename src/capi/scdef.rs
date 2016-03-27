@@ -283,11 +283,11 @@ pub struct SCITER_CALLBACK_NOTIFICATION
 }
 pub type LPSCITER_CALLBACK_NOTIFICATION = *mut SCITER_CALLBACK_NOTIFICATION;
 
-pub type SciterHostCallback = extern "stdcall" fn (pns: LPSCITER_CALLBACK_NOTIFICATION, callbackParam: LPVOID) -> UINT;
+pub type SciterHostCallback = extern "system" fn (pns: LPSCITER_CALLBACK_NOTIFICATION, callbackParam: LPVOID) -> UINT;
 
-pub type SciterWindowDelegate = extern "stdcall" fn (hwnd: HWINDOW, msg: UINT, wParam: WPARAM, lParam: LPARAM, pParam: LPVOID, handled: * mut BOOL) -> LRESULT;
+pub type SciterWindowDelegate = extern "system" fn (hwnd: HWINDOW, msg: UINT, wParam: WPARAM, lParam: LPARAM, pParam: LPVOID, handled: * mut BOOL) -> LRESULT;
 
-pub type ElementEventProc = extern "stdcall" fn (tag: LPVOID, he: HELEMENT, evtg: UINT, prms: LPVOID) -> BOOL;
+pub type ElementEventProc = extern "system" fn (tag: LPVOID, he: HELEMENT, evtg: UINT, prms: LPVOID) -> BOOL;
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
@@ -315,11 +315,11 @@ pub enum OUTPUT_SEVERITY
   ERROR,
 }
 
-pub type DEBUG_OUTPUT_PROC = extern "stdcall" fn (param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, text: LPCWSTR, text_length: UINT);
+pub type DEBUG_OUTPUT_PROC = extern "system" fn (param: LPVOID, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, text: LPCWSTR, text_length: UINT);
 
-pub type LPCWSTR_RECEIVER = extern "stdcall" fn (szstr: LPCWSTR, str_length: UINT, param: LPVOID);
-pub type LPCSTR_RECEIVER  = extern "stdcall" fn (szstr: LPCSTR,  str_length: UINT, param: LPVOID);
-pub type LPCBYTE_RECEIVER = extern "stdcall" fn (szstr: LPCBYTE, str_length: UINT, param: LPVOID);
+pub type LPCWSTR_RECEIVER = extern "system" fn (szstr: LPCWSTR, str_length: UINT, param: LPVOID);
+pub type LPCSTR_RECEIVER  = extern "system" fn (szstr: LPCSTR,  str_length: UINT, param: LPVOID);
+pub type LPCBYTE_RECEIVER = extern "system" fn (szstr: LPCBYTE, str_length: UINT, param: LPVOID);
 
 #[repr(C)]
 pub struct METHOD_PARAMS {
@@ -332,4 +332,4 @@ pub struct REQUEST_PARAM {
   value: LPCWSTR,
 }
 
-pub type KeyValueCallback = extern "stdcall" fn (param: LPVOID, pkey: *const VALUE, pval: *const VALUE) -> BOOL;
+pub type KeyValueCallback = extern "system" fn (param: LPVOID, pkey: *const VALUE, pval: *const VALUE) -> BOOL;

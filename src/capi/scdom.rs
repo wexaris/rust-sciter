@@ -41,6 +41,6 @@ pub enum SET_ELEMENT_HTML
 }
 
 
-pub type SciterElementCallback = extern "stdcall" fn (he: HELEMENT, param: LPVOID) -> BOOL;
+pub type SciterElementCallback = extern "system" fn (he: HELEMENT, param: LPVOID) -> BOOL;
 
-pub type ELEMENT_COMPARATOR = extern "stdcall" fn (he1: HELEMENT, he2: HELEMENT, param: LPVOID) -> INT;
+pub type ELEMENT_COMPARATOR = extern "system" fn (he1: HELEMENT, he2: HELEMENT, param: LPVOID) -> INT;
