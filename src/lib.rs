@@ -65,6 +65,13 @@ mod ext {
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
+#[cfg(all(target_os="linux", target_arch="x86_64"))]
+mod ext {
+	use capi::scapi::{ISciterAPI};
+	#[link(name="libsciter-gtk-64")]
+	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
+}
+
 #[allow(non_snake_case)]
 #[doc(hidden)]
 /// Getting ISciterAPI reference, can be used for manual API calling.
