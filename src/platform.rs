@@ -147,6 +147,129 @@ mod windows {
 #[cfg(unix)]
 mod windows {
 
+	use ::{_API};
+	use capi::sctypes::*;
+	use capi::scdef::*;
+
+	use ::std::ptr;
+
+	extern "system"
+	{
+		fn gtk_init(argc: *const i32, argv: *const *const LPCSTR);
+		fn gtk_main();
+		fn gtk_main_quit();
+		fn gtk_widget_get_toplevel(view: HWINDOW) -> HWINDOW;
+		fn gtk_window_present(hwnd: HWINDOW);
+		fn gtk_windget_hide(hwnd: HWINDOW);
+		fn gtk_window_maximize(hwnd: HWINDOW);
+		fn gtk_window_iconify(hwnd: HWINDOW);
+		fn gtk_window_close(hwnd: HWINDOW);
+		fn gtk_window_set_title(hwnd: HWINDOW, title: LPCSTR);
+		fn gtk_window_get_title(hwnd: HWINDOW) -> LPCSTR;
+	}
+
+	pub struct OsWindow
+	{
+		hwnd: HWINDOW,
+	}
+
+	impl OsWindow {
+
+		pub fn new() -> OsWindow {
+			OsWindow { hwnd: 0 as HWINDOW }
+		}
+
+		fn init_app() {
+			unsafe { gtk_init(ptr::null(), ptr::null()) };
+		}
+
+		fn window(&self) -> HWINDOW {
+			let hwnd = self.get_hwnd();
+			if hwnd.is_null() {
+				hwnd
+			} else {
+				unsafe { gtk_widget_get_toplevel(hwnd) }
+			}
+		}
+
+	}
+
+	impl super::BaseWindow for OsWindow {
+
+		/// Get native window handle.
+		fn get_hwnd(&self) -> HWINDOW {
+			return self.hwnd;
+		}
+
+		/// Create a new native window.
+		fn create(&mut self, rect: (i32,i32,i32,i32), flags: UINT, parent: HWINDOW) -> HWINDOW {
+
+			if (flags & SCITER_CREATE_WINDOW_FLAGS::SW_MAIN as u32) != 0 {
+				OsWindow::init_app();
+			}
+
+			let (x,y,w,h) = rect;
+			let rc = RECT { left: x, top: y, right: x + w, bottom: y + h };
+
+			let cb = 0 as *const SciterWindowDelegate;
+			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+			if self.hwnd.is_null() {
+				panic!("Failed to create window!");
+			}
+			return self.hwnd;
+		}
+
+		/// Minimize or hide window.
+		fn collapse(&self, hide: bool) {
+			unsafe {
+				if hide {
+					gtk_widget_hide(self.get_hwnd())
+				} else {
+					gtk_window_iconify(self.window())
+				}
+			};
+		}
+
+		/// Show or maximize window.
+		fn expand(&self, maximize: bool) {
+			let wnd = self.window();
+			unsafe {
+				if maximize {
+					gtk_window_maximize(wnd)
+				} else {
+					gtk_window_present(wnd)
+				}
+			};
+		}
+
+		/// Close window.
+		fn dismiss(&self) {
+			unsafe { gtk_window_close(self.window()) };
+		}
+
+		/// Set native window title.
+		fn set_title(&mut self, title: &str) {
+			let (s,_) = s2u!(title);
+			unsafe { gtk_window_set_title(self.window(), s.as_ptr()) };
+		}
+
+		/// Get native window title.
+		fn get_title(&self) -> String {
+			let s = unsafe { gtk_window_get_title(self.window()) };
+			return u2s!(s);
+		}
+
+		/// Run the main app message loop until window been closed.
+		fn run_app(&self) {
+			unsafe { gtk_main() };
+		}
+
+		/// Post app quit message.
+		fn quit_app(&self) {
+			unsafe { gtk_main_quit() };
+		}
+	}
+
 }
 
 #[cfg(darwin)]
