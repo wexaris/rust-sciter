@@ -64,7 +64,10 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 	let me = unsafe { &mut *boxed };
 
 	let evtg : EVENT_GROUPS = unsafe { ::std::mem::transmute(evtg) };
-	assert!(!he.is_null() || evtg == EVENT_GROUPS::SUBSCRIPTIONS_REQUEST);
+	// assert!(!he.is_null() || evtg == EVENT_GROUPS::SUBSCRIPTIONS_REQUEST);
+	if he.is_null() && evtg != EVENT_GROUPS::SUBSCRIPTIONS_REQUEST {
+		println!("warning! null element for {:?}", evtg);
+	}
 
 	let result = match evtg {
 
@@ -119,6 +122,10 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 					EventReason::General(reason)
 				}
 			};
+
+			if he.is_null() {
+				println!("warning! null element for {:?}:{:?}", evtg, code);
+			}
 
 			if phase == PHASE_MASK::SINKING {	// catch this only once
 				match code {
