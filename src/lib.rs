@@ -21,10 +21,13 @@ Check <http://sciter.com> website and its [documentation resources](http://scite
 
 /* Macros */
 
+#[cfg(target_os="macos")]
+#[macro_use] extern crate objc;
+
 #[macro_use] extern crate lazy_static;
 
-#[macro_use]
-mod macros;
+
+#[macro_use] mod macros;
 
 mod capi;
 pub use capi::scdom::{HELEMENT};
@@ -72,6 +75,13 @@ mod ext {
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
+#[cfg(all(target_os="macos", target_arch="x86_64"))]
+mod ext {
+	use capi::scapi::{ISciterAPI};
+	#[link(name="sciter-osx-64", kind = "dylib")]
+	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
+}
+
 #[allow(non_snake_case)]
 #[doc(hidden)]
 /// Getting ISciterAPI reference, can be used for manual API calling.
@@ -86,4 +96,20 @@ pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 
 lazy_static! {
 	static ref _API: &'static ISciterAPI = { SciterAPI() };
+}
+
+
+pub fn version_num() -> u32 {
+	let v1 = (_API.SciterVersion)(true);
+	let v2 = (_API.SciterVersion)(false);
+	let num = ((v1 >> 16) << 24) | ((v1 & 0xFFFF) << 16) | ((v2 >> 16) << 8) | (v2 & 0xFFFF);
+	return num;
+}
+
+pub fn version() -> String {
+	let v1 = (_API.SciterVersion)(true);
+	let v2 = (_API.SciterVersion)(false);
+	let num = [v1 >> 16, v1 & 0xFFFF, v2 >> 16, v2 & 0xFFFF];
+	let version = format!("{}.{}.{}.{}", num[0], num[1], num[2], num[3]);
+	return version;
 }

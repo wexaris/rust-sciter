@@ -146,7 +146,7 @@ mod windows {
 
 }
 
-#[cfg(unix)]
+#[cfg(target_os="linux")]
 mod windows {
 
 	use ::{_API};
@@ -281,69 +281,51 @@ mod windows {
 #[cfg(target_os="macos")]
 mod windows {
 
-	#[macro_use]
-	extern crate objc;
 	extern crate objc_foundation;
 
-	use objc::Encode;
 	use objc::runtime::{Class, Object};
-	use objc_foundation::{NSString, INSString};
+	use self::objc_foundation::{NSString, INSString};
 
 	use ::{_API};
 	use capi::sctypes::*;
 	use capi::scdef::*;
 	use super::BaseWindow;
 
-	use ::std::ptr;
-
-	/// Wrapper around an `Object` pointer that will release it when dropped.
-	#[derive(Default)]
-	struct StrongPtr(*mut Object);
-
-	impl std::ops::Deref for StrongPtr {
-	    type Target = Object;
-
-	    fn deref(&self) -> &Object {
-	        unsafe { &*self.0 }
-	    }
-	}
-
-	impl Drop for StrongPtr {
-	    fn drop(&mut self) {
-	        let _: () = unsafe { msg_send![self.0, release] };
-	    }
-	}
-
 	pub struct OsWindow
 	{
 		hwnd: HWINDOW,
 		flags: UINT,
-		app: StrongPtr,
 	}
 
 	impl OsWindow {
 
 		pub fn new() -> OsWindow {
-			OsWindow { hwnd: 0 as HWINDOW, flags: 0, app: OsWindow::get_app() }
+			OsWindow { hwnd: 0 as HWINDOW, flags: 0, }
 		}
 
-		fn get_app() -> StrongPtr {
-			let cls = Class::get("NSApplication");
-			let obj = msg_send!(cls, sharedApplication);
-			StrongPtr(obj)
+		fn get_app() -> *mut Object {
+			let cls = Class::get("NSApplication").unwrap();
+			let obj = unsafe { msg_send!(cls, sharedApplication) };
+			return obj;
 		}
 
 		fn init_app() {
+			let _ = OsWindow::get_app();
 		}
 
-		fn window(&self) -> Option<StrongPtr> {
+		fn view(&self) -> *mut Object {
 			let hwnd = self.get_hwnd();
-			if hwnd.is_null() {
-				None
-			} else {
-				let obj = msg_send!(hwnd, window);
-				Some(StrongPtr(obj))
-			}
+			let hwnd: *mut Object = unsafe { ::std::mem::transmute(hwnd) };
+			println!("view {:?}", hwnd);
+			return hwnd;
+		}
+
+		fn window(&self) -> *mut Object {
+			let hwnd = self.view();
+			let obj: *mut Object = unsafe { msg_send!(hwnd, window) };
+			println!("view {:?} -> window {:?}", hwnd, obj);
+			assert!(!obj.is_null());
+			return obj;
 		}
 	}
 
@@ -354,10 +336,6 @@ mod windows {
 			return self.hwnd;
 		}
 
-		fn get_flags(&self) -> SCITER_CREATE_WINDOW_FLAGS {
-			return self.flags as SCITER_CREATE_WINDOW_FLAGS;
-		}
-
 		/// Create a new native window.
 		fn create(&mut self, rect: (i32,i32,i32,i32), flags: UINT, parent: HWINDOW) -> HWINDOW {
 
@@ -365,11 +343,21 @@ mod windows {
 				OsWindow::init_app();
 			}
 
+			println!("window::create(rect {:?}, flags {:X}, parent {:?}", rect, flags, parent);
+
 			let (x,y,w,h) = rect;
 			let rc = RECT { left: x, top: y, right: x + w, bottom: y + h };
+			let prc: *const RECT = if w > 0 && h > 0 {
+				&rc
+			} else {
+				0 as *const RECT
+			};
+
+			println!("window::create with flags {:X}", flags);
 
 			let cb = 0 as *const SciterWindowDelegate;
-			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+			self.flags = flags;
+			self.hwnd = (_API.SciterCreateWindow)(flags, prc, cb, 0 as LPVOID, parent);
 			if self.hwnd.is_null() {
 				panic!("Failed to create window!");
 			}
@@ -378,39 +366,42 @@ mod windows {
 
 		/// Minimize or hide window.
 		fn collapse(&self, hide: bool) {
-			if let Some(wnd) = self.window() {
-				if hide {
-					msg_send!(wnd, orderOut:0);
-				} else {
-					let hwnd = self.get_hwnd();
-					msg_send!(wnd, performMiniaturize:hwnd);
-				}
+			let wnd = self.window();
+			if hide {
+				unsafe { msg_send!(wnd, orderOut:0) };
+			} else {
+				let hwnd = self.view();
+				unsafe { msg_send!(wnd, performMiniaturize:hwnd) };
 			}
 		}
 
 		/// Show or maximize window.
 		fn expand(&self, maximize: bool) {
 			let wnd = self.window();
-			if self.flags & SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR as UINT {
-				msg_send!(wnd, activateIgnoringOtherApps:1)
+			if (self.flags & SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR as UINT) != 0 {
+				let app = OsWindow::get_app();
+				unsafe { msg_send!(app, activateIgnoringOtherApps:true) };
 			}
-			msg_send!(wnd, makeKeyAndOrderFront:0);
+			unsafe {
+				msg_send!(wnd, makeKeyAndOrderFront:0);
+				// msg_send!(wnd, orderFrontRegardless);
+			}
 			if maximize {
-				msg_send!(wnd, performZoom:0)
+				unsafe { msg_send!(wnd, performZoom:0) };
 			}
 		}
 
 		/// Close window.
 		fn dismiss(&self) {
 			let wnd = self.window();
-			msg_send!(wnd, close);
+			unsafe { msg_send!(wnd, close) };
 		}
 
 		/// Set native window title.
 		fn set_title(&mut self, title: &str) {
 			let s = NSString::from_str(title);
 			let wnd = self.window();
-			msg_send!(wnd, setTitle:s);
+			unsafe { msg_send!(wnd, setTitle:s) };
 		}
 
 		/// Get native window title.
@@ -420,12 +411,14 @@ mod windows {
 
 		/// Run the main app message loop until window been closed.
 		fn run_app(&self) {
-			msg_send!(self.app, run);
+			let app = OsWindow::get_app();
+			unsafe { msg_send!(app, run) };
 		}
 
 		/// Post app quit message.
 		fn quit_app(&self) {
-			msg_send!(self.app, terminate:self.app);
+			let app = OsWindow::get_app();
+			unsafe { msg_send!(app, terminate:app) };
 		}
 	}
 

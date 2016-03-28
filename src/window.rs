@@ -11,7 +11,7 @@ that is a root widget of Sciter window on Linux/GTK.
 
 ## Creation of new window
 
-```
+```no_run
 extern crate sciter;
 
 fn main() {
