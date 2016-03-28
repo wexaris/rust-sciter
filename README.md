@@ -125,6 +125,6 @@ _Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/
 ### Platforms:
 
 * [x] Windows
-* [ ] OSX
+* [x] OSX
 * [x] Linux
 

@@ -98,7 +98,7 @@ lazy_static! {
 	static ref _API: &'static ISciterAPI = { SciterAPI() };
 }
 
-
+/// Sciter engine version number (e.g. `0x03030200`).
 pub fn version_num() -> u32 {
 	let v1 = (_API.SciterVersion)(true);
 	let v2 = (_API.SciterVersion)(false);
@@ -106,6 +106,7 @@ pub fn version_num() -> u32 {
 	return num;
 }
 
+/// Sciter engine version string (e.g. "`3.3.2.0`").
 pub fn version() -> String {
 	let v1 = (_API.SciterVersion)(true);
 	let v2 = (_API.SciterVersion)(false);
