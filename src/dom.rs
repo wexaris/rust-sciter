@@ -868,13 +868,11 @@ extern "system" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
 
 /* Not implemented yet or not used APIs:
 
-SciterAttachEventHandler
 SciterAttachHwndToElement
 
 SciterCallBehaviorMethod
 SciterCombineURL
 SciterControlGetType
-SciterDetachEventHandler
 SciterFireEvent
 SciterGetElementIntrinsicHeight
 SciterGetElementIntrinsicWidths

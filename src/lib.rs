@@ -5,6 +5,8 @@ Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/)
 with GPU accelerated rendering designed to render modern desktop application UI.
 It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
 
+Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples.
+
 Sciter supports all standard elements defined in HTML5 specification [with some additions](http://sciter.com/developers/for-web-programmers/).
 CSS extended to better support Desktop UI development, e.g. flow and flex units, vertical and horizontal alignment, OS theming.
 
@@ -13,6 +15,33 @@ CSS extended to better support Desktop UI development, e.g. flow and flex units,
 ![Sciter tools](http://sciter.com/images/sciter-tools.png)
 
 Check <http://sciter.com> website and its [documentation resources](http://sciter.com/developers/) for engine principles, architecture and more.
+
+## Brief look:
+
+Here is a minimal sciter app:
+
+```no_run
+extern crate sciter;
+
+fn main() {
+    let mut frame = sciter::Window::new();
+    frame.load_file("minimal.htm");
+    frame.run_app(true);
+}
+```
+
+It looks similar like this:
+
+![Minimal sciter sample](http://i.imgur.com/ojcM5JJ.png)
+
+Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/examples) folder for more complex usage
+and module-level sections for the guides about:
+
+* [Window](window/index.html) creation
+* [Behaviors](dom/event/index.html) and event handling
+* [DOM](dom/index.html) access methods
+* Sciter [Value](value/index.html) interface
+
 .
 */
 

@@ -58,14 +58,14 @@ extern crate sciter;
 
 fn main() {
     let mut frame = sciter::Window::new();
-    frame.host.load_file("minimal.htm");
+    frame.load_file("minimal.htm");
     frame.run_app(true);
 }
 ```
 
 It looks similar like this:
 
-![Minimal pysciter sample](http://i.imgur.com/ojcM5JJ.png)
+![Minimal sciter sample](http://i.imgur.com/ojcM5JJ.png)
 
 ### Interoperability
 
