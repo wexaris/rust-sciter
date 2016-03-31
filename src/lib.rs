@@ -41,6 +41,7 @@ pub mod host;
 pub mod value;
 pub mod utf;
 pub mod dom;
+pub mod types;
 
 pub use dom::Element;
 pub use dom::event::EventHandler;
@@ -51,7 +52,7 @@ pub use window::Window;
 
 
 /* Loader */
-use capi::scapi::{ISciterAPI};
+pub use capi::scapi::{ISciterAPI};
 
 
 #[cfg(all(windows, target_arch="x86"))]
