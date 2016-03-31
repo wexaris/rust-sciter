@@ -4,6 +4,8 @@ use ::{_API};
 use capi::sctypes::*;
 use capi::screquest::HREQUEST;
 use capi::schandler::NativeHandler;
+use dom::event::EventHandler;
+use eventhandler::*;
 use value::{Value};
 
 pub use capi::scdef::{SCITER_RT_OPTIONS, SCRIPT_RUNTIME_FEATURES, GFX_LAYER};
@@ -124,15 +126,20 @@ pub struct Host {
 
 impl Host {
 
-	#[doc(hidden)]
-	pub fn from(hwnd: HWINDOW) -> Host {
+	/// Attach Sciter host to existing window.
+	///
+	/// Usually Sciter window created by `sciter::Window::create()`, but you can attach Sciter to the existing native window.
+	/// In this case you need to mix-in window events processing with `SciterProcND`.
+	/// Sciter engine will be initialized either on `WM_CREATE` or `WM_INITDIALOG` response
+	/// or by calling `SciterCreateOnDirectXWindow`.
+	pub fn attach(hwnd: HWINDOW) -> Host {
 		// Host with default debug handler installed
 		let host = Host { hwnd: Cell::new(hwnd), handler: RefCell::new(NativeHandler::default()) };
 		host.setup_callback(hwnd, DefaultHandler);
 		return host;
 	}
 
-	/// Set callback for sciter engine events.
+	/// Set callback for Sciter engine events.
 	pub fn setup_callback<T: HostHandler>(&self, hwnd: HWINDOW, handler: T) {
 		*self.handler.borrow_mut() = NativeHandler::from(handler);
 		self.hwnd.set(hwnd);
@@ -141,7 +148,15 @@ impl Host {
 		(_API.SciterSetupDebugOutput)(0 as HWINDOW, self.handler.borrow().as_mut_ptr(), _on_debug_notification::<T>);
 	}
 
-	/// Setup debug output function for specific window or globally.
+	/// Attach `dom::EventHandler` to the Sciter window.
+	pub fn attach_handler<T: EventHandler>(&self, handler: T) {
+		let hwnd = self.get_hwnd();
+		let boxed = Box::new( WindowHandler { hwnd: hwnd, handler: handler } );
+		let ptr = Box::into_raw(boxed);
+		(_API.SciterWindowAttachEventHandler)(hwnd, _event_handler_window_proc::<T>, ptr as LPVOID, ::dom::event::default_events() as UINT);
+	}
+
+	/// Set debug mode for specific window or globally.
 	pub fn enable_debug(&self, enable: bool) {
 		let hwnd = 0 as HWINDOW;
 		(_API.SciterSetOption)(hwnd, SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as UINT_PTR);

@@ -60,6 +60,10 @@ mod windows {
 			OsWindow { hwnd: 0 as HWINDOW, flags: 0 }
 		}
 
+		pub fn from(hwnd: HWINDOW) -> OsWindow {
+			OsWindow { hwnd: hwnd, flags: 0 }
+		}
+
 		fn init_app() {
 			unsafe { OleInitialize(::std::ptr::null()) };
 		}

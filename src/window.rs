@@ -72,8 +72,14 @@ impl Window {
 		let hwnd = base.create(rect, flags as UINT, parent.unwrap_or(0 as HWINDOW));
 		assert!(!hwnd.is_null());
 
-		let wnd = Window { base: base, host: Rc::new(Host::from(hwnd))};
+		let wnd = Window { base: base, host: Rc::new(Host::attach(hwnd))};
 		return wnd;
+	}
+
+	/// Attach Sciter to existing native window.
+	pub fn attach(hwnd: HWINDOW) -> Window {
+		assert!( hwnd.is_null() == false );
+		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
 	}
 
 	/// Obtain reference to `Host` which allows you to control sciter engine and windows.
