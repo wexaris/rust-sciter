@@ -1,5 +1,7 @@
 # Rust bindings for Sciter
 
+[![Join the chat at https://gitter.im/pravic/rust-sciter](https://badges.gitter.im/pravic/rust-sciter.svg)](https://gitter.im/pravic/rust-sciter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 _Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another language bindings._
 
 ----
