@@ -45,6 +45,9 @@ and module-level sections for the guides about:
 .
 */
 
+#![doc(html_logo_url = "http://sciter.com/screenshots/slide-sciter-osx.png",
+       html_favicon_url = "http://sciter.com/wp-content/themes/sciter/!images/favicon.ico")]
+
 // documentation test:
 // #![warn(missing_docs)]
 
