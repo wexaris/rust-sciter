@@ -143,9 +143,3 @@ fn main() {
 	frame.load_file("interop.htm");
 	frame.run_app(true);
 }
-
-#[test]
-fn test_main() {
-	main();
-	assert!("Manual assert to show stdout".len() == 0);	// to display stdout
-}

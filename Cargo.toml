@@ -18,6 +18,6 @@ crate-type = ["rlib"]
 libc = "*"
 lazy_static = "*"
 
-[target.'cfg(target_os="macos")'.dependencies]
+[target.x86_64-apple-darwin.dependencies]
 objc = "*"
 objc-foundation = "*"

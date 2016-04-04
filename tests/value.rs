@@ -117,7 +117,7 @@ fn parse_works() {
 	assert_eq!(v.to_bool(), Some(true));
 }
 
-#[test]
+#[test]	// crashes with 1.7.0 i686-pc-windows-msvc
 #[should_panic(expected="failed on character")]
 fn parse_fail_works() {
 	let item = "{item: "; // invalid json
