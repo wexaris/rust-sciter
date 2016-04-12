@@ -49,8 +49,9 @@ Check <http://sciter.com> website and its [documentation resources](http://scite
 
 1. Download [Sciter SDK](http://sciter.com/download/) and extract it somewhere.
 2. Add target platform binaries to PATH (`bin`, `bin.osx` or `bin.gtk`) and install Sciter shared library to your LIBRARY_PATH.
-3. Add this to your Cargo.toml: `sciter = "*"`.
-4. Build library and run the minimal sciter sample: `cargo run --example minimal`.
+3. Build library and run the minimal sciter sample: `cargo run --example minimal`.
+4. For your apps add the following dependency to the Cargo.toml: `sciter-rs = "*"`.
+
 
 ## Brief look:
 

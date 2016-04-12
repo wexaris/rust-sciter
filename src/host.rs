@@ -192,16 +192,21 @@ impl Host {
 	}
 
 	/// This function is used as response to `SC_LOAD_DATA` request.
-	pub fn data_ready(&self, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
+	pub fn data_ready(&self, uri: &str, data: &[u8]) {
 		let (s,_) = s2w!(uri);
-		match request_id {
-			Some(req) => {
-				(_API.SciterDataReadyAsync)(self.hwnd.get(), s.as_ptr(), data.as_ptr(), data.len() as UINT, req)
-			},
-			None => {
-				(_API.SciterDataReady)(self.hwnd.get(), s.as_ptr(), data.as_ptr(), data.len() as UINT)
-			},
-		};
+		(_API.SciterDataReady)(self.hwnd.get(), s.as_ptr(), data.as_ptr(), data.len() as UINT);
+	}
+
+	/// Use this function outside of `SCN_LOAD_DATA` request.
+	///
+	/// It can be used for the two purposes:
+	///
+	/// 1. Asynchronious resource loading in respect of `SCN_LOAD_DATA` requests (you must provide `request_id` in this case).
+	/// 2. Refresh of already loaded resource (for example, dynamic image updates).
+	pub fn data_ready_async(&self, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
+		let (s,_) = s2w!(uri);
+		let req = request_id.unwrap_or(::std::ptr::null_mut());
+		(_API.SciterDataReadyAsync)(self.hwnd.get(), s.as_ptr(), data.as_ptr(), data.len() as UINT, req);
 	}
 
 	/// Evaluate script in context of current document.
