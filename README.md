@@ -9,7 +9,8 @@ _Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for anothe
 
 Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/) HTML/CSS/script engine with GPU accelerated rendering designed to render modern desktop application UI. It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
 
-Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples.
+Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples
+and [DirectX UI integration](https://github.com/pravic/rust-gfx-sciter) via [Rust GFX](https://github.com/gfx-rs/gfx).
 
 Physically Sciter is a mono library which contains:
 
