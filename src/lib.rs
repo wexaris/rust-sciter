@@ -1,3 +1,7 @@
+// This component uses Sciter Engine,
+// copyright Terra Informatica Software, Inc.
+// (http://terrainformatica.com/).
+
 /*!
 # Rust bindings library for Sciter engine.
 

@@ -1,7 +1,7 @@
 # Rust bindings for Sciter
 
-![Build status](https://ci.appveyor.com/api/projects/status/github/pravic/rust-sciter?svg=true)
-[![Join the chat at https://gitter.im/pravic/rust-sciter](https://badges.gitter.im/pravic/rust-sciter.svg)](https://gitter.im/pravic/rust-sciter)
+![Build status](https://ci.appveyor.com/api/projects/status/github/pravic/rust-sciter)
+[![Join the chat at https://gitter.im/pravic/rust-sciter](https://badges.gitter.im/pravic/rust-sciter.png)](https://gitter.im/pravic/rust-sciter)
 
 _Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another language bindings._
 
@@ -133,3 +133,7 @@ _Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/
 * [x] OSX
 * [x] Linux
 
+
+## License
+
+Bindings library licensed under [MIT license](http://opensource.org/licenses/MIT). Sciter Engine has the [own license terms](http://sciter.com/prices/) and [end used license agreement](https://github.com/c-smile/sciter-sdk/blob/master/license.htm) for SDK usage.
