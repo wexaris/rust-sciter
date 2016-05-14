@@ -188,6 +188,10 @@ mod windows {
 			OsWindow { hwnd: 0 as HWINDOW, flags: 0 }
 		}
 
+		pub fn from(hwnd: HWINDOW) -> OsWindow {
+			OsWindow { hwnd: hwnd, flags: 0 }
+		}
+
 		fn init_app() {
 			unsafe { gtk_init(ptr::null(), ptr::null()) };
 		}
@@ -305,6 +309,10 @@ mod windows {
 
 		pub fn new() -> OsWindow {
 			OsWindow { hwnd: 0 as HWINDOW, flags: 0, }
+		}
+
+		pub fn from(hwnd: HWINDOW) -> OsWindow {
+			OsWindow { hwnd: hwnd, flags: 0 }
 		}
 
 		fn get_app() -> *mut Object {
