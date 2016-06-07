@@ -137,9 +137,10 @@ impl sciter::EventHandler for EventHandler {
 }
 
 fn main() {
+	let html = include_bytes!("interop.htm");
 	let handler = EventHandler { root: None };
 	let mut frame = sciter::Window::new();
 	frame.event_handler(handler);
-	frame.load_file("interop.htm");
+	frame.load_html(html, None);
 	frame.run_app(true);
 }
