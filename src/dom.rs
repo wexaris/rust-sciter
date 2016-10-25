@@ -139,6 +139,7 @@ use capi::sctypes::*;
 use value::Value;
 
 pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML};
+use capi::scbehavior::{EVENT_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
 
 pub use dom::event::EventHandler;
 pub use dom::event::EventReason;
@@ -385,7 +386,48 @@ impl Element {
 	// TODO: get_location
 	// TODO: request_data, request_html
 	// TODO: send_request
-	// TODO: send_event, post_event, fire_event
+
+	/// Sends sinking/bubbling event to the child/parent chain of element.
+	pub fn send_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>) -> Result<bool> {
+		let mut handled = false as BOOL;
+		let r = reason.unwrap_or(EVENT_REASON::SYNTHESIZED);
+		let s = source.unwrap_or(self.he);
+		let ok = (_API.SciterSendEvent)(self.he, code as u32, s, r as u32, &mut handled);
+		ok_or!(handled != 0, ok)
+	}
+
+	/// Post asynchronously a sinking/bubbling event to the child/parent chain of element.
+	pub fn post_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>) -> Result<()> {
+		let r = reason.unwrap_or(EVENT_REASON::SYNTHESIZED);
+		let s = source.unwrap_or(self.he);
+		let ok = (_API.SciterPostEvent)(self.he, code as u32, s, r as u32);
+		ok_or!((), ok)
+	}
+
+	/// Send or posts event to the child/parent chain of element.
+	pub fn fire_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>, post: bool, data: Option<Value>) -> Result<bool> {
+		let mut handled = false as BOOL;
+		let mut params = BEHAVIOR_EVENT_PARAMS {
+			cmd: code as UINT,
+			reason: reason.unwrap_or(EVENT_REASON::SYNTHESIZED) as UINT_PTR,
+			he: source.unwrap_or(self.he),
+			heTarget: self.he,
+			data: Default::default(),
+		};
+		if data.is_some() {
+			data.unwrap().pack_to(&mut params.data);
+		}
+		let ok = (_API.SciterFireEvent)(&params, post as BOOL, &mut handled);
+		ok_or!(handled != 0, ok)
+	}
+
+	/// Send or posts event with specified params to the child/parent chain of element.
+	pub fn fire_event_params(evt: &BEHAVIOR_EVENT_PARAMS, post: bool) -> Result<bool> {
+		let mut handled = false as BOOL;
+		let ok = (_API.SciterFireEvent)(evt, post as BOOL, &mut handled);
+		ok_or!(handled != 0, ok)
+	}
+
 
 	/// Evaluate script in element context.
 	pub fn eval_script(&self, script: &str) -> Result<Value> {
