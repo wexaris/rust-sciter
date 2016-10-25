@@ -1,6 +1,6 @@
 [package]
 name = "sciter-examples"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["pravic <ehysta@gmail.com>"]
 
 [dependencies.sciter-rs]
@@ -25,3 +25,7 @@ path = "interop.rs"
 [[bin]]
 name = "dom"
 path = "dom.rs"
+
+[[bin]]
+name = "fire_event"
+path = "fire_event.rs"
