@@ -30,9 +30,18 @@ let v = Value::symbol("hello");
 assert!(v.is_symbol());
 assert!(v.is_string());
 
-let mut v = Value::error("hello");
+let v = Value::error("hello");
 assert!(v.is_error_string());
 assert!(v.is_string());
+
+let v = Value::array(4);
+assert!(v.is_array());
+assert!(v.len() == 4);
+
+let v = Value::map();
+assert!(v.is_map());
+assert!(v.len() == 0);
+
 ```
 
 Also there is conversion from Rust types:
