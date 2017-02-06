@@ -2,33 +2,33 @@
   <head>
     <title>Minimalistic Sciter demo</title>
     <style>
-    
+
       html {
         background: radial-gradient(75% 75%, circle farthest-side, white, orange, rgb(0,0,204));
         color:#fff;
       }
-      
+
       html:rtl {
         mapping: left-to-right(background);
       }
-    
+
     </style>
     <script type="text/tiscript">
       stdout.println("hello, rust!");
       stdout.println("hello, again!");
 
       view.caption = $(head > title).value;
-    
+
       $(#machine).text = Sciter.machineName();
-      
+
       var counter = 0;
-      
+
       $(button#append).on("click", function(){
         $(body).$append(<h1#test>{++counter }</h1>);
       });
-      
+
       $(button#open).on("click", function(){
-      
+
         var fn = view.selectFile(#open,
           "HTML Files (*.htm,*.html)|*.HTM;*.HTML|All Files (*.*)|*.*" , "html" );
 
@@ -42,7 +42,7 @@
 
   <h1>Minimal Sciter Application</h1>
   <p>Running on <em #machine /> machine</p>
-  
+
   <button #append>Append</button>
   <button #open>Open</button>
   <select>
@@ -50,5 +50,9 @@
     <option>Second</option>
     <option>Third</option>
   </select>
+
+  <form>
+    Text: <input type="text">
+  </form>
 </body>
 </html>

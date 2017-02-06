@@ -1,6 +1,7 @@
 //! Sciter's platform independent graphics interface.
 
 #![allow(non_camel_case_types, non_snake_case)]
+#![allow(dead_code)]
 
 use capi::sctypes::{LPVOID};
 
