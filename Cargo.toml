@@ -21,3 +21,28 @@ lazy_static = "*"
 [target.x86_64-apple-darwin.dependencies]
 objc = "*"
 objc-foundation = "*"
+
+[[example]]
+name = "first"
+path = "examples/first.rs"
+
+[[example]]
+name = "minimal"
+path = "examples/minimal.rs"
+
+[[example]]
+name = "download"
+path = "examples/download.rs"
+
+[[example]]
+name = "dom"
+path = "examples/dom.rs"
+
+[[example]]
+name = "fire_event"
+path = "examples/fire_event.rs"
+
+[[example]]
+name = "interop"
+path = "examples/interop.rs"
+
