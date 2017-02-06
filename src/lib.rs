@@ -98,9 +98,33 @@ mod ext {
 	// bin/32, bin/64, bin/skia32, bin/skia64
 	// However it is quiet unconvenient now (e.g. we can not put x64 and x86 builds in %PATH%)
 	//
+	#![allow(non_snake_case, non_camel_case_types)]
 	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter", kind="dylib")]
-	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
+	use capi::sctypes::{LPCSTR, LPCVOID, UINT};
+
+	type SciterAPI_ptr = extern "system" fn () -> *const ISciterAPI;
+
+	extern "system"
+	{
+		fn LoadLibraryA(lpFileName: LPCSTR) -> LPCVOID;
+		fn GetProcAddress(hModule: LPCVOID, lpProcName: LPCSTR) -> LPCVOID;
+		fn GetLastError() -> UINT;
+	}
+
+	pub unsafe fn SciterAPI() -> *const ISciterAPI {
+		let dll = LoadLibraryA(b"sciter.dll\0".as_ptr() as LPCSTR);
+		let err = GetLastError();
+		if dll.is_null() {
+			let msg = "Please verify that Sciter SDK is installed and its binaries (SDK/bin, bin.osx or bin.gtk) available in the PATH.";
+			panic!("fatal: '{}' was not found in PATH (Error {})\n  {}", "sciter.dll", err, msg);
+		}
+		let func = GetProcAddress(dll, b"SciterAPI\0".as_ptr() as LPCSTR);
+		if func.is_null() {
+			panic!("Where is \"SciterAPI\"? It is expected to be in sciter.dll.");
+		}
+		let get_api: SciterAPI_ptr = ::std::mem::transmute(func);
+		return get_api();
+	}
 }
 
 #[cfg(all(target_os="linux", target_arch="x86_64"))]
