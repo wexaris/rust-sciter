@@ -1,16 +1,25 @@
 # Rust bindings for Sciter
 
 ![Build status](https://ci.appveyor.com/api/projects/status/github/pravic/rust-sciter)
-[![Join the chat at https://gitter.im/pravic/rust-sciter](https://badges.gitter.im/pravic/rust-sciter.png)](https://gitter.im/pravic/rust-sciter)
+[![Join the chat at https://gitter.im/pravic/sciter](https://badges.gitter.im/pravic/sciter.png)](https://gitter.im/pravic/sciter)
 
-_Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another language bindings._
+Check [this page](http://sciter.com/developers/sciter-sdk-bindings/) for another language bindings (Delphi / D / Go / .NET / Python / Rust).
 
 ----
 
+
+## Introduction
+
 Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/) HTML/CSS/script engine with GPU accelerated rendering designed to render modern desktop application UI. It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
 
-Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples
+
+## Screenshots
+
+Check [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples
 and [DirectX UI integration](https://github.com/pravic/rust-gfx-sciter) via [Rust GFX](https://github.com/gfx-rs/gfx).
+
+
+## Description
 
 Physically Sciter is a mono library which contains:
 
@@ -125,6 +134,7 @@ _Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/
 * [ ] [sciter::request](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-request.hpp) - resource request object, used for custom resource downloading and handling
 * [ ] [sciter::video](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-video-api.h) - custom video rendering
 * [ ] [sciter::archive](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) - Sciter's compressed archive produced by sdk/bin/packfolder
+* [ ] [sciter::msg](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-msg) - Backend-independent input event processing
 
 
 ### Platforms:
