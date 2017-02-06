@@ -19,12 +19,12 @@ name = "sciter"
 crate-type = ["rlib"]
 
 [dependencies]
-libc = "*"
-lazy_static = "*"
+libc = "0.2"
+lazy_static = "0.2"
 
 [target.x86_64-apple-darwin.dependencies]
-objc = "*"
-objc-foundation = "*"
+objc = "0.2"
+objc-foundation = "0.1"
 
 [[example]]
 name = "first"
