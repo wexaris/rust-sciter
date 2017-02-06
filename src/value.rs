@@ -139,6 +139,20 @@ impl Value {
 		Value { data: VALUE::default(), tmp: ::std::ptr::null_mut() }
 	}
 
+	/// Make explicit [array](http://sciter.com/docs/content/script/Array.htm) value with given length.
+	pub fn array(length: usize) -> Value {
+		let mut me = Value::new();
+		(_API.ValueIntDataSet)(me.as_ptr(), length as i32, VALUE_TYPE::T_ARRAY as UINT, 0);
+		return me;
+	}
+
+	/// Make explicit [map](http://sciter.com/docs/content/script/Object.htm) value.
+	pub fn map() -> Value {
+		let mut me = Value::new();
+		(_API.ValueIntDataSet)(me.as_ptr(), 0i32, VALUE_TYPE::T_MAP as UINT, 0);
+		return me;
+	}
+
 	/// Make explicit json [null](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null) value.
 	pub fn null() -> Value {
 		let mut me = Value::new();
@@ -634,7 +648,7 @@ impl ::std::str::FromStr for Value {
 impl<'a> From<&'a [u8]> for Value {
 	fn from(val: &'a [u8]) -> Self {
 		let mut me = Value::new();
-		(_API.ValueBinaryDataSet)(me.as_ptr(), val.as_ptr(), val.len() as u32, VALUE_TYPE::T_BYTES as UINT, 0);
+		(_API.ValueBinaryDataSet)(me.as_ptr(), val.as_ptr(), val.len() as UINT, VALUE_TYPE::T_BYTES as UINT, 0);
 		return me;
 	}
 }

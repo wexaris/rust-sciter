@@ -42,6 +42,24 @@ fn symbol_works() {
 }
 
 #[test]
+fn array_works() {
+	let v = Value::array(0);
+	assert!(v.is_array());
+	assert!(v.len() == 0);
+
+	let v = Value::array(17);
+	assert!(v.is_array());
+	assert!(v.len() == 17);
+}
+
+#[test]
+fn map_works() {
+	let v = Value::map();
+	assert!(v.is_map());
+	assert!(v.len() == 0);
+}
+
+#[test]
 fn from_bool_works() {
 	let v = Value::from(true);
 	assert!(v.is_bool());
