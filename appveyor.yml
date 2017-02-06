@@ -6,6 +6,8 @@ environment:
   matrix:
   - TARGET: 1.7.0-x86_64-pc-windows-msvc
     ARCH: 64
+  - TARGET: 1.15.0-x86_64-pc-windows-msvc
+    ARCH: 64
   - TARGET: nightly-x86_64-pc-windows-msvc
     ARCH: 64
   - TARGET: nightly-i686-pc-windows-msvc
@@ -14,8 +16,7 @@ install:
   - cmd: echo Testing sciter%ARCH% %CONFIGURATION% with %TARGET% under %PLATFORM%.
   - cmd: echo Current directory is %APPVEYOR_BUILD_FOLDER%
   - cmd: mkdir ..\deps
-  - cmd: curl -so "..\deps\sciter%ARCH%.dll" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin/sciter%ARCH%.dll"
-  - cmd: curl -so "..\deps\sciter%ARCH%.lib" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/lib/sciter%ARCH%.lib"
+  - cmd: curl -so "..\deps\sciter.dll" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin/%ARCH%/sciter.dll"
   - cmd: curl -so "..\deps\rust-install.exe" "https://static.rust-lang.org/dist/rust-%TARGET%.exe"
   - cmd: ..\deps\rust-install.exe /VERYSILENT /NORESTART /DIR="C:\rust"
   - cmd: set PATH=%PATH%;C:\rust\bin;C:\projects\deps
@@ -23,15 +24,11 @@ build_script:
   - cmd: cd
   - cargo clean
   - cmd: echo Building library
-  - cmd: mkdir target\release\deps
-  - cmd: copy ..\deps\sciter%ARCH%.lib target\release\deps
   - cargo build --release
   - cmd: echo Building examples
-  - cmd: mkdir examples\target\release\deps
-  - cmd: copy ..\deps\sciter%ARCH%.lib examples\target\release\deps
-  - cmd: cd examples
-  - cargo build --release
-  - cmd: cd ..
+  - cargo build --release --example first
+  - cargo build --release --example minimal
+  - cargo build --release --example interop
 test_script:
   - cmd: cd
   - cargo test --release
