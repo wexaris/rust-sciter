@@ -43,6 +43,7 @@ Internally it contains the following modules:
     * GDI+ graphics backend implementation (Windows);
     * CoreGraphics backend implementation (Mac OS X);
     * Cairo backend implementation (GTK on all platforms including Linuxes);
+    * Skia/OpenGL backend (all platforms)
 * **core primitives** – set of common primitives: string, arrays, hash maps and so on.
 
 
