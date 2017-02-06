@@ -10,3 +10,4 @@ pub mod sctiscript;
 pub mod sctypes;
 pub mod scvalue;
 pub mod schandler;
+pub mod scmsg;

@@ -1,6 +1,6 @@
 [package]
 name = "sciter-rs"
-version = "0.4.2"
+version = "0.4.10"
 description = "A Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit)."
 keywords = ["gui", "sciter", "tiscript", "htmlayout", "html", "css", "web", "cross-platform"]
 

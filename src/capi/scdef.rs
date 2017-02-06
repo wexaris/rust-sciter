@@ -51,12 +51,22 @@ pub enum SCRIPT_RUNTIME_FEATURES
 #[repr(C)]
 #[derive(Debug)]
 #[allow(missing_docs)]
-/// Explicitly set sciter graphics layer (Windows only).
+/// Explicitly set sciter graphics layer.
 pub enum GFX_LAYER
 {
+	#[cfg(windows)]
   GFX_LAYER_GDI      = 1,
+
+  #[cfg(osx)]
+  GFX_LAYER_CG       = 1,
+
+  #[cfg(unix)]
+  GFX_LAYER_CAIRO    = 1,
+
   GFX_LAYER_WARP     = 2,
   GFX_LAYER_D2D      = 3,
+  GFX_LAYER_SKIA_CPU = 4,
+  GFX_LAYER_SKIA_OPENGL = 5,
   GFX_LAYER_AUTO     = 0xFFFF,
 }
 
@@ -320,6 +330,8 @@ pub type DEBUG_OUTPUT_PROC = extern "system" fn (param: LPVOID, subsystem: OUTPU
 pub type LPCWSTR_RECEIVER = extern "system" fn (szstr: LPCWSTR, str_length: UINT, param: LPVOID);
 pub type LPCSTR_RECEIVER  = extern "system" fn (szstr: LPCSTR,  str_length: UINT, param: LPVOID);
 pub type LPCBYTE_RECEIVER = extern "system" fn (szstr: LPCBYTE, str_length: UINT, param: LPVOID);
+
+pub type ELEMENT_BITMAP_RECEIVER = extern "system" fn (rgba: LPCBYTE, x: INT, y: INT, width: UINT, height: UINT, param: LPVOID);
 
 #[repr(C)]
 pub struct METHOD_PARAMS {

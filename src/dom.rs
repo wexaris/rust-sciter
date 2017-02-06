@@ -139,7 +139,7 @@ use capi::sctypes::*;
 use value::Value;
 
 pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML};
-use capi::scbehavior::{EVENT_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
+use capi::scbehavior::{CLICK_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
 
 pub use dom::event::EventHandler;
 pub use dom::event::EventReason;
@@ -388,28 +388,28 @@ impl Element {
 	// TODO: send_request
 
 	/// Sends sinking/bubbling event to the child/parent chain of element.
-	pub fn send_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>) -> Result<bool> {
+	pub fn send_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>) -> Result<bool> {
 		let mut handled = false as BOOL;
-		let r = reason.unwrap_or(EVENT_REASON::SYNTHESIZED);
+		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
 		let s = source.unwrap_or(self.he);
 		let ok = (_API.SciterSendEvent)(self.he, code as u32, s, r as u32, &mut handled);
 		ok_or!(handled != 0, ok)
 	}
 
 	/// Post asynchronously a sinking/bubbling event to the child/parent chain of element.
-	pub fn post_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>) -> Result<()> {
-		let r = reason.unwrap_or(EVENT_REASON::SYNTHESIZED);
+	pub fn post_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>) -> Result<()> {
+		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
 		let s = source.unwrap_or(self.he);
 		let ok = (_API.SciterPostEvent)(self.he, code as u32, s, r as u32);
 		ok_or!((), ok)
 	}
 
 	/// Send or posts event to the child/parent chain of element.
-	pub fn fire_event(&self, code: BEHAVIOR_EVENTS, reason: Option<EVENT_REASON>, source: Option<HELEMENT>, post: bool, data: Option<Value>) -> Result<bool> {
+	pub fn fire_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>, post: bool, data: Option<Value>) -> Result<bool> {
 		let mut handled = false as BOOL;
 		let mut params = BEHAVIOR_EVENT_PARAMS {
 			cmd: code as UINT,
-			reason: reason.unwrap_or(EVENT_REASON::SYNTHESIZED) as UINT_PTR,
+			reason: reason.unwrap_or(CLICK_REASON::SYNTHESIZED) as UINT_PTR,
 			he: source.unwrap_or(self.he),
 			heTarget: self.he,
 			data: Default::default(),
@@ -1074,7 +1074,7 @@ This way you can establish interaction between scipt and native code inside your
 
 */
 
-	pub use capi::scbehavior::{EVENT_REASON, EVENT_GROUPS, EDIT_CHANGED_REASON, BEHAVIOR_EVENTS, PHASE_MASK};
+	pub use capi::scbehavior::{CLICK_REASON, EVENT_GROUPS, EDIT_CHANGED_REASON, BEHAVIOR_EVENTS, PHASE_MASK};
 
 	use capi::sctypes::*;
 	use capi::scdom::HELEMENT;
@@ -1091,7 +1091,7 @@ This way you can establish interaction between scipt and native code inside your
 	/// UI action causing change.
 	pub enum EventReason {
 		/// General event source triggers (by mouse, key or synthesized).
-	  General(EVENT_REASON),
+	  General(CLICK_REASON),
 	  /// Edit control change trigger.
 	  EditChanged(EDIT_CHANGED_REASON),
 	  /// `<video>` request for frame source binding (*unsupported yet*).

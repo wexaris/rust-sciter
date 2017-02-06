@@ -119,11 +119,12 @@ pub enum PHASE_MASK
 #[derive(Debug, PartialOrd, PartialEq)]
 #[allow(missing_docs)]
 /// General event source triggers
-pub enum EVENT_REASON
+pub enum CLICK_REASON
 {
 	BY_MOUSE_CLICK,
 	BY_KEY_CLICK,
 	SYNTHESIZED, // synthesized, programmatically generated.
+	BY_MOUSE_ON_ICON,
 }
 
 #[repr(C)]
@@ -140,6 +141,8 @@ pub enum EDIT_CHANGED_REASON
 	BY_DEL_CHAR,
 	/// character range deletion (selection).
 	BY_DEL_CHARS,
+	/// undo/redo
+	BY_UNDO_REDO
 }
 
 #[repr(C)]

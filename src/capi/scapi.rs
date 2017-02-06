@@ -10,6 +10,7 @@ use capi::sctiscript::{HVM, tiscript_value, tiscript_native_interface};
 use capi::scbehavior::*;
 use capi::scgraphics::{SciterGraphicsAPI};
 use capi::screquest::{SciterRequestAPI, HREQUEST};
+use capi::scmsg::{SCITER_X_MSG};
 
 
 /// Sciter API functions.
@@ -214,27 +215,34 @@ pub struct ISciterAPI
 	pub ValueNativeFunctorSet: extern "system" fn (pval: * mut VALUE, pinvoke: NATIVE_FUNCTOR_INVOKE, prelease: NATIVE_FUNCTOR_RELEASE, tag: LPVOID) -> VALUE_RESULT,
 	pub ValueIsNativeFunctor: extern "system" fn (pval: * const VALUE) -> BOOL,
 
-	  // tiscript VM API
+	// tiscript VM API
 	pub TIScriptAPI: extern "system" fn () -> * mut tiscript_native_interface,
 
 	pub SciterGetVM: extern "system" fn (hwnd: HWINDOW) -> HVM,
 
+	// since 3.1.0.12
 	pub Sciter_v2V: extern "system" fn (vm: HVM, script_value: tiscript_value, value: * mut VALUE, isolate: BOOL) -> BOOL,
 	pub Sciter_V2v: extern "system" fn (vm: HVM, valuev: * const VALUE, script_value: * mut tiscript_value) -> BOOL,
 
+	// since 3.1.0.18
 	pub SciterOpenArchive: extern "system" fn (archiveData: LPCBYTE, archiveDataLength: UINT) -> HSARCHIVE,
 	pub SciterGetArchiveItem: extern "system" fn (harc: HSARCHIVE, path: LPCWSTR, pdata: * mut LPCBYTE, pdataLength: * mut UINT) -> BOOL,
 	pub SciterCloseArchive: extern "system" fn (harc: HSARCHIVE) -> BOOL,
 
+	// since 3.2.0.0
 	pub SciterFireEvent: extern "system" fn (evt: * const BEHAVIOR_EVENT_PARAMS, post: BOOL, handled: * mut BOOL) -> SCDOM_RESULT,
 
 	pub SciterGetCallbackParam: extern "system" fn (hwnd: HWINDOW) -> LPVOID,
 	pub SciterPostCallback: extern "system" fn (hwnd: HWINDOW, wparam: UINT_PTR, lparam: UINT_PTR, timeoutms: UINT) -> UINT_PTR,
 
+	// since 3.3.1.0
 	pub GetSciterGraphicsAPI: extern "system" fn () -> * const SciterGraphicsAPI,
+
+	// since 3.3.1.6
 	pub GetSciterRequestAPI: extern "system" fn () -> * const SciterRequestAPI,
 
   // #ifdef WINDOWS
+  // since 3.3.1.4
   #[cfg(windows)]
 	pub SciterCreateOnDirectXWindow: extern "system" fn (hwnd: HWINDOW, pSwapChain: * mut IDXGISwapChain) -> BOOL,
 	#[cfg(windows)]
@@ -242,4 +250,8 @@ pub struct ISciterAPI
 	#[cfg(windows)]
 	pub SciterRenderOnDirectXTexture: extern "system" fn (hwnd: HWINDOW, elementToRenderOrNull: HELEMENT, surface: * mut IDXGISurface) -> BOOL,
   // #endif
+
+  // since 4.0.0.0
+  pub SciterProcX: extern "system" fn(hwnd: HWINDOW, msg: * const SCITER_X_MSG) -> BOOL,
+
 }

@@ -91,24 +91,25 @@ pub use window::Window;
 pub use capi::scapi::{ISciterAPI};
 
 
-#[cfg(all(windows, target_arch="x86"))]
+#[cfg(windows)]
 mod ext {
+	// Note:
+	// Sciter 4.x shipped with universal "sciter.dll" library for different builds:
+	// bin/32, bin/64, bin/skia32, bin/skia64
+	// However it is quiet unconvenient now (e.g. we can not put x64 and x86 builds in %PATH%)
+	//
 	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter32")]
-	extern "stdcall" { pub fn SciterAPI() -> *const ISciterAPI;	}
-}
-
-#[cfg(all(windows, target_arch="x86_64"))]
-mod ext {
-	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter64")]
+	#[link(name="sciter", kind="dylib")]
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
 #[cfg(all(target_os="linux", target_arch="x86_64"))]
 mod ext {
+	// Note:
+	// Since 3.3.1.6 library name was changed to "libsciter".
+	//
 	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter-gtk-64")]
+	#[link(name="libsciter-gtk-64", kind="dylib")]
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 

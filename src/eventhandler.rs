@@ -118,7 +118,7 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 				}
 
 				_ => {
-					let reason: EVENT_REASON = unsafe{ ::std::mem::transmute(nm.reason as UINT) };
+					let reason: CLICK_REASON = unsafe{ ::std::mem::transmute(nm.reason as UINT) };
 					EventReason::General(reason)
 				}
 			};
