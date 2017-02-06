@@ -2,13 +2,17 @@
 name = "sciter-rs"
 version = "0.4.10"
 description = "A Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit)."
-keywords = ["gui", "sciter", "tiscript", "htmlayout", "html", "css", "web", "cross-platform"]
+keywords = ["gui", "sciter", "html", "css", "web", "tiscript", "htmlayout", "cross-platform"]
+categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
 
 authors = ["pravic <ehysta@gmail.com>"]
 repository = "https://github.com/pravic/rust-sciter"
 documentation = "http://pravic.github.io/rust-sciter"
 readme = "README.md"
 license = "MIT"
+
+exclude = [".gitignore", "appveyor.yml"]
+
 
 [lib]
 name = "sciter"
@@ -46,3 +50,6 @@ path = "examples/fire_event.rs"
 name = "interop"
 path = "examples/interop.rs"
 
+
+[badges]
+appveyor = { repository = "pravic/rust-sciter" }
