@@ -118,10 +118,10 @@ And we can access this function from script:
 stdout.printf("2 + 3 = %d\n", view.calc_sum(2, 3));
 ```
 
-_Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/examples) folder for more complex usage_.
+_Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/master/examples) folder for more complex usage_.
 
 
-## [Library documentation](http://pravic.github.io/rust-sciter/).
+## [Library documentation](http://sciter-sdk.github.io/rust-sciter/).
 
 
 ## What supported right now:
