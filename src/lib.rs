@@ -38,7 +38,7 @@ It looks similar like this:
 
 ![Minimal sciter sample](http://i.imgur.com/ojcM5JJ.png)
 
-Check [rust-sciter/examples](https://github.com/pravic/rust-sciter/tree/master/examples) folder for more complex usage
+Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/master/examples) folder for more complex usage
 and module-level sections for the guides about:
 
 * [Window](window/index.html) creation

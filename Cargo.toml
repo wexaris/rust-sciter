@@ -52,4 +52,4 @@ path = "examples/interop.rs"
 
 
 [badges]
-appveyor = { repository = "pravic/rust-sciter" }
+appveyor = { repository = "sciter-sdk/rust-sciter" }
