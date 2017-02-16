@@ -82,9 +82,9 @@ impl EventHandler {
 
 		let mut api = Value::new();
 
-		api.set_item(Value::from("add"), Value::from(on_add));
-		api.set_item(Value::from("sub"), Value::from(on_sub));
-		api.set_item(Value::from("mul"), Value::from(on_mul));
+		api.set_item("add", on_add);
+		api.set_item("sub", on_sub);
+		api.set_item("mul", on_mul);
 
 		println!("returning {:?}", api);
 		return api;

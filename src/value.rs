@@ -34,10 +34,12 @@ let v = Value::error("hello");
 assert!(v.is_error_string());
 assert!(v.is_string());
 
+// allocate a new array with 4 empty elements
 let v = Value::array(4);
 assert!(v.is_array());
 assert!(v.len() == 4);
 
+// allocate a new value with map type
 let v = Value::map();
 assert!(v.is_map());
 assert!(v.len() == 0);
@@ -103,8 +105,14 @@ use sciter::Value;
 let mut v: Value = "[10, 20]".parse().unwrap();
 assert_eq!(v[0], Value::from(10));
 
+// explicit arguments:
 v.set(1, Value::from(21));
 v.set(2, Value::from(22));
+
+// implicit arguments:
+v.set(1, 21);
+v.set(2, 22);
+
 assert_eq!(v.len(), 3);
 
 assert!(v.get(0).is_int());
@@ -116,10 +124,12 @@ Map access:
 use sciter::Value;
 
 let mut v: Value = "{one: 1, two: 2}".parse().unwrap();
+assert_eq!(v["one"], 1.into());
+assert_eq!(v.get_item("one"), 1.into());
 assert_eq!(v[Value::from("one")], Value::from(1));
 
-v.set_item(Value::from("three"), Value::from(3));
-assert!(v.get_item(Value::from("one")).is_int());
+v.set_item("three", 3);
+assert!(v.get_item("one").is_int());
 ```
 
 .
@@ -251,13 +261,13 @@ impl Value {
 	}
 
 	/// Append value to the end of T_ARRAY sciter::value.
-	pub fn push(&mut self, src: Value) {
-		(_API.ValueNthElementValueSet)(self.as_ptr(), self.len() as INT, src.as_cptr());
+	pub fn push<T: Into<Value>>(&mut self, src: T) {
+		(_API.ValueNthElementValueSet)(self.as_ptr(), self.len() as INT, src.into().as_cptr());
 	}
 
 	/// Insert or set value at given `index` of T_ARRAY, T_MAP, T_FUNCTION and T_OBJECT sciter::value.
-	pub fn set(&mut self, index: usize, src: Value) {
-		(_API.ValueNthElementValueSet)(self.as_ptr(), index as INT, src.as_cptr());
+	pub fn set<T: Into<Value>>(&mut self, index: usize, src: T) {
+		(_API.ValueNthElementValueSet)(self.as_ptr(), index as INT, src.into().as_cptr());
 	}
 
 	/// Retreive value of sub-element at `index`
@@ -279,14 +289,14 @@ impl Value {
 	/// * if it is a object - sets value of property of the object;
 	/// * otherwise it converts this to map and adds key/v to it.
 	///
-	pub fn set_item(&mut self, key: Value, value: Value) {
-		(_API.ValueSetValueToKey)(self.as_ptr(), key.as_cptr(), value.as_cptr());
+	pub fn set_item<TKey: Into<Value>, TValue: Into<Value>>(&mut self, key: TKey, value: TValue) {
+		(_API.ValueSetValueToKey)(self.as_ptr(), key.into().as_cptr(), value.into().as_cptr());
 	}
 
 	/// Retrieve value of sub-element by key.
-	pub fn get_item(&self, key: Value) -> Value {
+	pub fn get_item<T: Into<Value>>(&self, key: T) -> Value {
 		let mut v = Value::new();
-		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), v.as_ptr());
+		(_API.ValueGetValueOfKey)(self.as_cptr(), key.into().as_cptr(), v.as_ptr());
 		return v;
 	}
 
@@ -583,6 +593,16 @@ impl ::std::ops::Index<Value> for Value {
 	fn index<'a>(&'a self, key: Value) -> &'a Self::Output {
 		let tmp = self.ensure_tmp_mut();
 		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), tmp.as_mut_ptr());
+		return tmp;
+	}
+}
+
+/// Get item by string key for map type.
+impl ::std::ops::Index<&'static str> for Value {
+	type Output = Value;
+	fn index<'a>(&'a self, key: &'static str) -> &'a Self::Output {
+		let tmp = self.ensure_tmp_mut();
+		(_API.ValueGetValueOfKey)(self.as_cptr(), Value::from(key).as_cptr(), tmp.as_mut_ptr());
 		return tmp;
 	}
 }

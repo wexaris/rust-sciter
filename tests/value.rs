@@ -220,6 +220,24 @@ fn to_works() {
 
 #[test]
 fn into_works() {
+
+	let v = Value::from(1);
+	assert!(v.is_int());
+
+	let v: Value = Value::from(1);
+	assert!(v.is_int());
+
+	let v: Value = 1.into();
+	assert!(v.is_int());
+
+	let mut v = Value::new();
+	v.push(false);
+	v.push(1);
+	v.push(3.0);
+	v.push("2");
+	assert!(v.is_array());
+	assert_eq!(v.len(), 4);
+
 	assert_eq!(Value::from(1).into_string(), "1");
 	assert_eq!(Value::from("hello").into_string(), r#""hello""#);
 }
@@ -240,12 +258,12 @@ fn index_works() {
 	v.push(Value::from(3));
 
 	println!("v {:?}", v);
-	assert_eq!(v.len(), 3);
-	assert_eq!(v[0], Value::from(1));
 
-	v.set(1, Value::from(17));
-	println!("v {:?}", v);
-	assert_eq!(v[1], Value::from(17));
+	assert_eq!(v.len(), 3);
+	assert_eq!(v[0], 1.into());
+
+	v.set(1, 17);
+	assert_eq!(v[1], 17.into());
 
 	let mut v: Value = r##"{"5": 5, "6": 6, seven: "seven"}"##.parse().unwrap();
 	let key = Value::from("seven");
@@ -253,6 +271,10 @@ fn index_works() {
 	println!("map {:?}", v);
 	assert_eq!(v.get_item(key), Value::from(7.0));
 
+	// simple syntax:
+	let mut v = Value::map();
+	v.set_item("seven", 7);
+	assert_eq!(v["seven"], 7.into());
 }
 
 #[test]
