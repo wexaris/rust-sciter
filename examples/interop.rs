@@ -142,5 +142,5 @@ fn main() {
 	let mut frame = sciter::Window::new();
 	frame.event_handler(handler);
 	frame.load_html(html, None);
-	frame.run_app(true);
+	frame.run_app();
 }

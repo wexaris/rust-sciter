@@ -55,5 +55,5 @@ fn main() {
 	frame.sciter_handler(handler);
 	frame.set_title("Download sample");
 	frame.load_file("http://httpbin.org/html");
-	frame.run_app(true);
+	frame.run_app();
 }

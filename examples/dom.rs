@@ -203,7 +203,7 @@ fn testing_dom() {
 	frame.event_handler(handler);
 	frame.set_title("DOM sample");
 	frame.load_file("http://httpbin.org/html");
-	frame.run_app(true);
+	frame.run_app();
 }
 
 fn main() {

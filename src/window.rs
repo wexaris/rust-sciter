@@ -142,10 +142,13 @@ impl Window {
 	}
 
 	/// Show window and run the main app message loop until window been closed.
-	pub fn run_app(&self, show_window: bool) {
-		if show_window {
-			self.base.expand(false);
-		}
+	pub fn run_app(self) {
+		self.base.expand(false);
+		self.base.run_app();
+	}
+
+	/// Run the main app message loop with already configured window.
+	pub fn run_loop(&self) {
 		self.base.run_app();
 	}
 
