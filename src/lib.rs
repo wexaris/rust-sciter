@@ -131,9 +131,9 @@ mod ext {
 mod ext {
 	// Note:
 	// Since 3.3.1.6 library name was changed to "libsciter".
-	//
+	// However CC requires `-l sciter` form.
 	use capi::scapi::{ISciterAPI};
-	#[link(name="libsciter-gtk-64", kind="dylib")]
+	#[link(name="sciter-gtk-64", kind="dylib")]
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
