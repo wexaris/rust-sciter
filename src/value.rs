@@ -210,7 +210,7 @@ impl Value {
 	/// Make sciter [angle](https://sciter.com/docs/content/script/Angle.htm) value, in radians.
 	pub fn angle(val: f64) -> Value {
 		let mut me = Value::new();
-		(_API.ValueFloatDataSet)(me.as_ptr(), val, VALUE_TYPE::T_DURATION as u32, 0);
+		(_API.ValueFloatDataSet)(me.as_ptr(), val, VALUE_TYPE::T_ANGLE as u32, 0);
 		return me;
 	}
 
