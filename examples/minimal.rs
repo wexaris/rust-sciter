@@ -1,5 +1,5 @@
 //! Minimalistic Sciter sample.
-
+#![windows_subsystem="windows"]
 extern crate sciter;
 
 fn main() {
