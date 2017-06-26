@@ -58,6 +58,11 @@ pub enum VALUE_TYPE {
 	T_BYTES,
 	T_OBJECT,
 	T_DOM_OBJECT,
+	T_RESOURCE,
+	T_RANGE,
+	T_DURATION,
+	T_ANGLE,
+	T_COLOR,
 
 	T_UNKNOWN,
 }
@@ -67,8 +72,9 @@ pub enum VALUE_TYPE {
 pub enum VALUE_UNIT_TYPE_STRING
 {
 	STRING = 0,        // string
-	ERROR  = 1,         // is an error string
+	ERROR  = 1,        // is an error string
 	SECURE = 2,        // secure string ("wiped" on destroy)
+	FILE = 0xfffe,     // file name
 	SYMBOL = 0xffff,   // symbol in tiscript sense
 }
 

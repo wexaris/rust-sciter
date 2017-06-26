@@ -193,6 +193,27 @@ impl Value {
 		return me;
 	}
 
+	/// Make sciter [color](https://sciter.com/docs/content/script/Color.htm) value, in 0xAABBGGRR form.
+	pub fn color(val: u32) -> Value {
+		let mut me = Value::new();
+		(_API.ValueIntDataSet)(me.as_ptr(), val as i32, VALUE_TYPE::T_COLOR as u32, 0);
+		return me;
+	}
+
+	/// Make sciter [duration](https://sciter.com/docs/content/script/language/Types.htm) value, in seconds.
+	pub fn duration(val: f64) -> Value {
+		let mut me = Value::new();
+		(_API.ValueFloatDataSet)(me.as_ptr(), val, VALUE_TYPE::T_DURATION as u32, 0);
+		return me;
+	}
+
+	/// Make sciter [angle](https://sciter.com/docs/content/script/Angle.htm) value, in radians.
+	pub fn angle(val: f64) -> Value {
+		let mut me = Value::new();
+		(_API.ValueFloatDataSet)(me.as_ptr(), val, VALUE_TYPE::T_DURATION as u32, 0);
+		return me;
+	}
+
 	/// Parse json string into value.
 	pub fn parse(val: &str) -> Result<Value, u32> {
 		return Value::parse_as(val, VALUE_STRING_CVT_TYPE::JSON_LITERAL);
@@ -320,6 +341,33 @@ impl Value {
 
 	/// Value to float.
 	pub fn to_float(&self) -> Option<f64> {
+		let mut val = 0 as f64;
+		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::OK => Some(val),
+			_ => None
+		}
+	}
+
+	/// Value to color.
+	pub fn to_color(&self) -> Option<u32> {
+		let mut val = 0 as i32;
+		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::OK => Some(val as u32),
+			_ => None
+		}
+	}
+
+	/// Value to duration.
+	pub fn to_duration(&self) -> Option<f64> {
+		let mut val = 0 as f64;
+		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
+			VALUE_RESULT::OK => Some(val),
+			_ => None
+		}
+	}
+
+	/// Value to angle.
+	pub fn to_angle(&self) -> Option<f64> {
 		let mut val = 0 as f64;
 		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val),
@@ -468,6 +516,18 @@ impl Value {
 	#[allow(missing_docs)]
 	pub fn is_currency(&self) -> bool {
 		self.data.t == VALUE_TYPE::T_CURRENCY
+	}
+	#[allow(missing_docs)]
+	pub fn is_color(&self) -> bool {
+		self.data.t == VALUE_TYPE::T_COLOR
+	}
+	#[allow(missing_docs)]
+	pub fn is_duration(&self) -> bool {
+		self.data.t == VALUE_TYPE::T_DURATION
+	}
+	#[allow(missing_docs)]
+	pub fn is_angle(&self) -> bool {
+		self.data.t == VALUE_TYPE::T_ANGLE
 	}
 	#[allow(missing_docs)]
 	pub fn is_map(&self) -> bool {

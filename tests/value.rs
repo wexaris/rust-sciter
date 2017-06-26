@@ -41,6 +41,40 @@ fn symbol_works() {
 	assert!(v.is_undefined());
 }
 
+fn is_color_supported() -> bool {
+	// e.g. `0x04000100`
+	sciter::version_num() > 0x04000100
+}
+
+#[test]
+fn color_works() {
+	if !is_color_supported() { return; }
+
+	// yellow R255, G255, B000
+	// RGBA form in memory, ABGR in integer.
+	let v = Value::color(0x0000FFFF);
+	assert!(v.is_color());
+	assert_eq!(v.to_color(), Some(0x0000FFFF));
+}
+
+#[test]
+fn duration_works() {
+	if !is_color_supported() { return; }
+
+	let v = Value::duration(12.5);
+	assert!(v.is_duration());
+	assert_eq!(v.to_duration(), Some(12.5));
+}
+
+#[test]
+fn angle_works() {
+	if !is_color_supported() { return; }
+
+	let v = Value::angle(1.0);
+	assert!(v.is_angle());
+	assert_eq!(v.to_angle(), Some(1.0));
+}
+
 #[test]
 fn array_works() {
 	let v = Value::array(0);
