@@ -1,5 +1,10 @@
 //! Minimalistic Sciter sample.
-#![windows_subsystem="windows"]
+
+// Uncomment to build this example with a Windows subsystem,
+// which eliminates console window. Requires Rust 1.18.
+
+// #![windows_subsystem="windows"]
+
 extern crate sciter;
 
 fn main() {
