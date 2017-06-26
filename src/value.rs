@@ -513,14 +513,40 @@ impl ::std::fmt::Display for Value {
 /// Print `Value` as json string with explicit type showed.
 impl ::std::fmt::Debug for Value {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+
 		let mut tname = format!("{:?}", self.data.t);
+
 		if self.is_undefined() || self.is_null() {
 			return f.write_str(&tname[2..].to_lowercase());
-		}
-		if self.is_string() && self.data.u != 0 {
-			let units = ["symbol", "string", "error", "secure"];
+
+		} else if self.is_string() && self.data.u != 0 {
+			// VALUE_UNIT_TYPE_STRING
+			let units = [("file", 0xfffe), ("symbol", 0xffff), ("string", 0), ("error", 1), ("secure", 2)];
+			let item = units.iter().find(|&&x| x.1 == self.data.u);
 			tname.push_str(":");
-			tname.push_str(units[(self.data.u as i16 + 1) as usize]);
+			if item.is_some() {
+				tname.push_str(item.unwrap().0);
+			} else {
+				tname.push_str(&self.data.u.to_string());
+			}
+
+		} else if self.is_object() {
+			// VALUE_UNIT_TYPE_OBJECT
+			let units = ["array", "object", "class", "native", "function", "error"];
+			let u = self.data.u as usize;
+			tname.push_str(":");
+			if u < units.len() {
+				tname.push_str(units[u]);
+			} else {
+				tname.push_str(&u.to_string());
+			}
+
+		} else if self.data.u != 0 {
+			// VALUE_UNIT_TYPE
+			// redundant? like "length:7:12px" instead of "length:12px" (7 == `UT_PX`).
+
+			// tname.push_str(":");
+			// tname.push_str(&self.data.u.to_string());
 		}
 		try!(f.write_str(&tname[2..].to_lowercase()));
 		try!(f.write_str(":"));

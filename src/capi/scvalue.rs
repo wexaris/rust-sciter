@@ -58,6 +58,8 @@ pub enum VALUE_TYPE {
 	T_BYTES,
 	T_OBJECT,
 	T_DOM_OBJECT,
+
+	T_UNKNOWN,
 }
 
 #[repr(C)]
