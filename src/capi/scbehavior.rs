@@ -154,32 +154,32 @@ pub enum BEHAVIOR_EVENTS
 	/// click on button
 	BUTTON_CLICK = 0,
 	/// mouse down or key down in button
-	BUTTON_PRESS = 1,
+	BUTTON_PRESS,
 	/// checkbox/radio/slider changed its state/value
-	BUTTON_STATE_CHANGED = 2,
+	BUTTON_STATE_CHANGED,
 	/// before text change
-	EDIT_VALUE_CHANGING = 3,
+	EDIT_VALUE_CHANGING,
 	/// after text change
-	EDIT_VALUE_CHANGED = 4,
+	EDIT_VALUE_CHANGED,
 	/// selection in `<select>` changed
-	SELECT_SELECTION_CHANGED = 5,
+	SELECT_SELECTION_CHANGED,
 	/// node in select expanded/collapsed, heTarget is the node
-	SELECT_STATE_CHANGED = 6,
+	SELECT_STATE_CHANGED,
 
 	/// request to show popup just received,
 	///     here DOM of popup element can be modifed.
-	POPUP_REQUEST   = 7,
+	POPUP_REQUEST,
 
 	/// popup element has been measured and ready to be shown on screen,
 	///     here you can use functions like `ScrollToView`.
-	POPUP_READY     = 8,
+	POPUP_READY,
 
 	/// popup element is closed,
 	///     here DOM of popup element can be modifed again - e.g. some items can be removed to free memory.
-	POPUP_DISMISSED = 9,
+	POPUP_DISMISSED,
 
 	/// menu item activated by mouse hover or by keyboard,
-	MENU_ITEM_ACTIVE = 0xA,
+	MENU_ITEM_ACTIVE,
 
 	/// menu item click,
 	///   BEHAVIOR_EVENT_PARAMS structure layout
@@ -187,7 +187,7 @@ pub enum BEHAVIOR_EVENTS
 	///   BEHAVIOR_EVENT_PARAMS.heTarget - owner(anchor) of the menu
 	///   BEHAVIOR_EVENT_PARAMS.he - the menu item, presumably `<li>` element
 	///   BEHAVIOR_EVENT_PARAMS.reason - BY_MOUSE_CLICK | BY_KEY_CLICK
-	MENU_ITEM_CLICK = 0xB,
+	MENU_ITEM_CLICK,
 
 
 
@@ -201,12 +201,12 @@ pub enum BEHAVIOR_EVENTS
 
 
 	/// broadcast notification, sent to all elements of some container being shown or hidden
-	VISIUAL_STATUS_CHANGED = 0x11,
+	VISIUAL_STATUS_CHANGED,
 	/// broadcast notification, sent to all elements of some container that got new value of `:disabled` state
-	DISABLED_STATUS_CHANGED = 0x12,
+	DISABLED_STATUS_CHANGED,
 
 	/// popup is about to be closed
-	POPUP_DISMISSING = 0x13,
+	POPUP_DISMISSING,
 
 	/// content has been changed, is posted to the element that gets content changed,  reason is combination of `CONTENT_CHANGE_BITS`.
 	/// `target == NULL` means the window got new document and this event is dispatched only to the window.
@@ -231,18 +231,9 @@ pub enum BEHAVIOR_EVENTS
 	/// used for example by accesskeys behaviors to send activation request, e.g. tab on `behavior:tabs`.
 	ACTIVATE_CHILD,
 
-
-	/// request to virtual grid to initialize its view
-	INIT_DATA_VIEW,
-
-	/// request from virtual grid to data source behavior to fill data in the table
-	/// parameters passed throug `DATA_ROWS_PARAMS` structure.
-	ROWS_DATA_REQUEST,
-
-
 	/// ui state changed, observers shall update their visual states.
 	/// is sent for example by `behavior:richtext` when caret position/selection has changed.
-	UI_STATE_CHANGED,
+	UI_STATE_CHANGED = 0x95,
 
 
 	/// `behavior:form` detected submission event. `BEHAVIOR_EVENT_PARAMS::data` field contains data to be posted.
@@ -280,18 +271,18 @@ pub enum BEHAVIOR_EVENTS
 	/// document created, script namespace initialized. `target` -> the document
 	DOCUMENT_CREATED  = 0xC0,
 	/// document is about to be closed, to cancel closing do: `evt.data = sciter::value("cancel")`;
-	DOCUMENT_CLOSE_REQUEST = 0xC1,
+	DOCUMENT_CLOSE_REQUEST,
 	/// last notification before document removal from the DOM
-	DOCUMENT_CLOSE    = 0xC2,
+	DOCUMENT_CLOSE,
 	/// document has got DOM structure, styles and behaviors of DOM elements. Script loading run is complete at this moment.
-	DOCUMENT_READY    = 0xC3,
+	DOCUMENT_READY,
 
 	/// `<video>` "ready" notification
 	VIDEO_INITIALIZED = 0xD1,
 	/// `<video>` playback started notification
-	VIDEO_STARTED     = 0xD2,
+	VIDEO_STARTED,
 	/// `<video>` playback stoped/paused notification
-	VIDEO_STOPPED     = 0xD3,
+	VIDEO_STOPPED,
 	/// `<video>` request for frame source binding,
 	///   If you want to provide your own video frames source for the given target `<video>` element do the following:
 	///
@@ -302,15 +293,15 @@ pub enum BEHAVIOR_EVENTS
 	///   4. call `sciter::video_destination::start_streaming(...)` providing needed parameters
 	///      call `sciter::video_destination::render_frame(...)` as soon as they are available
 	///      call `sciter::video_destination::stop_streaming()` to stop the rendering (a.k.a. end of movie reached)
-	VIDEO_BIND_RQ     = 0xD4,
+	VIDEO_BIND_RQ,
 
 
 	/// `behavior:pager` starts pagination
 	PAGINATION_STARTS  = 0xE0,
 	/// `behavior:pager` paginated page no, reason -> page no
-	PAGINATION_PAGE    = 0xE1,
+	PAGINATION_PAGE,
 	/// `behavior:pager` end pagination, reason -> total pages
-	PAGINATION_ENDS    = 0xE2,
+	PAGINATION_ENDS,
 
 	/// all custom event codes shall be greater than this number. All codes below this will be used
 	/// solely by application - Sciter will not intrepret it and will do just dispatching.
