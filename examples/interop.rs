@@ -114,8 +114,8 @@ impl sciter::EventHandler for EventHandler {
 
 	fn on_script_call(&mut self, root: HELEMENT, name: &str, argv: &[Value]) -> Option<Value> {
 
-		let args = argv.iter().map(|ref x| format!("{}", &x)).collect::<Vec<String>>().join(", ");
-		println!("script->native: {}({}), root {:?}", name, args, root);
+		let args = argv.iter().map(|ref x| format!("{:?}", &x)).collect::<Vec<String>>().join(", ");
+		println!("script->native: {}({}), root {:?}", name, args, Element::from(root));
 
 		let handled = self.dispatch_script_call(root, name, argv);
 		if handled.is_some() {

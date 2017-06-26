@@ -3,7 +3,8 @@
 extern crate sciter;
 
 fn main() {
-	println!("calling SciterAPI");
+	let arch = if cfg!(target_arch = "x86_64") { "x64"} else { "x86" };
+	println!("calling SciterAPI {}", arch);
 	let scapi = sciter::SciterAPI();
 
 	println!("getting abi version");
