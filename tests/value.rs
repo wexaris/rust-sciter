@@ -152,6 +152,27 @@ fn from_str_seq_works() {
 }
 
 #[test]
+fn from_function_works() {
+	// create from lambda
+	let v = Value::from(|args: &[Value]| Value::from(args.len() as i32));
+	assert!(v.is_native_function());
+
+	let args = [Value::from(17), Value::from(42)];
+	let r = v.call(None, &args, None);
+
+	assert!(r.is_ok());
+	assert_eq!(r.unwrap(), Value::from(args.len() as i32));
+
+	// create from function
+	fn inner_fn(args: &[Value]) -> Value {
+		Value::array(args.len())
+	}
+
+	let v = Value::from(inner_fn);
+	assert!(v.is_native_function());
+}
+
+#[test]
 fn parse_works() {
 	let items = ["", "null", "1", "\"2\"", "2.0", "true", "[3, 4]", r##"{"5": 5, "6": 6, seven: "seven"}"##];
 	for item in items.iter() {
