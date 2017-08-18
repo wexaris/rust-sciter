@@ -349,3 +349,13 @@ fn debug_works() {
 
 	// assert!(false);
 }
+
+#[test]
+fn thread_works() {
+	let mut v = Value::map();
+	let tid = std::thread::spawn(move || {
+		v.set_item("seven", 7);
+		assert_eq!(v.len(), 1);
+	});
+	tid.join().unwrap();
+}

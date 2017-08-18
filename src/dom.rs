@@ -217,7 +217,10 @@ pub struct Element {
 	he: HELEMENT,
 }
 
+/// `sciter::Element` can be transferred across thread boundaries.
 unsafe impl Send for Element {}
+
+/// It is safe to share `sciter::Element` between threads - underlaying API is thread-safe.
 unsafe impl Sync for Element {}
 
 impl Element {

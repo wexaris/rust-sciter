@@ -144,12 +144,17 @@ pub use capi::scvalue::{VALUE_RESULT, VALUE_STRING_CVT_TYPE, VALUE_TYPE};
 
 // TODO: map keys/values/items
 
-/// sciter::value wrapper. See the module-level documentation.
+/// `sciter::value` wrapper.
+///
+/// See the [module-level](index.html) documentation.
 pub struct Value
 {
 	data: VALUE,
 	tmp: * mut Value,
 }
+
+/// `sciter::Value` can be transferred across thread boundaries.
+unsafe impl Send for Value {}
 
 impl Value {
 
