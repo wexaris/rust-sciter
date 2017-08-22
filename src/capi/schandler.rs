@@ -19,7 +19,6 @@ pub struct NativeHandler {
 
 impl Drop for NativeHandler {
 	fn drop(&mut self) {
-		// println!("Native::drop(handler {:?}, dtor {:?})", self.handler, self.dtor);
 		if !self.handler.is_null() {
 			(self.dtor)(self.handler);
 		}
@@ -46,16 +45,7 @@ impl NativeHandler {
 		ptr as *const NativeHandler
 	}
 
-	pub fn from_mut_ptr(ptr: LPVOID) -> * const NativeHandler {
-		ptr as *const NativeHandler
-	}
-
-	pub fn from_mut_ptr2<'a>(ptr: LPVOID) -> &'a NativeHandler {
-		let obj = ptr as *const NativeHandler;
-		unsafe { &*obj}
-	}
-
-	pub fn from_mut_ptr3<'a>(ptr: LPVOID) -> &'a mut NativeHandler {
+	pub fn from_mut_ptr<'a>(ptr: LPVOID) -> &'a mut NativeHandler {
 		let obj = ptr as *mut NativeHandler;
 		unsafe { &mut *obj}
 	}
@@ -87,12 +77,10 @@ impl NativeHandler {
 	fn drop_it<T>(param: Opaque) {
 		// reconstruct pointer to Box
 		let pobj = param as *mut T;
-		if pobj.is_null() {
-			return;
+		if !pobj.is_null() {
+			// and drop it
+			unsafe { Box::from_raw(pobj) };
 		}
-
-		// and drop it
-		unsafe { Box::from_raw(pobj) };
 	}
 }
 

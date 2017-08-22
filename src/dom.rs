@@ -750,15 +750,16 @@ impl Element {
 
 	/// Call specified function for every element in a DOM that meets specified CSS selectors.
 	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Result<Vec<Element>> {
+		use ::capi::schandler::NativeHandler;
 		extern "system" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
-			let handler = ::capi::schandler::NativeHandler::from_mut_ptr3(param);
+			let handler = NativeHandler::from_mut_ptr(param);
 			let mut obj = handler.as_mut::<T>();
 			let e = Element::from(he);
 			let stop = obj.on_element(e);
 			return stop as BOOL;
 		}
 		let (s,_) = s2u!(selector);
-		let handler = ::capi::schandler::NativeHandler::from(callback);
+		let handler = NativeHandler::from(callback);
 		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
 		if ok != SCDOM_RESULT::OK {
 			return Err(ok);
