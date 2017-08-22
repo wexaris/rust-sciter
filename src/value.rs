@@ -269,6 +269,7 @@ impl Value {
 	}
 
 	/// Convert T_OBJECT value type to JSON T_MAP or T_ARRAY.
+	/// Also must be used if you need to pass values between different threads.
 	pub fn isolate(&mut self) {
 		(_API.ValueIsolate)(self.as_ptr());
 	}
