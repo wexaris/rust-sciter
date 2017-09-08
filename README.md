@@ -79,7 +79,7 @@ fn main() {
 }
 ```
 
-It looks similar like this:
+It looks similar to this:
 
 ![Minimal sciter sample](http://i.imgur.com/ojcM5JJ.png)
 
