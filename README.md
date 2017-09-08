@@ -27,8 +27,8 @@ Physically Sciter is a mono library which contains:
 * [HTML and CSS](http://sciter.com/developers/for-web-programmers/) rendering engine based on the H-SMILE core used in [HTMLayout](http://www.terrainformatica.com/htmlayout/main.whtm),
 * JavaScript alike [Scripting engine](http://sciter.com/developers/sciter-docs/) – core of [TIScript](http://sciter.com/developers/for-web-programmers/tiscript-vs-javascript/) which by itself is based on [c-smile](http://c-smile.sourceforge.net/) engine,
 * Persistent [Database](http://sciter.com/docs/content/script/Storage.htm) (a.k.a. [JSON DB](http://terrainformatica.com/2006/10/what-the-hell-is-that-json-db/)) based on excellent DB products of [Konstantin Knizhnik](http://garret.ru/databases.html).
-* [Graphics](http://sciter.com/docs/content/sciter/Graphics.htm) module using excellent AGG library of Maxim Shemanarev at [www.antigrain.com](http://antigrain.com).
-* Network communication module, it relies on [Libcurl](http://curl.haxx.se/), the Great.
+* [Graphics](http://sciter.com/docs/content/sciter/Graphics.htm) module that uses native graphics primitives provided by each supported platform: Direct2D on Windows 7 and above, GDI+ on Windows XP, CoreGraphics on MacOS, Cairo on Linux/GTK. Yet there is an option to use built-in [Skia/OpenGL](https://skia.org/) backend on each platform. 
+* Network communication module, it relies on platform HTTP client primitives and/or [Libcurl](http://curl.haxx.se/).
 
 
 Internally it contains the following modules:
