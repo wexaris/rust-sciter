@@ -52,7 +52,7 @@ Sciter supports all standard elements defined in HTML5 specification [with some 
 
 [Sciter SDK](http://sciter.com/download/) comes with demo "browser" with builtin DOM inspector, script debugger and documentation browser:
 
-![Sciter tools](http://sciter.com/images/sciter-tools.png)
+![Sciter tools](https://sciter.com/wp-content/uploads/2015/10/dom-tree-in-inspector-640x438.png)
 
 Check <http://sciter.com> website and its [documentation resources](http://sciter.com/developers/) for engine principles, architecture and more.
 
