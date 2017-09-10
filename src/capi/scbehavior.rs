@@ -276,6 +276,9 @@ pub enum BEHAVIOR_EVENTS
 	DOCUMENT_CLOSE,
 	/// document has got DOM structure, styles and behaviors of DOM elements. Script loading run is complete at this moment.
 	DOCUMENT_READY,
+	/// document just finished parsing - has got DOM structure. This event is generated before the `DOCUMENT_READY`.
+	/// Since 4.0.3.
+	DOCUMENT_PARSED   = 0xC4,
 
 	/// `<video>` "ready" notification
 	VIDEO_INITIALIZED = 0xD1,
