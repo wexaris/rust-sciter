@@ -52,8 +52,8 @@
       	return "its working!";
       }
 
-      function raise_error(arg) {
-      	throw new Error(String.$(Unexpected type of input {typeof arg}.));
+      function raise_error(arg1, arg2, arg3) {
+      	throw new Error(String.$(Unexpected type of input: {typeof arg1}, {typeof arg2}, {typeof arg3}.));
       }
 
       self.timer(2000, function() {

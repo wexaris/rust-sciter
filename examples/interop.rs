@@ -36,19 +36,19 @@ impl EventHandler {
 		}
 		let obj = answer.unwrap();
 		let answer = obj.call(None, &make_args!("argument"), None);
-		println!(" answer {:?}", answer);
+		println!(" answer is {:?}", answer);
 
 		println!("eval 'hello'");
 		let answer = root.eval_script(r#"hello("42");"#);
-		println!(" answer {:?}", answer);
+		println!(" answer is {:?}", answer);
 
-		println!("calling 'raise_error'");
+		println!("calling 'raise_error'; the following exceptions are expected then:");
 		let answer = root.call_function("raise_error", &make_args!(17, "42", false));
-		println!(" answer {:?}", answer);
+		println!(" answer is {:?}", answer);
 
 		println!("calling unexisting function");
 		let answer = root.call_function("raise_error2", &[]);
-		println!(" answer {:?}", answer);
+		println!(" answer is {:?}", answer);
 
 		Some(Value::from(true))
 	}
