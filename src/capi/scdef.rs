@@ -72,14 +72,14 @@ pub enum GFX_LAYER
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
-/// Various sciter engine options.
+/// Various sciter engine options (global or per-window).
 pub enum SCITER_RT_OPTIONS
 {
 	/// value:TRUE - enable, value:FALSE - disable, enabled by default.
   SCITER_SMOOTH_SCROLL = 1,
-  /// value: milliseconds, connection timeout of http client.
+  /// global; value: milliseconds, connection timeout of http client.
   SCITER_CONNECTION_TIMEOUT = 2,
-  /// value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently.
+  /// global; value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently.
   SCITER_HTTPS_ERROR = 3,
   /// value: 0 - system default, 1 - no smoothing, 2 - std smoothing, 3 - clear type.
   SCITER_FONT_SMOOTHING = 4,
@@ -87,15 +87,15 @@ pub enum SCITER_RT_OPTIONS
 	/// 0 - normal drawing,
 	/// 1 - window has transparent background after calls DwmExtendFrameIntoClientArea() or DwmEnableBlurBehindWindow().
   SCITER_TRANSPARENT_WINDOW = 6,
-  /// value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
+  /// global; value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
   SCITER_SET_GPU_BLACKLIST  = 7,
-  /// value - combination of [SCRIPT_RUNTIME_FEATURES](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
+  /// global or per-window; value - combination of [SCRIPT_RUNTIME_FEATURES](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
   SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8,
-  /// value - [GFX_LAYER](enum.GFX_LAYER.html).
+  /// global (must be called before any window creation); value - [GFX_LAYER](enum.GFX_LAYER.html).
   SCITER_SET_GFX_LAYER = 9,
-  /// value - TRUE/FALSE
+  /// global or per-window; value - TRUE/FALSE
   SCITER_SET_DEBUG_MODE = 10,
-  /// value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
+  /// global; value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
   /// That UX theme is not using OS primitives for rendering input elements.
   /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
   SCITER_SET_UX_THEMING = 11,

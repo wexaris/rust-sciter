@@ -67,6 +67,7 @@ and module-level sections for the guides about:
 
 mod capi;
 pub use capi::scdom::{HELEMENT};
+pub use capi::scdef::{SCITER_RT_OPTIONS, GFX_LAYER};
 
 /* Rust interface */
 mod platform;
@@ -175,4 +176,10 @@ pub fn version() -> String {
 	let num = [v1 >> 16, v1 & 0xFFFF, v2 >> 16, v2 & 0xFFFF];
 	let version = format!("{}.{}.{}.{}", num[0], num[1], num[2], num[3]);
 	return version;
+}
+
+/// Set various sciter engine global options, see the `SCITER_RT_OPTIONS`.
+pub fn set_option(option: SCITER_RT_OPTIONS, value: usize) -> std::result::Result<(), ()> {
+	let ok = (_API.SciterSetOption)(std::ptr::null_mut(), option, value);
+	if ok != 0 { Ok(()) } else { Err(()) }
 }
