@@ -178,7 +178,7 @@ pub fn version() -> String {
 	return version;
 }
 
-/// Set various sciter engine global options, see the `SCITER_RT_OPTIONS`.
+/// Set various sciter engine global options, see the [`SCITER_RT_OPTIONS`](enum.SCITER_RT_OPTIONS.html).
 pub fn set_option(option: SCITER_RT_OPTIONS, value: usize) -> std::result::Result<(), ()> {
 	let ok = (_API.SciterSetOption)(std::ptr::null_mut(), option, value);
 	if ok != 0 { Ok(()) } else { Err(()) }

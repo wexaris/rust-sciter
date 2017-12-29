@@ -42,7 +42,7 @@ macro_rules! ok_or {
 }
 
 
-/** Sciter notification handler for `Window.sciter_handler()`.
+/** Sciter notification handler for [`Window.sciter_handler()`](../window/struct.Window.html#method.sciter_handler).
 
 ## Resource handling and custom resource loader
 
@@ -128,7 +128,8 @@ impl Host {
 
 	/// Attach Sciter host to existing window.
 	///
-	/// Usually Sciter window created by `sciter::Window::create()`, but you can attach Sciter to the existing native window.
+	/// Usually Sciter window created by a [`sciter::Window::create()`](../window/struct.Window.html#method.create),
+	/// but you can attach Sciter to the existing native window.
 	/// In this case you need to mix-in window events processing with `SciterProcND`.
 	/// Sciter engine will be initialized either on `WM_CREATE` or `WM_INITDIALOG` response
 	/// or by calling `SciterCreateOnDirectXWindow`.
@@ -229,7 +230,7 @@ impl Host {
 		ok_or!(ok, rv, rv)
 	}
 
-	/// Set various sciter engine options, see the `SCITER_RT_OPTIONS`.
+	/// Set various sciter engine options, see the [`SCITER_RT_OPTIONS`](../enum.SCITER_RT_OPTIONS.html).
 	pub fn set_option(&self, option: SCITER_RT_OPTIONS, value: usize) -> Result<()> {
 		let ok = (_API.SciterSetOption)(self.hwnd.get(), option, value as UINT_PTR);
 		ok_or!(ok)
