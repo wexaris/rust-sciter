@@ -5,8 +5,8 @@ To create instance of Sciter you will need either to create new Sciter window or
 Handle of the Sciter engine is defined as `HWINDOW` type which is:
 
 * `HWND` handle on Microsoft Windows.
-* `NSView*` – pointer to [NSView](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSView_Class/) instance that is a contentView of Sciter window on OS X.
-* `GtkWidget*` – pointer to [GtkWidget](https://developer.gnome.org/gtk3/stable/GtkWidget.html) instance
+* `NSView*` – pointer to [`NSView`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSView_Class/) instance that is a contentView of Sciter window on OS X.
+* `GtkWidget*` – pointer to [`GtkWidget`](https://developer.gnome.org/gtk3/stable/GtkWidget.html) instance
 that is a root widget of Sciter window on Linux/GTK.
 
 ## Creation of new window
@@ -84,7 +84,7 @@ impl Window {
 
 	/// Obtain reference to `Host` which allows you to control sciter engine and windows.
 	pub fn get_host(&self) -> Rc<Host> {
-		self.host.clone()
+		Rc::clone(&self.host)
 	}
 
 	/// Set callback for sciter engine events.

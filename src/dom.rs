@@ -25,7 +25,7 @@ assert_eq(root.get_tag(), "html");
 ```
 
 By having root element reference we are able to access any other element in the tree
-using various access and search functions like SciterGetNthChild, SciterSelectElements, …
+using various access and search functions like `SciterGetNthChild`, `SciterSelectElements`, …
 All of them are wrapped into methods of `dom::Element`.
 Here is how you would get reference to first `<div>` element with class "sidebar" using CSS selectors:
 
@@ -362,7 +362,7 @@ impl Element {
 
 	/// Set inner or outer html of the element.
 	pub fn set_html(&mut self, html: &[u8], how: Option<SET_ELEMENT_HTML>) -> Result<()> {
-		if html.len() == 0 {
+		if html.is_empty() {
 			return self.clear();
 		}
 		let ok = (_API.SciterSetElementHtml)(self.he, html.as_ptr(), html.len() as UINT, how.unwrap_or(SET_ELEMENT_HTML::SIH_REPLACE_CONTENT) as UINT);
@@ -495,7 +495,7 @@ impl Element {
 		let ok = (_API.SciterGetAttributeByNameCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
 		match ok {
 			SCDOM_RESULT::OK => Some(s),
-			SCDOM_RESULT::OK_NOT_HANDLED => None,
+			// SCDOM_RESULT::OK_NOT_HANDLED => None,
 			_ => None,
 		}
 	}
@@ -669,6 +669,11 @@ impl Element {
 		return self.children_count();
 	}
 
+	/// Returns `true` is `self` has zero elements.
+	pub fn is_empty(&self) -> bool {
+		self.len() == 0
+	}
+
 	/// Clear content of the element.
 	pub fn clear(&mut self) -> Result<()> {
 		let ok = (_API.SciterSetElementText)(self.he, ::std::ptr::null(), 0);
@@ -790,7 +795,7 @@ impl Element {
 	pub fn find_all(&self, selector: &str) -> Result<Option<Vec<Element>>> {
 		let cb = FindAllElements::default();
 		let all = self.select_elements(selector, cb);
-		all.map(|x| Some(x))
+		all.map(Some)
 	}
 
 	//\name Scroll methods:

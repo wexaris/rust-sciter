@@ -1,4 +1,4 @@
-/*! Rust interface to [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.h).
+/*! Rust interface to the [`sciter::value`](https://github.com/c-smile/sciter-sdk/blob/master/include/value.h).
 
 Sciter `Value` holds superset of JSON objects.
 
@@ -224,7 +224,7 @@ impl Value {
 		return Value::parse_as(val, VALUE_STRING_CVT_TYPE::JSON_LITERAL);
 	}
 
-	/// Parse json string into value.
+	/// Parse json string into value. Returns number of chars left unparsed in case of error.
 	pub fn parse_as(val: &str, how: VALUE_STRING_CVT_TYPE) -> Result<Value, u32> {
 		let mut me = Value::new();
 		let (s,n) = s2w!(val);
@@ -329,7 +329,7 @@ impl Value {
 
 	/// Value to integer.
 	pub fn to_int(&self) -> Option<i32> {
-		let mut val = 0 as i32;
+		let mut val = 0i32;
 		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val),
 			_ => None
@@ -338,7 +338,7 @@ impl Value {
 
 	/// Value to bool.
 	pub fn to_bool(&self) -> Option<bool> {
-		let mut val = 0 as i32;
+		let mut val = 0i32;
 		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val != 0),
 			_ => None
@@ -347,7 +347,7 @@ impl Value {
 
 	/// Value to float.
 	pub fn to_float(&self) -> Option<f64> {
-		let mut val = 0 as f64;
+		let mut val = 0f64;
 		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val),
 			_ => None
@@ -356,7 +356,7 @@ impl Value {
 
 	/// Value to color.
 	pub fn to_color(&self) -> Option<u32> {
-		let mut val = 0 as i32;
+		let mut val = 0i32;
 		match (_API.ValueIntData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val as u32),
 			_ => None
@@ -365,7 +365,7 @@ impl Value {
 
 	/// Value to duration.
 	pub fn to_duration(&self) -> Option<f64> {
-		let mut val = 0 as f64;
+		let mut val = 0f64;
 		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val),
 			_ => None
@@ -374,7 +374,7 @@ impl Value {
 
 	/// Value to angle.
 	pub fn to_angle(&self) -> Option<f64> {
-		let mut val = 0 as f64;
+		let mut val = 0f64;
 		match (_API.ValueFloatData)(self.as_cptr(), &mut val) {
 			VALUE_RESULT::OK => Some(val),
 			_ => None
@@ -392,7 +392,7 @@ impl Value {
 	}
 
 	/// Value to json string (converted in-place). _Subject to change._
-	pub fn into_string(&mut self) -> String {
+	pub fn into_string(mut self) -> String {
 		(_API.ValueToString)(self.as_ptr(), VALUE_STRING_CVT_TYPE::JSON_LITERAL);
 		return self.as_string().unwrap();
 	}
@@ -425,7 +425,7 @@ impl Value {
 		let mut rv = Value::new();
 		let argv = Value::pack_args(args);
 		let (name,_) = s2w!(name.unwrap_or(""));
-		let ok = (_API.ValueInvoke)(self.as_cptr(), this.unwrap_or(Value::default()).as_ptr(),
+		let ok = (_API.ValueInvoke)(self.as_cptr(), this.unwrap_or_default().as_ptr(),
 			argv.len() as UINT, argv.as_ptr(), rv.as_ptr(), name.as_ptr());
 		match ok {
 			VALUE_RESULT::OK => Ok(rv),
@@ -450,13 +450,14 @@ impl Value {
 	}
 
 	#[doc(hidden)]
-	pub fn unpack_from(args: * const VALUE, count: UINT) -> Vec<Value> {
+	pub unsafe fn unpack_from(args: * const VALUE, count: UINT) -> Vec<Value> {
 		let argc = count as usize;
-		let args = unsafe { ::std::slice::from_raw_parts(args, argc) };
 		let mut argv: Vec<Value> = Vec::with_capacity(argc);
-		for i in 0..argc {
+		assert!(argc == 0 || !args.is_null());
+		let args = ::std::slice::from_raw_parts(args, argc);
+		for arg in args {
 			let mut v = Value::new();
-			(_API.ValueCopy)(v.as_ptr(), &args[i]);
+			(_API.ValueCopy)(v.as_ptr(), arg);
 			argv.push(v);
 		}
 		return argv;
@@ -478,6 +479,11 @@ impl Value {
 	}
 
 	// TODO: keys, values, items
+
+	/// Returns `true` is `self` is `undefined` or has zero elements.
+	pub fn is_empty(&self) -> bool {
+		self.is_undefined() || self.len() == 0
+	}
 
 	#[allow(missing_docs)]
 	pub fn is_undefined(&self) -> bool {
@@ -570,7 +576,7 @@ impl Value {
 /// Print `Value` as json string
 impl ::std::fmt::Display for Value {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-		let mut copy = self.clone();
+		let copy = self.clone();
 		let re = copy.into_string();
 		f.write_str(&re)
 	}
@@ -653,7 +659,7 @@ impl ::std::cmp::PartialEq for Value {
 	fn eq(&self, other: &Self) -> bool {
 		match (_API.ValueCompare)(self.as_cptr(), other.as_cptr()) {
 			VALUE_RESULT::OK_TRUE => true,
-			VALUE_RESULT::OK => false,
+			// VALUE_RESULT::OK => false,
 			_ => false
 		}
 	}
@@ -662,7 +668,7 @@ impl ::std::cmp::PartialEq for Value {
 /// Get item by index for array type.
 impl ::std::ops::Index<usize> for Value {
 	type Output = Value;
-	fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
+	fn index(&self, index: usize) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
 		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_mut_ptr());
 		return tmp;
@@ -672,7 +678,7 @@ impl ::std::ops::Index<usize> for Value {
 /// Set item by index for array type.
 #[cfg(notworking)]
 impl ::std::ops::IndexMut<usize> for Value {
-	fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut Value {
+	fn index_mut(&mut self, index: usize) -> &mut Value {
 		let tmp = self.ensure_tmp_mut();
 		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_ptr());
 		return tmp;
@@ -682,7 +688,7 @@ impl ::std::ops::IndexMut<usize> for Value {
 /// Get item by key for map type.
 impl ::std::ops::Index<Value> for Value {
 	type Output = Value;
-	fn index<'a>(&'a self, key: Value) -> &'a Self::Output {
+	fn index(&self, key: Value) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
 		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), tmp.as_mut_ptr());
 		return tmp;
@@ -692,7 +698,7 @@ impl ::std::ops::Index<Value> for Value {
 /// Get item by string key for map type.
 impl ::std::ops::Index<&'static str> for Value {
 	type Output = Value;
-	fn index<'a>(&'a self, key: &'static str) -> &'a Self::Output {
+	fn index(&self, key: &'static str) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
 		(_API.ValueGetValueOfKey)(self.as_cptr(), Value::from(key).as_cptr(), tmp.as_mut_ptr());
 		return tmp;
@@ -844,7 +850,7 @@ extern "C" fn _functor_invoke<F>(tag: LPVOID, argc: UINT, argv: *const VALUE, re
 	let ptr = tag as *mut F;
 	let me = unsafe { &mut *ptr };
 	let retval = unsafe { &mut *retval };
-	let args = Value::unpack_from(argv, argc);
+	let args = unsafe { Value::unpack_from(argv, argc) };
 	let rv = me(&args);
 	rv.pack_to(retval)
 }

@@ -90,7 +90,7 @@ macro_rules! MAKE_HANDLE {
 	};
 }
 
-/// Dispatch script calls to native code. Used in [dom::EventHandler](dom/event/trait.EventHandler.html) implementations.
+/// Dispatch script calls to native code. Used in [`dom::EventHandler`](dom/event/trait.EventHandler.html) implementations.
 ///
 /// This macro generates new function which dispatchs incoming script call to native function
 /// with arguments unpacking and type checking.

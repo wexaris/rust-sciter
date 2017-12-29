@@ -19,7 +19,7 @@ pub enum SCITER_X_MSG_CODE
 }
 
 #[repr(C)]
-/// Common header of message structures passed to SciterProcX.
+/// Common header of message structures passed to `SciterProcX`.
 pub struct SCITER_X_MSG
 {
 	pub msg: SCITER_X_MSG_CODE,
@@ -53,7 +53,7 @@ pub struct SCITER_X_MSG_SIZE
 #[repr(C)]
 #[derive(Copy, Clone)]
 #[derive(Debug, PartialOrd, PartialEq)]
-/// SCITER_X_MSG_PAINT target identifier.
+/// `SCITER_X_MSG_PAINT` target identifier.
 pub enum SCITER_PAINT_TARGET_TYPE
 {
 	/** default rendering target - window surface */

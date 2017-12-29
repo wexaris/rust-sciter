@@ -28,29 +28,25 @@ pub extern "system" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, 
 
 	// custom initialization
 	let evt: EVENT_GROUPS = unsafe { ::std::mem::transmute(evtg) };
-	match evt {
-		EVENT_GROUPS::HANDLE_INITIALIZATION => {
-			let me = &mut tuple.handler;
-			let scnm = params as *const INITIALIZATION_EVENTS;
-			let cmd = unsafe { *scnm };
-			match cmd {
-				INITIALIZATION_EVENTS::BEHAVIOR_DETACH => {
-					me.detached(hroot);
+	if evt == EVENT_GROUPS::HANDLE_INITIALIZATION {
+		let me = &mut tuple.handler;
+		let scnm = params as *const INITIALIZATION_EVENTS;
+		let cmd = unsafe { *scnm };
+		match cmd {
+			INITIALIZATION_EVENTS::BEHAVIOR_DETACH => {
+				me.detached(hroot);
 
-					// here we dropping our tuple
-					let ptr = unsafe { Box::from_raw(boxed) };
-					drop(ptr);
-					return true as BOOL;
-				},
+				// here we dropping our tuple
+				let ptr = unsafe { Box::from_raw(boxed) };
+				drop(ptr);
+				return true as BOOL;
+			},
 
-				INITIALIZATION_EVENTS::BEHAVIOR_ATTACH => {
-					me.attached(hroot);
-				},
-			};
-			return true as BOOL;
-		},
-
-		_ => (),
+			INITIALIZATION_EVENTS::BEHAVIOR_ATTACH => {
+				me.attached(hroot);
+			},
+		};
+		return true as BOOL;
 	};
 
 	return ::eventhandler::_event_handler_proc::<T>(&mut tuple.handler as *mut T as LPVOID, hroot, evtg, params);
@@ -147,7 +143,7 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 			let scnm = params as *mut SCRIPTING_METHOD_PARAMS;
 			let nm = unsafe { &mut *scnm };
 			let name = u2s!(nm.name);
-			let argv = Value::unpack_from(nm.argv, nm.argc);
+			let argv = unsafe { Value::unpack_from(nm.argv, nm.argc) };
 			let rv = me.on_script_call(he, &name, &argv);
 			let handled = if let Some(v) = rv {
 				v.pack_to(&mut nm.result);

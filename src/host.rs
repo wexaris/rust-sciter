@@ -83,7 +83,7 @@ pub trait HostHandler {
 
 	/// This output function will be used for reprting problems found while loading html and css documents.
 	fn on_debug_output(&mut self, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, message: &str) {
-		if message.len() > 0 {
+		if !message.is_empty() {
 			println!("{:?}:{:?}: {}", severity, subsystem, message);
 		}
 	}
@@ -108,10 +108,10 @@ pub trait HostHandler {
 }
 
 
-/// Default HostHandler implementation
+/// Default `HostHandler` implementation
 struct DefaultHandler;
 
-/// Default HostHandler implementation
+/// Default `HostHandler` implementation
 impl HostHandler for DefaultHandler {
 
 }
@@ -261,7 +261,7 @@ impl Host {
 	/// By default sciter window has `"screen:true"` and `"desktop:true"/"handheld:true"` media variables.
 	///
 	/// Media variables can be changed in runtime. This will cause styles of the document to be reset.
-	pub fn set_media_vars(&self, media: Value) -> Result<()> {
+	pub fn set_media_vars(&self, media: &Value) -> Result<()> {
 		let ok = (_API.SciterSetMediaVars)(self.hwnd.get(), media.as_cptr());
 		ok_or!(ok)
 	}

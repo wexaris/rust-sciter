@@ -22,7 +22,7 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 	let last = utf.len();
 	let mut pc = 0;
 	while (pc < last) {
-		let mut b: u32 = utf[pc] as u32; pc += 1;
+		let mut b = u32::from(utf[pc]); pc += 1;
 		if (b == 0) { break; }
 
 		if ((b & 0x80) == 0) {
@@ -37,7 +37,7 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 			}
 
 			b = (b & 0x1f) << 6;
-			b |= (utf[pc] as u32 & 0x3f); pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f); pc += 1;
 
 		} else if ((b & 0xf0) == 0xe0) {
 			// 3-BYTE sequence: zzzzyyyyyyxxxxxx = 1110zzzz 10yyyyyy 10xxxxxx
@@ -48,10 +48,10 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 			}
 
 			b = (b & 0x0f) << 12;
-			b |= (utf[pc] as u32 & 0x3f) << 6; pc += 1;
-			b |= (utf[pc] as u32 & 0x3f); pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f) << 6; pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f); pc += 1;
 
-			if (b == 0xFEFF && outbuf.len() == 0) { // bom at start
+			if (b == 0xFEFF && outbuf.is_empty()) { // bom at start
 				continue; // skip it
 			}
 
@@ -60,9 +60,9 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 			if(pc >= last - 2) { outbuf.push(errc); break; }
 
 			b = (b & 0x07) << 18;
-			b |= (utf[pc] as u32 & 0x3f) << 12; pc += 1;
-			b |= (utf[pc] as u32 & 0x3f) << 6; pc += 1;
-			b |= (utf[pc] as u32 & 0x3f); pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f) << 12; pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f) << 6; pc += 1;
+			b |= (u32::from(utf[pc]) & 0x3f); pc += 1;
 
 			// b shall contain now full 21-bit unicode code point.
 			assert!((b & 0x1fffff) == b);
@@ -77,7 +77,7 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 
 		} else {
 			num_errors += 1;
-			b = errc as u32;
+			b = u32::from(errc);
 		}
 
 		outbuf.push(b as u16);
@@ -95,7 +95,7 @@ fn fromwcs(wcs: &[u16], outbuf: &mut Vec<u8>) -> bool
 	let last = wcs.len();
 	let mut pc = 0;
 	while (pc < last) {
-		let c: u32 = wcs[pc] as u32;
+		let c = u32::from(wcs[pc]);
 		if (c < (1 << 7)) {
 			outbuf.push(c as u8);
 
@@ -188,7 +188,7 @@ pub fn s2vec(s: &str) -> Vec<u16> {
 	let cs = CString::new(s).unwrap();
 	let mut out = Vec::with_capacity(s.len() * 2);
 	towcs(cs.to_bytes(), &mut out);
-	if out.len() > 0 {
+	if !out.is_empty() {
 		out.push(0);
 	}
 	return out;

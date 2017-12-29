@@ -87,7 +87,7 @@ mod windows {
 			let (x,y,w,h) = rect;
 			let rc = RECT { left: x, top: y, right: x + w, bottom: y + h };
 
-			let cb = 0 as *const SciterWindowDelegate;
+			let cb = ::std::ptr::null();
 			self.flags = flags;
 			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
 			if self.hwnd.is_null() {
