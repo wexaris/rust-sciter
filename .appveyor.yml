@@ -4,7 +4,7 @@ branches:
     - master
 environment:
   matrix:
-  - TARGET: 1.7.0-x86_64-pc-windows-msvc
+  - TARGET: 1.9.0-x86_64-pc-windows-msvc
     ARCH: 64
   - TARGET: 1.18.0-x86_64-pc-windows-msvc
     ARCH: 64
