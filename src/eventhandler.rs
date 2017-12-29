@@ -17,7 +17,7 @@ pub extern "system" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, 
 	use capi::scdom::HELEMENT;
 
 	let boxed = tag as *mut WindowHandler<T>;
-	let mut tuple: &mut WindowHandler<T> = unsafe { &mut *boxed };
+	let tuple: &mut WindowHandler<T> = unsafe { &mut *boxed };
 
 	let root = ::dom::Element::from_window(tuple.hwnd);
 	let hroot: HELEMENT = if root.is_ok() {

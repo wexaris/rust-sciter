@@ -300,7 +300,7 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 	use capi::scdef::{SCITER_NOTIFICATION, SCITER_CALLBACK_NOTIFICATION};
 
 	// reconstruct pointer to Handler
-	let mut boxed = NativeHandler::from_mut_ptr(param);
+	let boxed = NativeHandler::from_mut_ptr(param);
 
 	// process notification
 	let nm: &mut SCITER_CALLBACK_NOTIFICATION = unsafe { &mut *pnm };
@@ -350,7 +350,7 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 	text: LPCWSTR, _text_length: UINT)
 {
 	// reconstruct pointer to Handler
-	let mut boxed = NativeHandler::from_mut_ptr(param);
+	let boxed = NativeHandler::from_mut_ptr(param);
 	{
 		let me = boxed.as_mut::<T>();
 		let message = ::utf::w2s(text).replace("\r", "\n");

@@ -753,7 +753,7 @@ impl Element {
 		use ::capi::schandler::NativeHandler;
 		extern "system" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
 			let handler = NativeHandler::from_mut_ptr(param);
-			let mut obj = handler.as_mut::<T>();
+			let obj = handler.as_mut::<T>();
 			let e = Element::from(he);
 			let stop = obj.on_element(e);
 			return stop as BOOL;
