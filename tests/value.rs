@@ -175,11 +175,10 @@ fn from_function_works() {
 #[test]
 fn parse_works() {
 	let items = ["", "null", "1", "\"2\"", "2.0", "true", "[3, 4]", r##"{"5": 5, "6": 6, seven: "seven"}"##];
-	for item in items.iter() {
+	for item in &items {
 		let r = Value::parse(item);
-		match r {
-			Err(num) => panic!("parse({}) failed on character {} of {}", item, num, item.len()),
-			Ok(_) => {},
+		if let Err(num) = r {
+			panic!("parse({}) failed on character {} of {}", item, num, item.len());
 		}
 	}
 
@@ -195,9 +194,8 @@ fn parse_works() {
 fn parse_fail_works() {
 	let item = "{item: "; // invalid json
 	let r = Value::parse(item);
-	match r {
-		Err(num) => panic!("parse({}) failed on character {} of {}", item, num, item.len()),
-		Ok(_) => {},
+	if let Err(num) = r {
+		panic!("parse({}) failed on character {} of {}", item, num, item.len());
 	}
 }
 
@@ -216,7 +214,7 @@ fn pack_args_works() {
 	assert_eq!(args.len(), 3);
 
 	let args = pack_args!(1,2,3);
-	let unpacked = Value::unpack_from(args.as_ptr(), args.len() as u32);
+	let unpacked = unsafe { Value::unpack_from(args.as_ptr(), args.len() as u32) };
 	assert_eq!(unpacked.len(), 3);
 	assert_eq!(unpacked[0], Value::from(1));
 }
@@ -268,9 +266,9 @@ fn to_works() {
 	assert!(vbool.to_int().is_some());
 	assert_eq!(vbool.to_bool().unwrap(), false);
 
-	assert_eq!(Value::from(3.14).to_float().unwrap(), 3.14);
+	assert_eq!(Value::from(4.2).to_float().unwrap(), 4.2);
 
-	assert_eq!(Value::from("3.14").as_string().unwrap(), "3.14");
+	assert_eq!(Value::from("4.2").as_string().unwrap(), "4.2");
 }
 
 #[test]
@@ -335,7 +333,7 @@ fn index_works() {
 #[test]
 fn display_works() {
 	println!("\nvalue strings: new {}, null {}, bool {}, int {}, float {}, symbol {}, str {}",
-		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(3.14),
+		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(4.2),
 		Value::symbol("symbol"), Value::from("hello"));
 
 	// assert!(false);
@@ -344,7 +342,7 @@ fn display_works() {
 #[test]
 fn debug_works() {
 	println!("\nvalue strings: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
-		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(3.14),
+		Value::new(), Value::null(), Value::from(true), Value::from(123), Value::from(4.2),
 		Value::symbol("symbol"), Value::from("hello"));
 
 	// assert!(false);

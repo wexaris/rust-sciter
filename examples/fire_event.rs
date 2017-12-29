@@ -18,41 +18,34 @@ impl sciter::EventHandler for FireEvent {
 			return false;
 		}
 
-		match code {
-			BEHAVIOR_EVENTS::BUTTON_CLICK => {
+		if code == BEHAVIOR_EVENTS::BUTTON_CLICK {
 
-				// `root` points to attached element, usually it is an `<html>`.
+			// `root` points to attached element, usually it is an `<html>`.
 
-				let root = Element::from(root).root();
+			let root = Element::from(root).root();
 
-				let message = root.find_first("#message").unwrap().expect("div#message not found");
-				let source = Element::from(source);
+			let message = root.find_first("#message").unwrap().expect("div#message not found");
+			let source = Element::from(source);
 
-				println!("our root is {:?}, message is {:?} and source is {:?}", root, message, source);
+			println!("our root is {:?}, message is {:?} and source is {:?}", root, message, source);
 
-				match source.get_attribute("id") {
-					Some(id) => {
+			if let Some(id) = source.get_attribute("id") {
+				if id == "send" {
 
-						if id == "send" {
+					// just send a simple event
+					source.send_event(BEHAVIOR_EVENTS::CHANGE, None, Some(message.as_ptr())).expect("Failed to send event");
+					return true;
 
-							// just send a simple event
-							source.send_event(BEHAVIOR_EVENTS::CHANGE, None, Some(message.as_ptr())).expect("Failed to send event");
-							return true;
+				} else if id == "fire" {
 
-						} else if id == "fire" {
+					// fire event with specified params
+					let data = Value::from("Rusty param");
 
-							// fire event with specified params
-							let data = Value::from("Rusty param");
-
-							source.fire_event(BEHAVIOR_EVENTS::CHANGE, None, Some(message.as_ptr()), false, Some(data)).expect("Failed to fire event");
-							return true;
-						}
-					},
-					_ => {},
-				};
-			},
-			_ => {},
-		}
+					source.fire_event(BEHAVIOR_EVENTS::CHANGE, None, Some(message.as_ptr()), false, Some(data)).expect("Failed to fire event");
+					return true;
+				}
+			};
+		};
 
 		false
 	}

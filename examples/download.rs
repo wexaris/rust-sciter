@@ -32,12 +32,12 @@ impl HostHandler for Handler {
 					println!("running on {:?}", name);
 				},
 				Err(e) => {
-					println!("error! {}", e.as_string().unwrap_or("?".to_string()));
+					println!("error! {}", e.as_string().unwrap_or_else(|| "?".to_string()));
 				},
 			}
 		}
 
-		return false;
+		false
 	}
 
 }

@@ -15,7 +15,7 @@ struct Handler {
 impl sciter::EventHandler for Handler {
 
 	fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
-		return Some(default_events() | EVENT_GROUPS::HANDLE_TIMER);
+		Some(default_events() | EVENT_GROUPS::HANDLE_TIMER)
 	}
 
 	fn attached(&mut self, root: sciter::HELEMENT) {
@@ -48,7 +48,7 @@ impl sciter::EventHandler for Handler {
 				if self.progress.is_some() && *self.progress.as_ref().unwrap() == target {
 					self.state = !self.state;
 
-					if self.state == true {
+					if self.state {
 						println!("starting timer");
 						target.set_value(Value::from(0));
 						target.start_timer(1000, 1).ok();
@@ -88,7 +88,7 @@ impl sciter::EventHandler for Handler {
 
 			return true;
 		}
-		return false;
+		false
 	}
 
 	fn document_complete(&mut self, root: sciter::HELEMENT, source: sciter::HELEMENT) {
@@ -121,7 +121,7 @@ impl sciter::EventHandler for Handler {
 			assert_eq!(text, "Herman Melville - Moby-Dick");
 
 			let html = h1.get_html(true);
-			assert_eq!(html.as_slice(), r"<h1>Herman Melville - Moby-Dick</h1>".as_bytes());
+			assert_eq!(html.as_slice(), br"<h1>Herman Melville - Moby-Dick</h1>".as_ref());
 
 			let value = h1.get_value();
 			assert!(value.is_string());
@@ -136,7 +136,7 @@ impl sciter::EventHandler for Handler {
 		}
 
 		let mut all = body.find_all("div > p").unwrap().expect("must be at least one div > p");
-		assert!(all.is_empty() == false);
+		assert!(!all.is_empty());
 		assert_eq!(all.len(), 1);
 
 		all.clear();

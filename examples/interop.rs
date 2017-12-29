@@ -50,33 +50,33 @@ impl EventHandler {
 		let answer = root.call_function("raise_error2", &[]);
 		println!(" answer {:?}", answer);
 
-		return Some(Value::from(true));
+		Some(Value::from(true))
 	}
 
 	fn NativeCall(&mut self, arg: String) -> Value {
-		return Value::from(format!("Rust window ({})", arg));
+		Value::from(format!("Rust window ({})", arg))
 	}
 
 	fn GetNativeApi(&mut self, ) -> Value {
 
 		fn on_add(args: &[Value]) -> Value {
-			let ints = args.iter().map(|ref x| x.to_int().unwrap());
+			let ints = args.iter().map(|x| x.to_int().unwrap());
 			// let sum: i32 = ints.sum();	// error: issue #27739
 			let sum: i32 = ints.fold(0, |sum, x| sum + x);
-			return Value::from(sum);
+			Value::from(sum)
 		}
 
 		fn on_sub(args: &[Value]) -> Value {
 			if args.len() != 2 || args.iter().any(|x| !x.is_int()) {
 				return Value::error("sub requires 2 integer arguments!");
 			}
-			let ints: Vec<_> = args.iter().map(|ref x| x.to_int().unwrap()).collect();
+			let ints: Vec<_> = args.iter().map(|x| x.to_int().unwrap()).collect();
 			let (a,b) = (ints[0], ints[1]);
-			return Value::from(a - b);
+			Value::from(a - b)
 		}
 
 		let on_mul = |args: &[Value]|  -> Value {
-			let prod = args.iter().map(|ref x| x.to_int().unwrap()).fold(1, |total, x| total * x);
+			let prod = args.iter().map(|x| x.to_int().unwrap()).fold(1, |total, x| total * x);
 			Value::from(prod)
 		};
 
@@ -87,7 +87,8 @@ impl EventHandler {
 		api.set_item("mul", on_mul);
 
 		println!("returning {:?}", api);
-		return api;
+
+		api
 	}
 
 	fn calc_sum(&mut self, a: i32, b: i32) -> i32 {
@@ -114,7 +115,7 @@ impl sciter::EventHandler for EventHandler {
 
 	fn on_script_call(&mut self, root: HELEMENT, name: &str, argv: &[Value]) -> Option<Value> {
 
-		let args = argv.iter().map(|ref x| format!("{:?}", &x)).collect::<Vec<String>>().join(", ");
+		let args = argv.iter().map(|x| format!("{:?}", &x)).collect::<Vec<String>>().join(", ");
 		println!("script->native: {}({}), root {:?}", name, args, Element::from(root));
 
 		let handled = self.dispatch_script_call(root, name, argv);
@@ -122,16 +123,11 @@ impl sciter::EventHandler for EventHandler {
 			return handled;
 		}
 
-		match name {
-
-			"ScriptCallTest" => {
-				return self.script_call_test(argv, Element::from(root));
-			},
-
-			_ => (),
+		if name == "ScriptCallTest" {
+			return self.script_call_test(argv, Element::from(root));
 		}
 
-		return None;
+		None
 	}
 
 }
