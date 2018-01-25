@@ -121,7 +121,7 @@ stdout.printf("2 + 3 = %d\n", view.calc_sum(2, 3));
 _Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/master/examples) folder for more complex usage_.
 
 
-## [Library documentation](http://sciter-sdk.github.io/rust-sciter/).
+## [Library documentation](https://docs.rs/sciter-rs/).
 
 
 ## What supported right now:
