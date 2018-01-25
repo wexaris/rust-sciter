@@ -238,12 +238,12 @@ impl Host {
 
 	/// Set home url for sciter resources.
 	///
-	/// If you will set it like `set_home_url("http://sciter.com/modules/")` then
+	/// If you will set it like `set_home_url("https://sciter.com/modules/")` then
 	///
 	///  `<script src="sciter:lib/root-extender.tis">` will load
 	///  root-extender.tis from
 	///
-	/// `http://sciter.com/modules/lib/root-extender.tis`.
+	/// `https://sciter.com/modules/lib/root-extender.tis`.
 	pub fn set_home_url(&self, url: &str) -> Result<()> {
 		let (s,_) = s2w!(url);
 		let ok = (_API.SciterSetHomeURL)(self.hwnd.get(), s.as_ptr());

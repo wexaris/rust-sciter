@@ -113,7 +113,7 @@ and value of `<form>` element is a collection (name/value map) of all inputs on 
 
 In native code values are represented by `sciter::Value` objects.
 `sciter::Value` is a structure that can hold different types of values: numbers, strings, arrays, objects, etc
-(see [documentation](http://sciter.com/docs/content/script/language/Types.htm)).
+(see [documentation](https://sciter.com/docs/content/script/language/Types.htm)).
 
 Here is how to set numeric value of DOM element in native code:
 
@@ -534,7 +534,7 @@ impl Element {
 
 	//\name Style Attributes
 
-	/// Get [style attribute](http://sciter.com/docs/content/sciter/Style.htm) of the element by its name.
+	/// Get [style attribute](https://sciter.com/docs/content/sciter/Style.htm) of the element by its name.
 	pub fn get_style_attribute(&self, name: &str) -> String {
 		let mut s = String::new();
 		let (name,_) = s2u!(name);
@@ -542,7 +542,7 @@ impl Element {
 		return s;
 	}
 
-	/// Set [style attribute](http://sciter.com/docs/content/sciter/Style.htm).
+	/// Set [style attribute](https://sciter.com/docs/content/sciter/Style.htm).
 	pub fn set_style_attribute(&mut self, name: &str, value: &str) -> Result<()> {
 		let (name,_) = s2u!(name);
 		let (value,_) = s2w!(value);
@@ -992,7 +992,7 @@ Your application handles UI events and acts accordingly executing its functions.
 To be able to handle events in native code you will need to attach instance of `sciter::EventHandler`
 to existing DOM element or to the window itself. In the `EventHandler` you will receive all events
 dispatched to the element and its children as before children (in `PHASE_MASK::SINKING` phase)
-as after them (`PHASE_MASK::BUBBLING` event phase), see [Events Propagation](http://sciter.com/developers/for-native-gui-programmers/#events-propagation).
+as after them (`PHASE_MASK::BUBBLING` event phase), see [Events Propagation](https://sciter.com/developers/for-native-gui-programmers/#events-propagation).
 
 `EventHandler` attached to the window will receive all DOM events no matter which element they are targeted to.
 
@@ -1014,7 +1014,7 @@ You also can assign events handlers defined in script code:
 el.onMouse = function(evt) { ... }
 ```
 
-* "Manually", by assigning behavior class to the [Element](http://sciter.com/docs/content/sciter/Element.htm):
+* "Manually", by assigning behavior class to the [Element](https://sciter.com/docs/content/sciter/Element.htm):
 
 ```tiscript
 class MyEventsHandler: Element { ... }  // your behavior class which inherits sciter's Element class
@@ -1029,7 +1029,7 @@ selector { prototype: MyEventsHandler; }
 
 In this case `MyEventsHandler` class should be defined in one of script files loaded by your HTML.
 
-See the **Behavior attributes** section of [Sciter CSS property map](http://sciter.com/docs/content/css/cssmap.html)
+See the **Behavior attributes** section of [Sciter CSS property map](https://sciter.com/docs/content/css/cssmap.html)
 and [this blog article](http://www.terrainformatica.com/2014/07/sciter-declarative-behavior-assignment-by-css-prototype-and-aspect-properties/) which covers
 Behaviors, Prototypes and Aspects of Sciter CSS behavior assignment.
 

@@ -5,20 +5,20 @@
 /*!
 # Rust bindings library for Sciter engine.
 
-Sciter is an embeddable [multiplatform](http://sciter.com/sciter/crossplatform/) HTML/CSS/script engine
+Sciter is an embeddable [multiplatform](https://sciter.com/sciter/crossplatform/) HTML/CSS/script engine
 with GPU accelerated rendering designed to render modern desktop application UI.
 It's a compact, single dll/dylib/so file (4-8 mb), engine without any additional dependencies.
 
 Check the [screenshot gallery](https://github.com/oskca/sciter#sciter-desktop-ui-examples) of the desktop UI examples.
 
-Sciter supports all standard elements defined in HTML5 specification [with some additions](http://sciter.com/developers/for-web-programmers/).
+Sciter supports all standard elements defined in HTML5 specification [with some additions](https://sciter.com/developers/for-web-programmers/).
 CSS extended to better support Desktop UI development, e.g. flow and flex units, vertical and horizontal alignment, OS theming.
 
-[Sciter SDK](http://sciter.com/download/) comes with demo "browser" with builtin DOM inspector, script debugger and documentation browser:
+[Sciter SDK](https://sciter.com/download/) comes with demo "browser" with builtin DOM inspector, script debugger and documentation browser:
 
-![Sciter tools](http://sciter.com/images/sciter-tools.png)
+![Sciter tools](https://sciter.com/images/sciter-tools.png)
 
-Check <http://sciter.com> website and its [documentation resources](http://sciter.com/developers/) for engine principles, architecture and more.
+Check <https://sciter.com> website and its [documentation resources](https://sciter.com/developers/) for engine principles, architecture and more.
 
 ## Brief look:
 
@@ -36,7 +36,7 @@ fn main() {
 
 It looks similar like this:
 
-![Minimal sciter sample](http://i.imgur.com/ojcM5JJ.png)
+![Minimal sciter sample](https://i.imgur.com/ojcM5JJ.png)
 
 Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/master/examples) folder for more complex usage
 and module-level sections for the guides about:
@@ -49,8 +49,8 @@ and module-level sections for the guides about:
 .
 */
 
-#![doc(html_logo_url = "http://sciter.com/screenshots/slide-sciter-osx.png",
-       html_favicon_url = "http://sciter.com/wp-content/themes/sciter/!images/favicon.ico")]
+#![doc(html_logo_url = "https://sciter.com/screenshots/slide-sciter-osx.png",
+       html_favicon_url = "https://sciter.com/wp-content/themes/sciter/!images/favicon.ico")]
 
 // documentation test:
 // #![warn(missing_docs)]

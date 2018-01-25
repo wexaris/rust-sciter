@@ -163,14 +163,14 @@ impl Value {
 		Value { data: VALUE::default(), tmp: ::std::ptr::null_mut() }
 	}
 
-	/// Make explicit [array](http://sciter.com/docs/content/script/Array.htm) value with given length.
+	/// Make explicit [array](https://sciter.com/docs/content/script/Array.htm) value with given length.
 	pub fn array(length: usize) -> Value {
 		let mut me = Value::new();
 		(_API.ValueIntDataSet)(me.as_ptr(), length as i32, VALUE_TYPE::T_ARRAY as UINT, 0);
 		return me;
 	}
 
-	/// Make explicit [map](http://sciter.com/docs/content/script/Object.htm) value.
+	/// Make explicit [map](https://sciter.com/docs/content/script/Object.htm) value.
 	pub fn map() -> Value {
 		let mut me = Value::new();
 		(_API.ValueIntDataSet)(me.as_ptr(), 0i32, VALUE_TYPE::T_MAP as UINT, 0);
@@ -184,14 +184,14 @@ impl Value {
 		return me;
 	}
 
-	/// Make sciter [symbol](http://sciter.com/docs/content/script/language/Syntax.htm#symbol-literals) value.
+	/// Make sciter [symbol](https://sciter.com/docs/content/script/language/Syntax.htm#symbol-literals) value.
 	pub fn symbol(val: &str) -> Value {
 		let mut me = Value::new();
 		me.assign_str(val, VALUE_UNIT_TYPE_STRING::SYMBOL);
 		return me;
 	}
 
-	/// Make sciter [error](http://sciter.com/docs/content/script/Error.htm) value.
+	/// Make sciter [error](https://sciter.com/docs/content/script/Error.htm) value.
 	pub fn error(val: &str) -> Value {
 		let mut me = Value::new();
 		me.assign_str(val, VALUE_UNIT_TYPE_STRING::ERROR);
