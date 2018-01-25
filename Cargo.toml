@@ -1,6 +1,6 @@
 [package]
 name = "sciter-rs"
-version = "0.4.25"
+version = "0.4.26"
 description = "Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit). Also capable with DirectX / OpenGL."
 keywords = ["gui", "gtk", "cocoa", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
@@ -18,11 +18,12 @@ appveyor = { repository = "sciter-sdk/rust-sciter" }
 
 [lib]
 name = "sciter"
+path = "src/lib.rs"
 crate-type = ["rlib"]
 
 [dependencies]
 libc = "0.2"
-lazy_static = "0.2"
+lazy_static = "1.0"
 
 [target.x86_64-apple-darwin.dependencies]
 objc = "0.2"
