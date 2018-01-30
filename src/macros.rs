@@ -105,7 +105,7 @@ macro_rules! dispatch_script_call {
 		 )*
 	) => {
 
-		fn dispatch_script_call(&mut self, root: sciter::HELEMENT, name: &str, argv: &[$crate::Value]) -> Option<$crate::Value>
+		fn dispatch_script_call(&mut self, _root: $crate::HELEMENT, name: &str, argv: &[$crate::Value]) -> Option<$crate::Value>
 		{
 			match name {
 				$(

@@ -862,6 +862,12 @@ pub trait FromValue {
 	fn from_value(v: &Value) -> Option<Self> where Self: Sized;
 }
 
+impl FromValue for Value {
+	fn from_value(v: &Value) -> Option<Self> {
+		Some(v.clone())
+	}
+}
+
 impl FromValue for bool {
 	fn from_value(v: &Value) -> Option<Self> {
 		v.to_bool()
