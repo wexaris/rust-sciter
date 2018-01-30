@@ -1,6 +1,6 @@
 [package]
 name = "sciter-rs"
-version = "0.4.26"
+version = "0.4.27"
 description = "Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit). Also capable with DirectX / OpenGL."
 keywords = ["gui", "gtk", "cocoa", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
@@ -52,3 +52,7 @@ path = "examples/fire_event.rs"
 [[example]]
 name = "interop"
 path = "examples/interop.rs"
+
+[[example]]
+name = "threads"
+path = "examples/threads.rs"
