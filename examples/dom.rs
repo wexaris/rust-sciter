@@ -110,6 +110,15 @@ impl sciter::EventHandler for Handler {
 		assert_eq!(body.first_sibling().expect("must be head"), head);
 		assert_eq!(body.last_sibling().expect("must be body"), body);
 
+		println!("for loop in children");
+		for e in root.children() {
+			println!("child {:?}", e);
+		}
+
+		println!("for loop in ref");
+		for e in &root {
+			println!("child {:?}", e);
+		}
 
 		if let Ok(Some(h1)) = body.find_first("body > h1") {
 			println!("h1 {:?}", h1);

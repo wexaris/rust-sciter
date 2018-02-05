@@ -648,6 +648,15 @@ impl Element {
 	}
 
 	/// Get element child at specified index.
+	/// An iterator over the direct children of a DOM element.
+	pub fn children(&self) -> Children {
+		Children {
+			base: self,
+			index: 0,
+			count: self.children_count(),
+		}
+	}
+
 	pub fn child(&self, index: usize) -> Option<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetNthChild)(self.he, index as UINT, &mut p);
@@ -894,6 +903,47 @@ impl ::std::fmt::Debug for Element {
 	}
 }
 
+
+/// An iterator over the direct children of a DOM element.
+pub struct Children<'a> {
+	base: &'a Element,
+	index: usize,
+	count: usize,
+}
+
+/// Allows `for child in el.children() {}` enumeration.
+impl<'a> ::std::iter::Iterator for Children<'a> {
+	type Item = Element;
+
+	fn next(&mut self) -> Option<Element> {
+		if self.index < self.count {
+			let pos = self.index;
+			self.index += 1;
+			self.base.child(pos)
+		} else {
+			None
+		}
+	}
+
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		let remain = self.count - self.index;
+		(remain, Some(remain))
+	}
+
+	fn count(self) -> usize {
+		self.count
+	}
+}
+
+/// Allows `for child in &el {}` enumeration.
+impl<'a> ::std::iter::IntoIterator for &'a Element {
+	type Item = Element;
+	type IntoIter = Children<'a>;
+
+	fn into_iter(self) -> Children<'a> {
+		self.children()
+	}
+}
 
 
 use ::utf;
