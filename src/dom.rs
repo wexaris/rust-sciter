@@ -10,7 +10,7 @@ Sciter builds this tree while loading/parsing of input HTML.
 As a rule each tag in source HTML gets matching DOM element (there are exceptions, see below).
 
 You can change text, attributes, state flags of DOM elements;
-add new or remove existing DOM elements.
+add new or remove existing DOM elemdoents.
 You can also attach your own DOM event handlers to DOM elements to receive events and notifications.
 
 Therefore your UI in Sciter is a collection of uniform DOM elements
@@ -22,9 +22,11 @@ that can be styled by CSS and manipulated by native or script code.
 To access the DOM tree we need to get reference of its root element
 (the root element is the element representing the `<html>` tag in HTML source).
 
-```rust,no-run
-let root = Element::from_window(hwnd);
-assert_eq(root.get_tag(), "html");
+```rust,no_run
+# use sciter::dom::Element;
+# let hwnd = ::std::ptr::null_mut();
+let root = Element::from_window(hwnd).unwrap();
+assert_eq!(root.get_tag(), "html");
 ```
 
 *TBD:* Other ways to access DOM tree.
@@ -34,7 +36,8 @@ using various access and search functions like `SciterGetNthChild`, `SciterSelec
 All of them are wrapped into methods of `dom::Element`.
 Here is how you would get reference to first `<div>` element with class "sidebar" using CSS selectors:
 
-```rust,no-run
+```rust,no_run
+# let root = sciter::dom::Element::from(::std::ptr::null_mut());
 let sidebar = root.find_first("div.sidebar").unwrap();
 ```
 
@@ -51,8 +54,9 @@ var sidebar = self.$(div.sidebar); // using a stringizer variant of select()
 
 You can change the **text** or HTML of a DOM element:
 
-```rust,no-run
-if let Some(el) = root.find_first("#cancel") {
+```rust,no_run
+# let root = sciter::dom::Element::from(::std::ptr::null_mut());
+if let Some(mut el) = root.find_first("#cancel").unwrap() {
 	el.set_text("Abort!");
 	el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
 }
@@ -68,14 +72,16 @@ el.html = "Hello <b>wrold</b>!"; // inner html
 
 You can also get or set DOM **attributes** of any DOM element:
 
-```rust,no-run
+```rust,no_run
+# let mut el = sciter::dom::Element::from(::std::ptr::null_mut());
 let val = el.get_attribute("class").unwrap();
 el.set_attribute("class", "new-class");
 ```
 
 To **remove** an existing DOM element (to detach it from the DOM) you will do this:
 
-```rust,no-run
+```rust,no_run
+# let mut el = sciter::dom::Element::from(::std::ptr::null_mut());
 el.detach();
 ```
 
@@ -83,9 +89,11 @@ and when code will leave the scope where the `el` variable is defined, the DOM e
 
 Creation and population of DOM elements looks like this:
 
-```rust,no-run
-let p = Element::with_text("p", "Hello"); // create <p> element
-el.append(p); // append it to existing element, or use insert() ...
+```rust,no_run
+# use sciter::dom::Element;
+# let mut el = sciter::dom::Element::from(::std::ptr::null_mut());
+let p = Element::with_text("p", "Hello").unwrap(); // create <p> element
+el.append(&p); // append it to existing element, or use insert() ...
 ```
 
 And in script:
@@ -97,7 +105,8 @@ el.append(p);
 
 To change runtime state flags of a DOM element we do something like this:
 
-```rust,no-run
+```rust,ignore
+# let mut el = sciter::dom::Element::from(::std::ptr::null_mut());
 el.set_state(STATE_VISITED);
 ```
 
@@ -126,8 +135,10 @@ In native code values are represented by `sciter::Value` objects.
 
 Here is how to set a numeric value of a DOM element in native code:
 
-```rust,no-run
-if let Some(num) = root.find_first("input[type=number]") {
+```rust,no_run
+# use sciter::Value;
+# let root = sciter::dom::Element::from(::std::ptr::null_mut());
+if let Some(mut num) = root.find_first("input[type=number]").unwrap() {
 	num.set_value( Value::from(12) );	// sciter::Value with T_INT type (i32 in Rust)
 	num.set_value(12); // equivalent but with implicit conversion
 }
@@ -1110,24 +1121,33 @@ You can use one of these methods to call scripts from code of your application:
 
 * To evaluate arbitrary script in context of current document loaded into the window:
 
-```rust,no-run
-let root = Element::from_window(hwnd);
-let result: Value = root.eval_script("... script ...");
+```rust,no_run
+# use sciter::dom::Element;
+# use sciter::Value;
+# let hwnd = ::std::ptr::null_mut();
+let root = Element::from_window(hwnd).unwrap();
+let result: Value = root.eval_script("... script ...").unwrap();
 ```
 
 * To call global function defined in script using its full name (may include name of namespaces where it resides):
 
-```rust,no-run
-let root = Element::from_window(hwnd);
-let result: Value = root.call_function("namespace.name", &make_args!(p0, p1, ...));
+```ignore
+# #[macro_use] extern crate sciter;
+# use sciter::Value;
+# let root = sciter::dom::Element::from(::std::ptr::null_mut());
+let result: Value = root.call_function("namespace.name", &make_args!(1, "2", 3.0)).unwrap();
 ```
 parameters – `&[Value]` slice.
 
 * To call method (function) defined in script for particular DOM element:
 
-```rust,no-run
-dom::element el = root.find_first(...);
-let result: Value = el.call_method("method_name", &make_args!());
+```ignore
+# #[macro_use] extern crate sciter;
+# use sciter::Value;
+# let root = sciter::dom::Element::from(::std::ptr::null_mut());
+if let Some(el) = root.find_first("input").unwrap() {
+	let result: Value = el.call_method("canUndo", &make_args!()).unwrap();
+}
 ```
 
 
