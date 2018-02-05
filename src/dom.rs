@@ -1,35 +1,40 @@
 /*! DOM access methods.
 
+
 ## Introduction.
 
-Let’s assume you already integrated Sciter in your application and so you have Sciter window with loaded content.
+Let’s assume you have already integrated Sciter in your application and so you have Sciter window with loaded content.
 
-From Sciter point of view loaded document is a tree of DOM elements (elements of Document Object Model).
+From Sciter's point of view the loaded document is a tree of DOM elements (elements of Document Object Model).
 Sciter builds this tree while loading/parsing of input HTML.
 As a rule each tag in source HTML gets matching DOM element (there are exceptions, see below).
 
 You can change text, attributes, state flags of DOM elements;
 add new or remove existing DOM elements.
-You also can attach your own DOM event handlers to DOM elements to receive events and notifications.
+You can also attach your own DOM event handlers to DOM elements to receive events and notifications.
 
-Therefore your UI in Sciter is a collection of uniform DOM elements that can be styled by CSS and manipulated by native or script code.
+Therefore your UI in Sciter is a collection of uniform DOM elements
+that can be styled by CSS and manipulated by native or script code.
+
 
 ## Basic operations
 
 To access the DOM tree we need to get reference of its root element
-(root element is an element representing `<html>` tag in HTML source).
+(the root element is the element representing the `<html>` tag in HTML source).
 
-```no-run
+```rust,no-run
 let root = Element::from_window(hwnd);
 assert_eq(root.get_tag(), "html");
 ```
 
-By having root element reference we are able to access any other element in the tree
+*TBD:* Other ways to access DOM tree.
+
+By having a root element reference we are able to access any other element in the tree
 using various access and search functions like `SciterGetNthChild`, `SciterSelectElements`, …
 All of them are wrapped into methods of `dom::Element`.
 Here is how you would get reference to first `<div>` element with class "sidebar" using CSS selectors:
 
-```no-run
+```rust,no-run
 let sidebar = root.find_first("div.sidebar").unwrap();
 ```
 
@@ -37,14 +42,16 @@ The same in script:
 
 ```tiscript
 var sidebar = self.select("div.sidebar"); // or
-var sidebar = self.$(div.sidebar); // using stringizer select variant
+var sidebar = self.$(div.sidebar); // using a stringizer variant of select()
 ```
+
+*TBD:* Other select methods.
 
 ## DOM element operations
 
-You can change *text* or HTML of DOM element:
+You can change the **text** or HTML of a DOM element:
 
-```no-run
+```rust,no-run
 if let Some(el) = root.find_first("#cancel") {
 	el.set_text("Abort!");
 	el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
@@ -59,26 +66,26 @@ el.text = "Hello world"; // text
 el.html = "Hello <b>wrold</b>!"; // inner html
 ```
 
-You can get or set DOM *attributes* of any DOM element:
+You can also get or set DOM **attributes** of any DOM element:
 
-```no-run
+```rust,no-run
 let val = el.get_attribute("class").unwrap();
 el.set_attribute("class", "new-class");
 ```
 
-To *remove* existing DOM element (detach it from the DOM) you will do this:
+To **remove** an existing DOM element (to detach it from the DOM) you will do this:
 
-```no-run
+```rust,no-run
 el.detach();
 ```
 
-and when code will live scope where the `el` variable is defined the DOM element will be destroyed.
+and when code will leave the scope where the `el` variable is defined, the DOM element will be destroyed.
 
 Creation and population of DOM elements looks like this:
 
-```no-run
+```rust,no-run
 let p = Element::with_text("p", "Hello"); // create <p> element
-el.append(p); // append it to existing element, or insert() ...
+el.append(p); // append it to existing element, or use insert() ...
 ```
 
 And in script:
@@ -88,9 +95,9 @@ var p = new Element("p", "Hello");
 el.append(p);
 ```
 
-To change runtime state flags of DOM element we do something like this:
+To change runtime state flags of a DOM element we do something like this:
 
-```no-run
+```rust,no-run
 el.set_state(STATE_VISITED);
 ```
 
@@ -102,24 +109,27 @@ el.state.visited = true;
 
 (after such call the element will match `:visited` CSS selector)
 
+
 ## Getting and setting values of DOM elements.
 
-By default value of DOM element is its text but some DOM elements may have so called behaviors
-attached to them (see below).
-`<input>`’s elements for example are plain DOM elements but each input type has its own behavior assigned to the element.
-The behavior, among other things, is responsible for providing and setting value of the element.
-For example value of `input type=checkbox>` is boolean – _true_ or _false_,
-and value of `<form>` element is a collection (name/value map) of all inputs on the form.
+By default a value of a DOM element is its text but some DOM elements may have
+so called behaviors attached to them (see below).
+`<input>`’s elements, for example, are plain DOM elements but each input type has its own behavior assigned to the element.
+The behavior, among other things, is responsible for providing and setting the value of the element.
+
+For example, value of an `input type=checkbox>` is boolean – _true_ or _false_,
+and value of a `<form>` element is a collection (name/value map) of all named inputs on the form.
 
 In native code values are represented by `sciter::Value` objects.
 `sciter::Value` is a structure that can hold different types of values: numbers, strings, arrays, objects, etc
 (see [documentation](https://sciter.com/docs/content/script/language/Types.htm)).
 
-Here is how to set numeric value of DOM element in native code:
+Here is how to set a numeric value of a DOM element in native code:
 
-```no-run
+```rust,no-run
 if let Some(num) = root.find_first("input[type=number]") {
-	num.set_value( sciter::Value::from(12) );
+	num.set_value( Value::from(12) );	// sciter::Value with T_INT type (i32 in Rust)
+	num.set_value(12); // equivalent but with implicit conversion
 }
 ```
 
@@ -377,8 +387,8 @@ impl Element {
 	}
 
 	/// Set value of the element.
-	pub fn set_value(&mut self, val: Value) -> Result<()> {
-		let ok = (_API.SciterSetValue)(self.he, val.as_cptr());
+	pub fn set_value<T: Into<Value>>(&mut self, val: T) -> Result<()> {
+		let ok = (_API.SciterSetValue)(self.he, val.into().as_cptr());
 		ok_or!((), ok)
 	}
 
@@ -642,12 +652,11 @@ impl Element {
 		None
 	}
 
-	/// Get element child at specified index.
+	/// Get element's child at specified index.
 	pub fn get(&self, index: usize) -> Option<Element> {
 		return self.child(index);
 	}
 
-	/// Get element child at specified index.
 	/// An iterator over the direct children of a DOM element.
 	pub fn children(&self) -> Children {
 		Children {
@@ -657,6 +666,7 @@ impl Element {
 		}
 	}
 
+	/// Get element's child at specified index.
 	pub fn child(&self, index: usize) -> Option<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetNthChild)(self.he, index as UINT, &mut p);
@@ -1100,14 +1110,14 @@ You can use one of these methods to call scripts from code of your application:
 
 * To evaluate arbitrary script in context of current document loaded into the window:
 
-```no-run
+```rust,no-run
 let root = Element::from_window(hwnd);
 let result: Value = root.eval_script("... script ...");
 ```
 
 * To call global function defined in script using its full name (may include name of namespaces where it resides):
 
-```no-run
+```rust,no-run
 let root = Element::from_window(hwnd);
 let result: Value = root.call_function("namespace.name", &make_args!(p0, p1, ...));
 ```
@@ -1115,7 +1125,7 @@ parameters – `&[Value]` slice.
 
 * To call method (function) defined in script for particular DOM element:
 
-```no-run
+```rust,no-run
 dom::element el = root.find_first(...);
 let result: Value = el.call_method("method_name", &make_args!());
 ```
@@ -1153,11 +1163,11 @@ This way you can establish interaction between scipt and native code inside your
 	/// UI action causing change.
 	pub enum EventReason {
 		/// General event source triggers (by mouse, key or synthesized).
-	  General(CLICK_REASON),
-	  /// Edit control change trigger.
-	  EditChanged(EDIT_CHANGED_REASON),
-	  /// `<video>` request for frame source binding (*unsupported yet*).
-	  VideoBind(LPVOID),
+		General(CLICK_REASON),
+		/// Edit control change trigger.
+		EditChanged(EDIT_CHANGED_REASON),
+		/// `<video>` request for frame source binding (*unsupported yet*).
+		VideoBind(LPVOID),
 	}
 
 
