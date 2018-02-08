@@ -43,7 +43,7 @@ fn symbol_works() {
 
 fn is_color_supported() -> bool {
 	// e.g. `0x04000100`
-	sciter::version_num() > 0x04000100
+	sciter::version_num() > 0x0400_0100
 }
 
 #[test]
@@ -52,9 +52,9 @@ fn color_works() {
 
 	// yellow R255, G255, B000
 	// RGBA form in memory, ABGR in integer.
-	let v = Value::color(0x0000FFFF);
+	let v = Value::color(0x0000_FFFF);
 	assert!(v.is_color());
-	assert_eq!(v.to_color(), Some(0x0000FFFF));
+	assert_eq!(v.to_color(), Some(0x0000_FFFF));
 }
 
 #[test]
@@ -79,7 +79,7 @@ fn angle_works() {
 fn array_works() {
 	let v = Value::array(0);
 	assert!(v.is_array());
-	assert!(v.len() == 0);
+	assert!(v.is_empty());
 
 	let v = Value::array(17);
 	assert!(v.is_array());
@@ -90,7 +90,7 @@ fn array_works() {
 fn map_works() {
 	let v = Value::map();
 	assert!(v.is_map());
-	assert!(v.len() == 0);
+	assert!(v.is_empty());
 }
 
 #[test]
@@ -120,6 +120,8 @@ fn from_float_works() {
 
 #[test]
 fn from_str_works() {
+	use std::str::FromStr;
+	
 	let v = Value::from("hello");
 	assert!(v.is_string());
 

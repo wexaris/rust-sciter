@@ -65,8 +65,8 @@ fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 			b |= (u32::from(utf[pc]) & 0x3f); pc += 1;
 
 			// b shall contain now full 21-bit unicode code point.
-			assert!((b & 0x1fffff) == b);
-			if((b & 0x1fffff) != b) {
+			assert!((b & 0x1f_ffff) == b);
+			if((b & 0x1f_ffff) != b) {
 				outbuf.push(errc);
 				num_errors += 1;
 				continue;

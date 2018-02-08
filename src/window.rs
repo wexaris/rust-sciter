@@ -78,7 +78,7 @@ impl Window {
 
 	/// Attach Sciter to existing native window.
 	pub fn attach(hwnd: HWINDOW) -> Window {
-		assert!( hwnd.is_null() == false );
+		assert!(!hwnd.is_null());
 		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
 	}
 

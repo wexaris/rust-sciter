@@ -20,7 +20,7 @@ impl Drop for EventHandler {
 
 impl EventHandler {
 
-	fn script_call_test(&self, args: &[Value], root: Element) -> Option<Value> {
+	fn script_call_test(&self, args: &[Value], root: &Element) -> Option<Value> {
 
 		println!("root: {:?}", root);
 		// return None;
@@ -57,12 +57,12 @@ impl EventHandler {
 		Value::from(format!("Rust window ({})", arg))
 	}
 
-	fn GetNativeApi(&mut self, ) -> Value {
+	fn GetNativeApi(&mut self) -> Value {
 
 		fn on_add(args: &[Value]) -> Value {
 			let ints = args.iter().map(|x| x.to_int().unwrap());
 			// let sum: i32 = ints.sum();	// error: issue #27739
-			let sum: i32 = ints.fold(0, |sum, x| sum + x);
+			let sum: i32 = ints.sum();
 			Value::from(sum)
 		}
 
@@ -76,7 +76,7 @@ impl EventHandler {
 		}
 
 		let on_mul = |args: &[Value]|  -> Value {
-			let prod = args.iter().map(|x| x.to_int().unwrap()).fold(1, |total, x| total * x);
+			let prod: i32 = args.iter().map(|x| x.to_int().unwrap()).product();
 			Value::from(prod)
 		};
 
@@ -124,7 +124,7 @@ impl sciter::EventHandler for EventHandler {
 		}
 
 		if name == "ScriptCallTest" {
-			return self.script_call_test(argv, Element::from(root));
+			return self.script_call_test(argv, &Element::from(root));
 		}
 
 		None

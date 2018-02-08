@@ -731,11 +731,12 @@ impl Element {
 
 	/// Append element as last child of this element.
 	pub fn append(&mut self, child: &Element) -> Result<()> {
-		self.insert(0x7FFFFFFF, child)
+		self.insert(0x7FFF_FFFF, child)
 	}
 
 	/// Append element as last child of this element.
 	#[allow(unused_must_use)]
+	#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 	pub fn push(&mut self, element: Element) {
 		self.append(&element);
 	}

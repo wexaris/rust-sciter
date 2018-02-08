@@ -163,7 +163,7 @@ impl Value {
 		Value { data: VALUE::default(), tmp: ::std::ptr::null_mut() }
 	}
 
-	/// Make explicit [array](https://sciter.com/docs/content/script/Array.htm) value with given length.
+	/// Make explicit [array](https://sciter.com/docs/content/script/Array.htm) value with the given length.
 	pub fn array(length: usize) -> Value {
 		let mut me = Value::new();
 		(_API.ValueIntDataSet)(me.as_ptr(), length as i32, VALUE_TYPE::T_ARRAY as UINT, 0);
@@ -234,13 +234,6 @@ impl Value {
 		} else {
 			Err(ok)
 		}
-	}
-
-	/// Parse json string into value.
-	/// Note that `Value::from_str()` parses a json string to value object and returns a `Result<Value>`
-	/// unlike `Value::from()`, which returns just string object only.
-	pub fn from_str(val: &str) -> Result<Self, VALUE_RESULT> {
-		Value::parse(val).or(Err(VALUE_RESULT::BAD_PARAMETER))
 	}
 
 	#[doc(hidden)]
@@ -767,7 +760,7 @@ impl From<String> for Value {
 impl ::std::str::FromStr for Value {
 	type Err = VALUE_RESULT;
 	fn from_str(val: &str) -> Result<Self, Self::Err> {
-		Value::from_str(val)
+		Value::parse(val).or(Err(VALUE_RESULT::BAD_PARAMETER))
 	}
 }
 

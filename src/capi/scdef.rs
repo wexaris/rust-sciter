@@ -18,7 +18,6 @@ pub enum IDXGISurface {}
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
-
 /// `HostHandler::on_data_load()` result code.
 ///
 /// This notification gives application a chance to override built-in loader and
@@ -42,10 +41,10 @@ pub enum LOAD_RESULT {
 /// Script runtime options.
 pub enum SCRIPT_RUNTIME_FEATURES
 {
-  ALLOW_FILE_IO = 0x00000001,
-  ALLOW_SOCKET_IO = 0x00000002,
-  ALLOW_EVAL = 0x00000004,
-  ALLOW_SYSINFO = 0x00000008
+  ALLOW_FILE_IO = 0x0000_0001,
+  ALLOW_SOCKET_IO = 0x0000_0002,
+  ALLOW_EVAL = 0x0000_0004,
+  ALLOW_SYSINFO = 0x0000_0008
 }
 
 #[repr(C)]

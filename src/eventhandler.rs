@@ -101,8 +101,8 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 			let scnm = params as *const BEHAVIOR_EVENT_PARAMS;
 			let nm = unsafe { &*scnm };
 
-			let code :BEHAVIOR_EVENTS = unsafe{ ::std::mem::transmute(nm.cmd & 0x00FFF) };
-			let phase: PHASE_MASK = unsafe { ::std::mem::transmute(nm.cmd & 0xFFFFF000) };
+			let code :BEHAVIOR_EVENTS = unsafe{ ::std::mem::transmute(nm.cmd & 0x0_0FFF) };
+			let phase: PHASE_MASK = unsafe { ::std::mem::transmute(nm.cmd & 0xFFFF_F000) };
 			let reason = match code {
 				BEHAVIOR_EVENTS::EDIT_VALUE_CHANGED | BEHAVIOR_EVENTS::EDIT_VALUE_CHANGING => {
 					let reason: EDIT_CHANGED_REASON = unsafe{ ::std::mem::transmute(nm.reason as UINT) };

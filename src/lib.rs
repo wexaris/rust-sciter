@@ -55,6 +55,11 @@ and module-level sections for the guides about:
 // documentation test:
 // #![warn(missing_docs)]
 
+/* Clippy lints */
+
+#![cfg_attr(feature = "cargo-clippy", allow(needless_return, let_and_return))]
+
+
 /* Macros */
 
 #[cfg(target_os="macos")]
@@ -134,7 +139,7 @@ mod ext {
 	// Since 3.3.1.6 library name was changed to "libsciter".
 	// However CC requires `-l sciter` form.
 	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter-gtk-64", kind="dylib")]
+	#[link(name="sciter-gtk-64")]
 	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
 }
 
