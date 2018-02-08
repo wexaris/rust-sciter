@@ -263,13 +263,19 @@ impl Element {
 	}
 
 	/// Create new element as child of `parent`.
-	pub fn create_at(tag: &str, parent: &mut Element) -> Result<Element> {
+	pub fn with_parent(tag: &str, parent: &mut Element) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
 		let (tag,_) = s2u!(tag);
 		let text = 0 as LPCWSTR;
 		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
 		let ok = parent.append(&e);
 		ok.map(|_| e)
+	}
+
+	/// Create new element as child of `parent`. Deprecated.
+	#[deprecated(since="0.5.0", note="please use `Element::with_parent()` instead.")]
+	pub fn create_at(tag: &str, parent: &mut Element) -> Result<Element> {
+		Element::with_parent(tag, parent)
 	}
 
 	/// Create new element with specified `text`, it is disconnected initially from the DOM.

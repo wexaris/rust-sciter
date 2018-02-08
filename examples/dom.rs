@@ -157,7 +157,7 @@ impl sciter::EventHandler for Handler {
 			// DOM manipulation.
 			// After creating the new Element, we can set only attributes for it until we'll attach it to the DOM.
 			//
-			let mut div = Element::create_at("div", &mut body).unwrap();
+			let mut div = Element::with_parent("div", &mut body).unwrap();
 			div.set_style_attribute("outline", "1px solid orange");
 			div.set_style_attribute("width", "max-content");
 			div.set_style_attribute("padding", "5dip");
