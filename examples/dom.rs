@@ -38,7 +38,7 @@ impl sciter::EventHandler for Handler {
 		}
 
 		match code {
-			sciter::dom::event::BEHAVIOR_EVENTS::BUTTON_CLICK => {
+			BEHAVIOR_EVENTS::BUTTON_CLICK => {
 
 				let source = Element::from(source);
 				let mut target = Element::from(target);

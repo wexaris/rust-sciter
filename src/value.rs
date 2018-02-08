@@ -135,8 +135,6 @@ assert!(v.get_item("one").is_int());
 .
 */
 
-#![allow(dead_code)]
-
 use ::{_API};
 use capi::sctypes::*;
 use capi::scvalue::{VALUE, VALUE_UNIT_TYPE_STRING};
@@ -892,12 +890,12 @@ impl FromValue for String {
 }
 
 
-
+#[cfg(test)]
 mod tests {
-	#![allow(unused_imports, unused_variables, unused_mut)]
+	#![allow(unused_imports)]
 
 	use super::{Value, FromValue};
-	use capi::scvalue::*;
+	use capi::scvalue::{VALUE, VALUE_TYPE};
 	use std::mem;
 	use ::{_API};
 

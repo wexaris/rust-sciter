@@ -735,19 +735,17 @@ impl Element {
 	}
 
 	/// Append element as last child of this element.
-	#[allow(unused_must_use)]
 	#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 	pub fn push(&mut self, element: Element) {
-		self.append(&element);
+		self.append(&element).expect("Could not append element.");
 	}
 
 	/// Remove the last child from this element and returns it, or `None` if this element is empty.
-	#[allow(unused_must_use)]
 	pub fn pop(&mut self) -> Option<Element> {
 		let count = self.len();
 		if count > 0 {
 			if let Some(mut child) = self.get(count - 1) {
-				child.detach();
+				child.detach().expect("Could not detach element.");
 				return Some(child);
 			}
 		}
@@ -1207,7 +1205,8 @@ This way you can establish interaction between scipt and native code inside your
 
 		/// Return list of event groups this event_handler is subscribed to.
 		///
-		/// Default is ``.
+		/// Default is `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL`.
+		/// See also [`default_events()`](fn.default_events.html).
 		fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
 			return Some(default_events());
 		}
