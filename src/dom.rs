@@ -139,8 +139,8 @@ Here is how to set a numeric value of a DOM element in native code:
 # use sciter::Value;
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
 if let Some(mut num) = root.find_first("input[type=number]").unwrap() {
-	num.set_value( Value::from(12) );	// sciter::Value with T_INT type (i32 in Rust)
-	num.set_value(12); // equivalent but with implicit conversion
+	num.set_value( Value::from(12) );  // sciter::Value with T_INT type (i32 in Rust)
+	num.set_value(12);  // equivalent but with implicit conversion
 }
 ```
 
