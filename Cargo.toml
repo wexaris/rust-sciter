@@ -15,6 +15,7 @@ exclude = [".gitignore", ".editorconfig", ".appveyor.yml", "clippy.toml"]
 
 [badges]
 appveyor = { repository = "sciter-sdk/rust-sciter" }
+maintenance = { status = "passively-maintained" }
 
 [workspace]
 members = [".", "serde"]
