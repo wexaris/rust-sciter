@@ -140,7 +140,8 @@ use capi::sctypes::*;
 use capi::scvalue::{VALUE, VALUE_UNIT_TYPE_STRING};
 pub use capi::scvalue::{VALUE_RESULT, VALUE_STRING_CVT_TYPE, VALUE_TYPE};
 
-// TODO: map keys/values/items
+
+// TODO: `get`, `get_item` methods should return `Option<Value>`
 
 /// `sciter::value` wrapper.
 ///
@@ -290,9 +291,9 @@ impl Value {
 
 	/// Retreive value of sub-element at `index`
 	///
-	/// * T_ARRAY - nth element of the array;
-	/// * T_MAP - value of nth key/value pair in the map;
-	/// * T_FUNCTION - value of nth argument of the function.
+	/// * `T_ARRAY` - nth element of the array;
+	/// * `T_MAP` - value of nth key/value pair in the map;
+	/// * `T_FUNCTION` - value of nth argument of the function.
 	///
 	pub fn get(&self, index: usize) -> Value {
 		let mut v = Value::new();
@@ -305,17 +306,79 @@ impl Value {
 	/// * if it is a map - sets named value in the map;
 	/// * if it is a function - sets named argument of the function;
 	/// * if it is a object - sets value of property of the object;
-	/// * otherwise it converts this to map and adds key/v to it.
+	/// * otherwise it converts this to map and adds key/value to it.
 	///
 	pub fn set_item<TKey: Into<Value>, TValue: Into<Value>>(&mut self, key: TKey, value: TValue) {
 		(_API.ValueSetValueToKey)(self.as_ptr(), key.into().as_cptr(), value.into().as_cptr());
 	}
 
-	/// Retrieve value of sub-element by key.
+	/// Retrieve the value of a sub-element by key.
 	pub fn get_item<T: Into<Value>>(&self, key: T) -> Value {
 		let mut v = Value::new();
 		(_API.ValueGetValueOfKey)(self.as_cptr(), key.into().as_cptr(), v.as_ptr());
 		return v;
+	}
+
+	/// Retrieve the key of a sub-element by index.
+	pub fn key_at(&self, index: usize) -> Value {
+		let mut v = Value::new();
+		(_API.ValueNthElementKey)(self.as_cptr(), index as INT, v.as_ptr());
+		return v;
+	}
+
+	/// An iterator visiting all keys of key/value pairs in the map.
+	///
+	/// * `T_MAP` - keys of key/value pairs in the map;
+	/// * `T_OBJECT` - names of key/value properties in the object;
+	/// * `T_FUNCTION` - names of arguments of the function (if any).
+	///
+	pub fn keys(&self) -> KeyIterator {
+		KeyIterator {
+			base: self,
+			index: 0,
+			count: self.len(),
+		}
+	}
+
+	/// An iterator visiting all values in arbitrary order.
+	///
+	/// * `T_ARRAY` - elements of the array;
+	/// * `T_MAP` - values of key/value pairs in the map;
+	/// * `T_OBJECT` - values of key/value properties in the object;
+	/// * `T_FUNCTION` - values of arguments of the function.
+	///
+	pub fn values(&self) -> SeqIterator {
+		SeqIterator {
+			base: self,
+			index: 0,
+			count: self.len(),
+		}
+	}
+
+	/// An iterator visiting all key-value pairs in arbitrary order.
+	///
+	/// The iterator element type is `(Value, Value)`.
+	/// The `Value` must has a key-value type (map, object, function).
+	pub fn items(&self) -> Vec<(Value, Value)> {
+		type Pair = Vec<(Value, Value)>;
+		let result = Box::new(Vec::with_capacity(self.len()));
+
+		extern "system" fn on_pair(param: LPVOID, pkey: *const VALUE, pval: *const VALUE) -> BOOL {
+			assert!(!param.is_null());
+			unsafe {
+				let mut result = Box::from_raw(param as *mut Pair);
+				let src = (Value::copy_from(pkey), Value::copy_from(pval));
+				result.push(src);
+				Box::into_raw(result);	// prevent free
+			}
+			return true as BOOL;
+		}
+
+		let ptr = Box::into_raw(result);
+		(_API.ValueEnumElements)(self.as_cptr(), on_pair, ptr as LPVOID);
+
+		let result = unsafe { Box::from_raw(ptr) };
+		return *result;
 	}
 
 	/// Value to integer.
@@ -447,11 +510,16 @@ impl Value {
 		assert!(argc == 0 || !args.is_null());
 		let args = ::std::slice::from_raw_parts(args, argc);
 		for arg in args {
-			let mut v = Value::new();
-			(_API.ValueCopy)(v.as_ptr(), arg);
-			argv.push(v);
+			argv.push(Value::copy_from(arg));
 		}
 		return argv;
+	}
+
+	#[doc(hidden)]
+	unsafe fn copy_from(ptr: *const VALUE) -> Value {
+		let mut v = Value::new();
+		(_API.ValueCopy)(v.as_ptr(), ptr);
+		return v;
 	}
 
 	fn ensure_tmp_mut(&self) -> &mut Value {
@@ -627,7 +695,7 @@ impl Drop for Value {
 	}
 }
 
-/// Return default value (_undefined_).
+/// Return default value (`undefined`).
 impl Default for Value {
 	fn default() -> Self {
 		return Value::new();
@@ -888,6 +956,105 @@ impl FromValue for String {
 		v.as_string()
 	}
 }
+
+
+/// An iterator visiting all keys of key/value pairs in the map-like `Value` objects.
+pub struct KeyIterator<'a> {
+	base: &'a Value,
+	index: usize,
+	count: usize,
+}
+
+impl<'a> ::std::iter::Iterator for KeyIterator<'a> {
+	type Item = Value;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.index < self.count {
+			self.index += 1;
+			Some(self.base.key_at(self.index - 1))
+		} else {
+			None
+		}
+	}
+
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		let remain = self.count - self.index;
+		(remain, Some(remain))
+	}
+
+	fn count(self) -> usize {
+		self.count
+	}
+}
+
+/// An iterator able to yield keys from both `Value`'s ends.
+impl<'a> ::std::iter::DoubleEndedIterator for KeyIterator<'a> {
+	fn next_back(&mut self) -> Option<Self::Item> {
+		if self.index == self.count || self.count == 0 {
+			None
+		} else {
+			self.count -= 1;
+			Some(self.base.key_at(self.count))
+		}
+	}
+}
+
+
+
+/// An iterator over the sub-elements of a `Value`.
+pub struct SeqIterator<'a> {
+	base: &'a Value,
+	index: usize,
+	count: usize,
+}
+
+impl<'a> ::std::iter::Iterator for SeqIterator<'a> {
+	type Item = Value;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.index < self.count {
+			self.index += 1;
+			Some(self.base.get(self.index - 1))
+		} else {
+			None
+		}
+	}
+
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		let remain = self.count - self.index;
+		(remain, Some(remain))
+	}
+
+	fn count(self) -> usize {
+		self.count
+	}
+}
+
+/// An iterator able to yield sub-elements from both `Value`'s ends.
+impl<'a> ::std::iter::DoubleEndedIterator for SeqIterator<'a> {
+	fn next_back(&mut self) -> Option<Self::Item> {
+		if self.index == self.count || self.count == 0 {
+			None
+		} else {
+			self.count -= 1;
+			Some(self.base.get(self.count))
+		}
+	}
+}
+
+/// Conversion into an `Iterator`.
+///
+/// Adds the `for` loop syntax support: `for subitem in &value {]`.
+impl<'a> ::std::iter::IntoIterator for &'a Value {
+	type Item = Value;
+	type IntoIter = SeqIterator<'a>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.values()
+	}
+}
+
+
 
 
 #[cfg(test)]

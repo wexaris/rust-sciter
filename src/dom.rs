@@ -961,6 +961,17 @@ impl<'a> ::std::iter::Iterator for Children<'a> {
 	}
 }
 
+impl<'a> ::std::iter::DoubleEndedIterator for Children<'a> {
+	fn next_back(&mut self) -> Option<Element> {
+		if self.index == self.count || self.count == 0 {
+			None
+		} else {
+			self.count -= 1;
+			self.base.child(self.count)
+		}
+	}
+}
+
 /// Allows `for child in &el {}` enumeration.
 impl<'a> ::std::iter::IntoIterator for &'a Element {
 	type Item = Element;

@@ -121,7 +121,7 @@ fn from_float_works() {
 #[test]
 fn from_str_works() {
 	use std::str::FromStr;
-	
+
 	let v = Value::from("hello");
 	assert!(v.is_string());
 
@@ -298,7 +298,7 @@ fn into_works() {
 }
 
 #[test]
-fn bytes_works() {
+fn bytes_work() {
 	let b = [1,2,3];
 	let v = Value::from(&b[..]);
 	assert!(v.is_bytes());
@@ -326,9 +326,15 @@ fn index_works() {
 	println!("map {:?}", v);
 	assert_eq!(v.get_item(key), Value::from(7.0));
 
+	assert_eq!(v.key_at(0), Value::from("5"));
+	assert_eq!(v.key_at(2), Value::symbol("seven"));
+	assert_eq!(v.get_item(v.key_at(1)), Value::from(6));
+
 	// simple syntax:
 	let mut v = Value::map();
 	v.set_item("seven", 7);
+	v.set_item("ten", 10);
+	v.set_item("six", 6);
 	assert_eq!(v["seven"], 7.into());
 }
 
@@ -358,4 +364,57 @@ fn thread_works() {
 		assert_eq!(v.len(), 1);
 	});
 	tid.join().unwrap();
+}
+
+#[test]
+fn iterators_work() {
+	let v: Value = [1,2,3].iter().cloned().collect();
+
+	// `&v` == `v.into_iter()`
+	for a in &v {
+		assert!(a.is_int());
+	}
+
+	for a in v.into_iter() {
+		assert!(a.is_int());
+	}
+}
+
+#[test]
+fn back_iter() {
+	let v: Value = [1,2,3].iter().cloned().collect();
+
+	let mut iter = v.into_iter();
+	assert_eq!(Some(1.into()), iter.next());
+	assert_eq!(Some(3.into()), iter.next_back());
+	assert_eq!(Some(2.into()), iter.next_back());
+	assert_eq!(None, iter.next_back());
+	assert_eq!(None, iter.next());
+
+	assert_eq!(v.into_iter().rev().map(|a| a.to_int().unwrap()).sum::<i32>(), 1 + 2 + 3);
+}
+
+#[test]
+fn keys_work() {
+	let v = Value::parse("five: 5, seven: 7").unwrap();
+	for k in v.keys() {
+		assert!(k.is_string());
+	}
+}
+
+#[test]
+fn values_work() {
+	let v = Value::parse("five: 5, seven: 7").unwrap();
+	for a in v.values() {
+		assert!(a.is_int());
+	}
+}
+
+#[test]
+fn items_work() {
+	let v = Value::parse("five: 5, seven: 7").unwrap();
+	for (k,a) in v.items() {
+		assert!(k.is_string());
+		assert!(a.is_int());
+	}
 }
