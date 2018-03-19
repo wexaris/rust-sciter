@@ -1,14 +1,14 @@
 #![allow(unused_variables)]
 
 extern crate sciter;
-extern crate serde_sciter;
+extern crate sciter_serde;
 
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_bytes;
 extern crate serde;
 
-use serde_sciter::{from_value, to_value};
+use sciter_serde::{from_value, to_value};
 
 
 // serialize, deserialize and compare with the original value.

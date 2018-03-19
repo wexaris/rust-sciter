@@ -1,6 +1,6 @@
 [package]
 name = "sciter-rs"
-version = "0.5.31"
+version = "0.5.32"
 description = "Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit). Also capable with DirectX / OpenGL."
 keywords = ["gui", "gtk", "cocoa", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
@@ -11,7 +11,7 @@ documentation = "https://docs.rs/sciter-rs"
 readme = "README.md"
 license = "MIT"
 
-exclude = [".gitignore", ".editorconfig", ".appveyor.yml"]
+exclude = [".gitignore", ".editorconfig", ".appveyor.yml", "clippy.toml"]
 
 [badges]
 appveyor = { repository = "sciter-sdk/rust-sciter" }

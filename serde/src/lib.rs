@@ -57,10 +57,10 @@ See the [Serde data model](https://serde.rs/data-model.html) for reference.
 
 ```rust
 extern crate sciter;
-extern crate serde_sciter;
+extern crate sciter_serde;
 
 use sciter::Value;
-use serde_sciter::{from_value, to_value};
+use sciter_serde::{from_value, to_value};
 
 fn back_and_forth() {
 	let v: Value = to_value(&true).unwrap();
@@ -113,10 +113,10 @@ extern crate serde_derive;
 extern crate serde;
 
 extern crate sciter;
-extern crate serde_sciter;
+extern crate sciter_serde;
 
 use sciter::Value;
-use serde_sciter::to_value;
+use sciter_serde::to_value;
 
 fn main() {
 
