@@ -136,18 +136,17 @@ mod ext {
 #[cfg(all(target_os="linux", target_arch="x86_64"))]
 mod ext {
 	// Note:
+	// Since 4.1.4 library name has been changed to "libsciter-gtk" (without 32/64 suffix).
 	// Since 3.3.1.6 library name was changed to "libsciter".
 	// However CC requires `-l sciter` form.
-	use capi::scapi::{ISciterAPI};
-	#[link(name="sciter-gtk-64")]
-	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
+	#[link(name="sciter-gtk")]
+	extern "system" { pub fn SciterAPI() -> *const ::capi::scapi::ISciterAPI;	}
 }
 
 #[cfg(all(target_os="macos", target_arch="x86_64"))]
 mod ext {
-	use capi::scapi::{ISciterAPI};
 	#[link(name="sciter-osx-64", kind = "dylib")]
-	extern "system" { pub fn SciterAPI() -> *const ISciterAPI;	}
+	extern "system" { pub fn SciterAPI() -> *const ::capi::scapi::ISciterAPI;	}
 }
 
 #[allow(non_snake_case)]
