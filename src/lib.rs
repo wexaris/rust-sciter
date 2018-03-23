@@ -133,7 +133,7 @@ mod ext {
 	}
 }
 
-#[cfg(all(target_os="linux", target_arch="x86_64"))]
+#[cfg(target_os="linux")]
 mod ext {
 	// Note:
 	// Since 4.1.4 library name has been changed to "libsciter-gtk" (without 32/64 suffix).
