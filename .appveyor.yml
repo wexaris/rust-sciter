@@ -6,8 +6,8 @@ environment:
   matrix:
   - TARGET: 1.21.0-x86_64-pc-windows-msvc
     ARCH: 64
-  - TARGET: 1.23.0-x86_64-pc-windows-msvc
-    ARCH: 64
+  - TARGET: 1.21.0-i686-pc-windows-msvc
+    ARCH: 32
   - TARGET: nightly-x86_64-pc-windows-msvc
     ARCH: 64
   - TARGET: nightly-i686-pc-windows-msvc
@@ -24,11 +24,11 @@ build_script:
   - cmd: cd
   - cargo clean
   - cmd: echo Building library
-  - cargo build --release
+  - cargo build --release --all
   - cmd: echo Building examples
-  - cargo build --release --example first
-  - cargo build --release --example minimal
-  - cargo build --release --example interop
+  - cargo build --release --examples
 test_script:
   - cmd: cd
-  - cargo test --release --all
+  - cargo test --all
+  - cmd: cd
+  - cargo test --all --release
