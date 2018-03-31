@@ -1,9 +1,10 @@
 # Rust bindings for Sciter
 
-[![Build status](https://ci.appveyor.com/api/projects/status/github/sciter-sdk/rust-sciter)](https://ci.appveyor.com/project/pravic/rust-sciter)
-[![Build Status](https://travis-ci.org/sciter-sdk/rust-sciter.svg?branch=master)](https://travis-ci.org/sciter-sdk/rust-sciter)
-[![Current Version](https://meritbadge.herokuapp.com/sciter-rs)](https://crates.io/crates/sciter-rs)
-[![Join the chat at https://gitter.im/pravic/sciter](https://badges.gitter.im/pravic/sciter.png)](https://gitter.im/pravic/sciter)
+[![Build status](https://img.shields.io/appveyor/ci/pravic/rust-sciter/master.svg)](https://ci.appveyor.com/project/pravic/rust-sciter)
+[![Build Status](https://img.shields.io/travis/sciter-sdk/rust-sciter/master.svg)](https://travis-ci.org/sciter-sdk/rust-sciter)
+[![Current Version](https://img.shields.io/crates/v/sciter-rs.svg)](https://crates.io/crates/sciter-rs)
+[![License](https://img.shields.io/crates/l/sciter-rs.svg)](https://crates.io/crates/sciter-rs)
+[![Join the chat at https://gitter.im/pravic/sciter](https://badges.gitter.im/pravic/sciter.svg)](https://gitter.im/pravic/sciter)
 
 Check [this page](https://sciter.com/developers/sciter-sdk-bindings/) for other language bindings (Delphi / D / Go / .NET / Python / Rust).
 
