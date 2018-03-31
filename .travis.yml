@@ -6,21 +6,33 @@ sudo: false
 language: rust
 compiler: gcc
 
-notifications:
-  email: false
+os:
+  - linux
+  - osx
 
 rust:
   - stable
   - nightly
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode6.4
+    - os: osx
+      osx_image: xcode8
+    - os: osx
+      osx_image: xcode9.2
+    - os: osx
+      osx_image: xcode9.3beta
 
 branches:
   only:
     - master
     - travis
+
+notifications:
+  email: change
+
 
 cache: cargo
 before_cache:
