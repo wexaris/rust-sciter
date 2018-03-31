@@ -146,6 +146,7 @@ _Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/mas
 * [x] Windows
 * [x] OSX
 * [x] Linux
+* [x] Raspberry Pi
 
 
 ## License
