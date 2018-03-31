@@ -15,6 +15,7 @@ rust:
 
 os:
   - linux
+  - osx
 
 branches:
   only:
@@ -40,31 +41,37 @@ addons:
 before_install:
   - set -e
   - rustup self update
-  - curl -so "$TRAVIS_BUILD_DIR/libsciter-gtk.so" https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin.gtk/x64/libsciter-gtk.so
 
 install:
   - source ~/.cargo/env || true
+  - export SDK_PATH=https://raw.githubusercontent.com/c-smile/sciter-sdk/master
+  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then curl -so "$TRAVIS_BUILD_DIR/sciter-osx-64.dylib" $SDK_PATH/bin.osx/sciter-osx-64.dylib; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then curl -so "$TRAVIS_BUILD_DIR/libsciter-gtk.so" $SDK_PATH/bin.gtk/x64/libsciter-gtk.so; fi
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$TRAVIS_BUILD_DIR"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cp "$TRAVIS_BUILD_DIR/sciter-osx-64.dylib" "$TRAVIS_BUILD_DIR/libsciter-osx-64.dylib"; fi
+
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$TRAVIS_BUILD_DIR"; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export RUSTFLAGS='-C link-arg=-Wl,--unresolved-symbols=ignore-in-shared-libs'; fi
 
   - export PATH="$PATH:$TRAVIS_BUILD_DIR"
   - export LIBRARY_PATH="$LIBRARY_PATH:$TRAVIS_BUILD_DIR"
   - export RUST_BACKTRACE=full
-  - export RUSTFLAGS='-C link-arg=-Wl,--unresolved-symbols=ignore-in-shared-libs'
 
   - #ls /usr/lib/x86_64-linux-gnu/libstdc++*
   - #strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBC
   - gcc --version
 
 script:
+  - cargo build --example first --verbose
   - cargo run --example first
   - cargo clean
   - cargo build --all
   - cargo build --all --release
   - cargo build --examples --release
-  - #cargo test --all
-  - #cargo test --all --release
+
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cargo test --all; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cargo test --all --release; fi
 
 after_script: set +e
