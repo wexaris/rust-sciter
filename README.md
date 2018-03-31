@@ -1,6 +1,7 @@
 # Rust bindings for Sciter
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/sciter-sdk/rust-sciter)](https://ci.appveyor.com/project/pravic/rust-sciter)
+[![Build Status](https://travis-ci.org/sciter-sdk/rust-sciter.svg?branch=master)](https://travis-ci.org/sciter-sdk/rust-sciter)
 [![Current Version](https://meritbadge.herokuapp.com/sciter-rs)](https://crates.io/crates/sciter-rs)
 [![Join the chat at https://gitter.im/pravic/sciter](https://badges.gitter.im/pravic/sciter.png)](https://gitter.im/pravic/sciter)
 
