@@ -1,6 +1,6 @@
 [package]
 name = "sciter-serde"
-version = "0.3.0"
+version = "0.3.1"
 description = "Serde support for Sciter engine."
 keywords = ["serde", "gui", "gtk", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
@@ -14,6 +14,7 @@ exclude = [".gitignore", ".editorconfig", ".appveyor.yml"]
 
 [badges]
 appveyor = { repository = "sciter-sdk/rust-sciter" }
+travis-ci = { repository = "sciter-sdk/rust-sciter" }
 
 [dependencies]
 sciter-rs = { version = "0.5" }
