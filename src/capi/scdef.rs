@@ -54,19 +54,19 @@ pub enum SCRIPT_RUNTIME_FEATURES
 pub enum GFX_LAYER
 {
 	#[cfg(windows)]
-  GFX_LAYER_GDI      = 1,
+  GDI      = 1,
 
   #[cfg(osx)]
-  GFX_LAYER_CG       = 1,
+  CG       = 1,
 
   #[cfg(unix)]
-  GFX_LAYER_CAIRO    = 1,
+  CAIRO    = 1,
 
-  GFX_LAYER_WARP     = 2,
-  GFX_LAYER_D2D      = 3,
-  GFX_LAYER_SKIA_CPU = 4,
-  GFX_LAYER_SKIA_OPENGL = 5,
-  GFX_LAYER_AUTO     = 0xFFFF,
+  WARP     = 2,
+  D2D      = 3,
+  SKIA_CPU = 4,
+  SKIA_OPENGL = 5,
+  AUTO     = 0xFFFF,
 }
 
 #[repr(C)]

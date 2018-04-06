@@ -231,6 +231,7 @@ impl Host {
 	}
 
 	/// Set various sciter engine options, see the [`SCITER_RT_OPTIONS`](../enum.SCITER_RT_OPTIONS.html).
+	#[deprecated(since="0.5.40", note="please use `Window::set_options()` instead.")]
 	pub fn set_option(&self, option: SCITER_RT_OPTIONS, value: usize) -> Result<()> {
 		let ok = (_API.SciterSetOption)(self.hwnd.get(), option, value as UINT_PTR);
 		ok_or!(ok)

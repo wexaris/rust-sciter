@@ -40,6 +40,25 @@ pub type Flags = SCITER_CREATE_WINDOW_FLAGS;
 
 pub use capi::scdef::{SCITER_CREATE_WINDOW_FLAGS};
 
+
+/// Per-window sciter engine options.
+pub enum Options {
+	/// value: `true` to enable, `false` to disable, enabled by default.
+	SmoothScroll(bool),
+
+	/// value: `0` - system default, `1` - no smoothing, `2` - standard smoothing, `3` - clear type.
+	FontSmoothing(u8),
+
+	/// Windows Aero support, value: `false` - normal drawing, `true` - window has transparent background after calls
+	/// [`DwmExtendFrameIntoClientArea()`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa969512(v=vs.85).aspx)
+	/// or [`DwmEnableBlurBehindWindow()`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa969508(v=vs.85).aspx).
+	TransparentWindow(bool),
+
+	///value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window).
+	AlphaWindow(bool),
+}
+
+
 /// Sciter window.
 pub struct Window
 {
@@ -139,6 +158,24 @@ impl Window {
 	/// Get native window title.
 	pub fn get_title(&self) -> String {
 		self.base.get_title()
+	}
+
+	/// Set various sciter engine options, see the [`Options`](enum.Options.html).
+	pub fn set_options(&self, options: Options) -> Result<(), ()> {
+		use self::Options::*;
+		use capi::scdef::SCITER_RT_OPTIONS;
+		let (option, value) = match options {
+			SmoothScroll(enable) => (SCITER_RT_OPTIONS::SCITER_SMOOTH_SCROLL, enable as usize),
+			FontSmoothing(technology) => (SCITER_RT_OPTIONS::SCITER_FONT_SMOOTHING, technology as usize),
+			TransparentWindow(enable) => (SCITER_RT_OPTIONS::SCITER_TRANSPARENT_WINDOW, enable as usize),
+			AlphaWindow(enable) => (SCITER_RT_OPTIONS::SCITER_ALPHA_WINDOW, enable as usize),
+		};
+		let ok = (_API.SciterSetOption)(self.get_hwnd(), option, value);
+		if ok != 0 {
+			Ok(())
+		} else {
+			Err(())
+		}
 	}
 
 	/// Show window and run the main app message loop until window been closed.

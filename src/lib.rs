@@ -78,12 +78,12 @@ pub use capi::scdef::{SCITER_RT_OPTIONS, GFX_LAYER};
 mod platform;
 mod eventhandler;
 
-pub mod window;
-pub mod host;
-pub mod value;
-pub mod utf;
 pub mod dom;
+pub mod host;
 pub mod types;
+pub mod utf;
+pub mod value;
+pub mod window;
 
 pub use dom::Element;
 pub use dom::event::EventHandler;
@@ -182,8 +182,53 @@ pub fn version() -> String {
 	return version;
 }
 
+/// Various global sciter engine options.
+pub enum RuntimeOptions<'a> {
+	/// global; value: milliseconds, connection timeout of http client.
+	ConnectionTimeout(u32),
+	/// global; value: 0 - drop connection, 1 - use builtin dialog, 2 - accept connection silently.
+	OnHttpsError(u8),
+	/// global; value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
+	GpuBlacklist(&'a str),
+	/// global or per-window; value - combination of [SCRIPT_RUNTIME_FEATURES](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
+	ScriptFeatures(u8),
+	/// global (must be called before any window creation); value - [GFX_LAYER](enum.GFX_LAYER.html).
+	GfxLayer(GFX_LAYER),
+	/// global or per-window; value - TRUE/FALSE
+	DebugMode(bool),
+	/// global; value - BOOL, TRUE - the engine will use "unisex" theme that is common for all platforms.
+	/// That UX theme is not using OS primitives for rendering input elements.
+	/// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
+	UxTheming(bool),
+}
+
+/// Set various sciter engine global options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
+pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
+	use RuntimeOptions::*;
+	let (option, value) = match options {
+		ConnectionTimeout(ms) => (SCITER_RT_OPTIONS::SCITER_CONNECTION_TIMEOUT, ms as usize),
+		OnHttpsError(behavior) => (SCITER_RT_OPTIONS::SCITER_HTTPS_ERROR, behavior as usize),
+		GpuBlacklist(json) => (SCITER_RT_OPTIONS::SCITER_SET_GPU_BLACKLIST, json.as_bytes().as_ptr() as usize),
+		ScriptFeatures(mask) => (SCITER_RT_OPTIONS::SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
+		GfxLayer(backend) => (SCITER_RT_OPTIONS::SCITER_SET_GFX_LAYER, backend as usize),
+		DebugMode(enable) => (SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as usize),
+		UxTheming(enable) => (SCITER_RT_OPTIONS::SCITER_SET_UX_THEMING, enable as usize),
+	};
+	let ok = (_API.SciterSetOption)(std::ptr::null_mut(), option, value);
+	if ok != 0 {
+		Ok(())
+	} else {
+		Err(())
+	}
+}
+
 /// Set various sciter engine global options, see the [`SCITER_RT_OPTIONS`](enum.SCITER_RT_OPTIONS.html).
+#[deprecated(since = "0.5.40", note = "please use `sciter::set_options()` instead.")]
 pub fn set_option(option: SCITER_RT_OPTIONS, value: usize) -> std::result::Result<(), ()> {
 	let ok = (_API.SciterSetOption)(std::ptr::null_mut(), option, value);
-	if ok != 0 { Ok(()) } else { Err(()) }
+	if ok != 0 {
+		Ok(())
+	} else {
+		Err(())
+	}
 }
