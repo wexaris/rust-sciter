@@ -74,11 +74,14 @@ before_script:
   - #ls /usr/lib/x86_64-linux-gnu/libstdc++*
   - #strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBC
   - gcc --version
+  - rustc --version
 
 script:
+  - cargo update
+
   - cargo build --example first --verbose
   - cargo run --example first
-  - cargo clean
+
   - cargo build --all
   - cargo build --all --release
   - cargo build --examples --release

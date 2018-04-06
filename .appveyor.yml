@@ -1,34 +1,66 @@
 version: 0.5.0.{build}
+
 branches:
   only:
     - master
+    - travis
+
+image:
+  - Visual Studio 2017
+
 environment:
   matrix:
-  - TARGET: 1.21.0-x86_64-pc-windows-msvc
+  - TARGET: x86_64-pc-windows-msvc
+    CHANNEL: 1.21.0
     ARCH: 64
-  - TARGET: 1.21.0-i686-pc-windows-msvc
+
+  - TARGET: i686-pc-windows-msvc
+    CHANNEL: 1.21.0
     ARCH: 32
-  - TARGET: nightly-x86_64-pc-windows-msvc
+
+  - TARGET: x86_64-pc-windows-msvc
+    CHANNEL: nightly
     ARCH: 64
-  - TARGET: nightly-i686-pc-windows-msvc
+
+  - TARGET: i686-pc-windows-msvc
+    CHANNEL: nightly
     ARCH: 32
+
+  - TARGET: x86_64-pc-windows-msvc
+    CHANNEL: 1.21.0
+    ARCH: 64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+
+cache:
+  - C:\Users\appveyor\.cargo\registry
+  #- C:\projects\deps -> appveyor.yml
+  #- target
+
 install:
-  - cmd: echo Testing sciter%ARCH% %CONFIGURATION% with %TARGET% under %PLATFORM%.
+  - cmd: echo Testing sciter%ARCH% with Rust %CHANNEL%.
   - cmd: echo Current directory is %APPVEYOR_BUILD_FOLDER%
   - cmd: mkdir ..\deps
-  - cmd: curl -so "..\deps\sciter.dll" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin/%ARCH%/sciter.dll"
-  - cmd: curl -so "..\deps\rust-install.exe" "https://static.rust-lang.org/dist/rust-%TARGET%.exe"
-  - cmd: ..\deps\rust-install.exe /VERYSILENT /NORESTART /DIR="C:\rust"
-  - cmd: set PATH=%PATH%;C:\rust\bin;C:\projects\deps
-build_script:
+  - curl -sSLo "..\deps\sciter.dll" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin/%ARCH%/sciter.dll"
+  - curl -sSLo "..\deps\rustup-init.exe" "https://win.rustup.rs/"
+  - ..\deps\rustup-init.exe -y --default-host %TARGET% --default-toolchain %CHANNEL%
+  - cmd: set PATH=%PATH%;C:\Users\appveyor\.cargo\bin;C:\projects\deps
+
+before_build:
   - cmd: cd
-  - cargo clean
+  - rustc --version
+  - cargo update
+
+build_script:
   - cmd: echo Building library
   - cargo build --release --all
+
   - cmd: echo Building examples
+  - cargo build --example first --verbose
   - cargo build --release --examples
+
 test_script:
-  - cmd: cd
+  - cargo run --example first
+
   - cargo test --all
-  - cmd: cd
   - cargo test --all --release
