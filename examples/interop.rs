@@ -46,7 +46,7 @@ impl EventHandler {
 		let answer = root.call_function("raise_error", &make_args!(17, "42", false));
 		println!(" answer is {:?}", answer);
 
-		println!("calling unexisting function");
+		println!("calling inexisting function");
 		let answer = root.call_function("raise_error2", &[]);
 		println!(" answer is {:?}", answer);
 
@@ -132,7 +132,40 @@ impl sciter::EventHandler for EventHandler {
 
 }
 
+fn check_options() {
+	for arg in std::env::args() {
+		if arg.starts_with("--sciter-gfx=") {
+			use sciter::GFX_LAYER;
+			let backend = match arg.split_at("--sciter-gfx=".len()).1.trim() {
+				"auto" => GFX_LAYER::AUTO,
+				"cpu" => GFX_LAYER::CPU,
+				"skia" | "skia-cpu" => GFX_LAYER::SKIA_CPU,
+				"skia-opengl" => GFX_LAYER::SKIA_OPENGL,
+
+				#[cfg(windows)]
+				"d2d" => GFX_LAYER::D2D,
+				#[cfg(windows)]
+				"warp" => GFX_LAYER::WARP,
+
+				_ => GFX_LAYER::AUTO,
+			};
+			println!("setting {:?} backend", backend);
+			let ok = sciter::set_options(sciter::RuntimeOptions::GfxLayer(backend));
+			if let Err(e) = ok {
+				println!("failed to set backend: {:?}", e);
+			}
+
+		} else if arg.starts_with("--ux-theme") {
+			#[cfg(windows)]
+			sciter::set_options(sciter::RuntimeOptions::UxTheming(true)).ok();
+		}
+	}
+}
+
 fn main() {
+	// interop --sciter-gfx=cpu --ux-theme
+	check_options();
+
 	let html = include_bytes!("interop.htm");
 	let handler = EventHandler { root: None };
 	let mut frame = sciter::Window::new();

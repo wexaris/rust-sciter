@@ -18,11 +18,14 @@
       view.caption = $(head > title).value;
 
       $(#machine).text = Sciter.machineName();
+      $(#backend).text = view.backendName;
+      $(#version).text = String.printf("%d.%d.%d.%d",
+        (Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
+        (Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff);
 
       var counter = 0;
-
       $(button#append).on("click", function(){
-        $(body).$append(<h1#test>{++counter }</h1>);
+        $(body).$append(<h1#test>{ ++counter }</h1>);
       });
 
       $(button#open).on("click", function(){
@@ -72,7 +75,7 @@
 <body>
 
   <h1>Rust Sciter Application</h1>
-  <p>Running on <em #machine /> machine</p>
+  <p>Running on <strong #machine /> machine via <strong #backend/> (<strong #version/>).</p>
 
   <button #append>Append</button>
   <button #open>Open</button>
