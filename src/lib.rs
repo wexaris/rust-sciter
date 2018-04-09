@@ -205,14 +205,15 @@ pub enum RuntimeOptions<'a> {
 /// Set various sciter engine global options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
 pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 	use RuntimeOptions::*;
+	use SCITER_RT_OPTIONS::*;
 	let (option, value) = match options {
-		ConnectionTimeout(ms) => (SCITER_RT_OPTIONS::SCITER_CONNECTION_TIMEOUT, ms as usize),
-		OnHttpsError(behavior) => (SCITER_RT_OPTIONS::SCITER_HTTPS_ERROR, behavior as usize),
-		GpuBlacklist(json) => (SCITER_RT_OPTIONS::SCITER_SET_GPU_BLACKLIST, json.as_bytes().as_ptr() as usize),
-		ScriptFeatures(mask) => (SCITER_RT_OPTIONS::SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
-		GfxLayer(backend) => (SCITER_RT_OPTIONS::SCITER_SET_GFX_LAYER, backend as usize),
-		DebugMode(enable) => (SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as usize),
-		UxTheming(enable) => (SCITER_RT_OPTIONS::SCITER_SET_UX_THEMING, enable as usize),
+		ConnectionTimeout(ms) => (SCITER_CONNECTION_TIMEOUT, ms as usize),
+		OnHttpsError(behavior) => (SCITER_HTTPS_ERROR, behavior as usize),
+		GpuBlacklist(json) => (SCITER_SET_GPU_BLACKLIST, json.as_bytes().as_ptr() as usize),
+		ScriptFeatures(mask) => (SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
+		GfxLayer(backend) => (SCITER_SET_GFX_LAYER, backend as usize),
+		DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
+		UxTheming(enable) => (SCITER_SET_UX_THEMING, enable as usize),
 	};
 	let ok = (_API.SciterSetOption)(std::ptr::null_mut(), option, value);
 	if ok != 0 {

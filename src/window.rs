@@ -162,13 +162,13 @@ impl Window {
 
 	/// Set various sciter engine options, see the [`Options`](enum.Options.html).
 	pub fn set_options(&self, options: Options) -> Result<(), ()> {
+		use capi::scdef::SCITER_RT_OPTIONS::*;
 		use self::Options::*;
-		use capi::scdef::SCITER_RT_OPTIONS;
 		let (option, value) = match options {
-			SmoothScroll(enable) => (SCITER_RT_OPTIONS::SCITER_SMOOTH_SCROLL, enable as usize),
-			FontSmoothing(technology) => (SCITER_RT_OPTIONS::SCITER_FONT_SMOOTHING, technology as usize),
-			TransparentWindow(enable) => (SCITER_RT_OPTIONS::SCITER_TRANSPARENT_WINDOW, enable as usize),
-			AlphaWindow(enable) => (SCITER_RT_OPTIONS::SCITER_ALPHA_WINDOW, enable as usize),
+			SmoothScroll(enable) => (SCITER_SMOOTH_SCROLL, enable as usize),
+			FontSmoothing(technology) => (SCITER_FONT_SMOOTHING, technology as usize),
+			TransparentWindow(enable) => (SCITER_TRANSPARENT_WINDOW, enable as usize),
+			AlphaWindow(enable) => (SCITER_ALPHA_WINDOW, enable as usize),
 		};
 		let ok = (_API.SciterSetOption)(self.get_hwnd(), option, value);
 		if ok != 0 {

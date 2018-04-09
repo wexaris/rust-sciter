@@ -35,38 +35,43 @@ pub enum LOAD_RESULT {
   LOAD_MYSELF,
 }
 
+/// Script runtime options.
 #[repr(C)]
 #[derive(Debug)]
 #[allow(missing_docs)]
-/// Script runtime options.
 pub enum SCRIPT_RUNTIME_FEATURES
 {
-  ALLOW_FILE_IO = 0x0000_0001,
-  ALLOW_SOCKET_IO = 0x0000_0002,
-  ALLOW_EVAL = 0x0000_0004,
-  ALLOW_SYSINFO = 0x0000_0008
+	ALLOW_FILE_IO = 0x1,
+	ALLOW_SOCKET_IO = 0x2,
+	ALLOW_EVAL = 0x4,
+	ALLOW_SYSINFO = 0x8,
 }
 
+/// Explicitly set a sciter graphics layer.
 #[repr(C)]
 #[derive(Debug)]
 #[allow(missing_docs)]
-/// Explicitly set sciter graphics layer.
 pub enum GFX_LAYER
 {
+	/// An auto-selected backend.
+	AUTO = 0xFFFF,
+
+	/// Depends on OS: GDI, Cairo or CoreGraphics.
+	CPU = 1,
+
+	/// A software rasterizer for Direct2D.
 	#[cfg(windows)]
-  GDI      = 1,
+	WARP = 2,
 
-  #[cfg(osx)]
-  CG       = 1,
+	/// A hardware Direct2D mode.
+	#[cfg(windows)]
+	D2D = 3,
 
-  #[cfg(unix)]
-  CAIRO    = 1,
+	/// Skia backend with CPU rasterization mode.
+	SKIA_CPU = 4,
 
-  WARP     = 2,
-  D2D      = 3,
-  SKIA_CPU = 4,
-  SKIA_OPENGL = 5,
-  AUTO     = 0xFFFF,
+	/// Skia backend with OpenGL rendering.
+	SKIA_OPENGL = 5,
 }
 
 #[repr(C)]
