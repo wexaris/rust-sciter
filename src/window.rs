@@ -70,22 +70,10 @@ impl Window {
 
 	/// Create a new main window.
 	pub fn new() -> Window {
-		let flags = SCITER_CREATE_WINDOW_FLAGS::main_window(true);
-		Window::create((0,0,0,0), flags, None)
+		Builder::main_window().create()
 	}
 
-	/// Create new window with specified `size(width, height)` and flags.
-	pub fn with_size(size: (i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS) -> Window {
-		let (w, h) = size;
-		Window::create((0,0,w,h), flags, None)
-	}
-
-	/// Create new window with specified position as `rect(x, y, width, height)` and flags.
-	pub fn with_rect(rect: (i32, i32, i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS) -> Window {
-		Window::create(rect, flags, None)
-	}
-
-	/// Create new window with specified position as `rect(x, y, width, height)`, flags and optional parent window.
+	/// Create a new window with the specified position as `rect(x, y, width, height)`, flags and an optional parent window.
 	pub fn create(rect: (i32, i32, i32, i32), flags: SCITER_CREATE_WINDOW_FLAGS, parent: Option<HWINDOW>) -> Window {
 		let mut base = OsWindow::new();
 		let hwnd = base.create(rect, flags as UINT, parent.unwrap_or(0 as HWINDOW));
@@ -232,5 +220,157 @@ impl Window {
 	/// Post app quit message.
 	pub fn quit_app(&self) {
 		self.base.quit_app()
+	}
+}
+
+
+/// Builder pattern for window creation.
+///
+/// For example,
+///
+/// ```rust,no_run
+/// let mut frame = sciter::window::Builder::main_window()
+///   .with_size((800,600))
+///   .resizeable()
+///   .glassy()
+///   .create();
+/// ```
+#[derive(Default)]
+pub struct Builder {
+	flags: Flags,
+	rect: RECT,
+	parent: Option<HWINDOW>,
+}
+
+impl Builder {
+
+	/// Main application window (resizeable with min/max buttons and title).
+	/// Will terminate the app on close.
+	pub fn main_window() -> Self {
+		Builder::main()
+			.resizeable()
+			.closeable()
+			.with_title()
+	}
+
+	/// Popup window (with min/max buttons and title).
+	pub fn popup_window() -> Self {
+		Builder::popup()
+			.closeable()
+			.with_title()
+	}
+
+	/// Child window style. if this flag is set all other flags are ignored.
+	pub fn child_window() -> Self {
+		Builder::with_flags(SCITER_CREATE_WINDOW_FLAGS::SW_CHILD)
+	}
+
+	/// If you want to start from scratch.
+	pub fn none() -> Self {
+		Builder::with_flags(SCITER_CREATE_WINDOW_FLAGS::SW_CHILD)	// 0
+	}
+
+	/// Start with some flags.
+	pub fn with_flags(flags: Flags) -> Self {
+		let mut me = Builder::default();
+		me.flags = flags;
+		me
+	}
+
+	/// Main window style (appears in taskbar).
+	/// Will terminate the app on close.
+	pub fn main() -> Self {
+		Builder::with_flags(SCITER_CREATE_WINDOW_FLAGS::SW_MAIN)
+	}
+
+	/// Popup style, window is created as topmost.
+	pub fn popup() -> Self {
+		Builder::with_flags(SCITER_CREATE_WINDOW_FLAGS::SW_POPUP)
+	}
+
+	/// Tool window style (with thin titlebar).
+	pub fn tool() -> Self {
+		Builder::with_flags(SCITER_CREATE_WINDOW_FLAGS::SW_TOOL)
+	}
+
+	/// Specify the parent window (e.g. for child creation).
+	pub fn with_parent(mut self, parent: HWINDOW) -> Self {
+		self.parent = Some(parent);
+		self
+	}
+
+	/// Specify the precise window size in `(width, height)` form.
+	pub fn with_size(mut self, size: (i32, i32)) -> Self {
+		self.rect.right = self.rect.left + size.0;
+		self.rect.bottom = self.rect.top + size.1;
+		self
+	}
+
+	/// Specify the precise window position in `(X, Y)` form.
+	pub fn with_pos(mut self, position: (i32, i32)) -> Self {
+		let size = self.rect.size();
+		self.rect.left = position.0;
+		self.rect.top = position.1;
+		self.rect.right = position.0 + size.cx;
+		self.rect.bottom = position.1 + size.cy;
+		self
+	}
+
+	/// Specify the exact window rectangle in `(X, Y, W, H)` form.
+	pub fn with_rect(mut self, rect: (i32, i32, i32, i32)) -> Self {
+		self.rect = RECT {
+			left: rect.0,
+			top: rect.1,
+			right: rect.2,
+			bottom: rect.3,
+		};
+		self
+	}
+
+	/// Top level window, has titlebar.
+	pub fn with_title(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR)
+	}
+
+	/// Can be resized.
+	pub fn resizeable(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE)
+	}
+
+	/// Can not be resized.
+	pub fn fixed(self) -> Self {
+		self.and(SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE)
+	}
+
+	/// Has minimize / maximize buttons.
+	pub fn closeable(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS)
+	}
+
+	/// Glassy window.
+	pub fn glassy(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_GLASSY)
+	}
+
+	/// Transparent window.
+	pub fn alpha(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_ALPHA)
+	}
+
+	fn or(mut self, flag: Flags) -> Self {
+		self.flags = self.flags | flag;
+		self
+	}
+
+	fn and(mut self, flag: Flags) -> Self {
+		let masked = self.flags as u32 & !(flag as u32);
+		self.flags = unsafe { ::std::mem::transmute(masked) };
+		self
+	}
+
+	/// Consume the builder and call [`Window::create()`](struct.Window.html#method.create) with built parameters.
+	pub fn create(self) -> Window {
+		let r = self.rect;
+		Window::create((r.left, r.top, r.right, r.bottom), self.flags, self.parent)
 	}
 }

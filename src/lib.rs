@@ -90,6 +90,18 @@ pub use host::{Archive, Host, HostHandler};
 pub use value::{Value, FromValue};
 pub use window::Window;
 
+/// Builder pattern for window creation. See [`window::Builder`](window/struct.Builder.html) documentation.
+///
+/// For example,
+///
+/// ```rust,no_run
+/// let mut frame = sciter::WindowBuilder::main_window()
+///   .with_size((800,600))
+///   .glassy()
+///   .fixed()
+///   .create();
+/// ```
+pub type WindowBuilder = window::Builder;
 
 
 /* Loader */

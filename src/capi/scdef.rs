@@ -107,8 +107,8 @@ pub enum SCITER_RT_OPTIONS
   SCITER_ALPHA_WINDOW  = 12,
 }
 
-#[repr(C)]
 /// Window flags
+#[repr(C)]
 pub enum SCITER_CREATE_WINDOW_FLAGS {
 	/// child window only, if this flag is set all other flags ignored
   SW_CHILD      = (1 << 0),
@@ -134,46 +134,9 @@ pub enum SCITER_CREATE_WINDOW_FLAGS {
   SW_OWNS_VM      = (1 << 10),
 }
 
-impl SCITER_CREATE_WINDOW_FLAGS {
-	/// Main application window.
-	pub fn main_window(resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
-		let flags = SCITER_CREATE_WINDOW_FLAGS::SW_MAIN
-							 | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS
-							 | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR;
-		if resizeable {
-			flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE
-		} else {
-			flags
-		}
-	}
-
-	/// Child window.
-	pub fn child_window() -> SCITER_CREATE_WINDOW_FLAGS {
+impl Default for SCITER_CREATE_WINDOW_FLAGS {
+	fn default() -> Self {
 		SCITER_CREATE_WINDOW_FLAGS::SW_CHILD
-	}
-
-	/// Popup window.
-	pub fn popup_window(title: bool, minmaxclose: bool, resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
-		let mut flags = SCITER_CREATE_WINDOW_FLAGS::SW_POPUP;
-		if title {
-			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR;
-		}
-		if minmaxclose {
-			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS;
-		}
-		if resizeable {
-			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
-		}
-		return flags;
-	}
-
-	/// Tool window.
-	pub fn tool_window(resizeable: bool) -> SCITER_CREATE_WINDOW_FLAGS {
-		let mut flags = SCITER_CREATE_WINDOW_FLAGS::SW_TOOL;
-		if resizeable {
-			flags = flags | SCITER_CREATE_WINDOW_FLAGS::SW_RESIZEABLE;
-		}
-		return flags;
 	}
 }
 
