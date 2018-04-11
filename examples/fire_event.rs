@@ -55,6 +55,6 @@ fn main() {
 		let html = include_bytes!("fire_event.htm");
 		let mut frame = sciter::Window::new();
 		frame.event_handler(FireEvent);
-		frame.load_html(html, None);
+		frame.load_html(html, Some("example://fire_event.htm"));
 		frame.run_app();
 }

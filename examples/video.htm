@@ -2,7 +2,7 @@
   <head>
     <title>Video behavior demo</title>
     <style>
-      body { background:gold; padding: 5dip; margin: 0; }
+      body { background: gold; padding: 5dip; margin: 0; }
 
       form { margin: 5dip; }
 
@@ -11,8 +11,8 @@
       video.generator {
         behavior: video-generator video;
         size: *;
-        foreground-size:contain;
-        border:1px solid orange;
+        foreground-size: contain;
+        border: 1px solid orange;
       }
 
     </style>
@@ -20,18 +20,19 @@
 
       $(video).onSize = function() {
         var (w,h) = this.box(#dimension);
-        $(form).value = { width:w, height:h };
+        $(form).value = { width: w, height: h };
       }
 
       function self.ready() {
         var (w,h) = this.box(#dimension);
-        $(form).value = { width:w, height:h };
+        $(form).value = { width: w, height: h };
       }
 
       event click $(#snapshot) {
         var frame = $(video).style.foregroundImage;
         var image = frame.toBytes();
-        if (var fn = view.selectFile(#save, "Images|*.png;*.jpg|All files|*.*", "png")) {
+        var fn = view.selectFile(#save, "Images|*.png;*.jpg|All files|*.*", "png");
+        if (fn) {
           frame.toBytes().save(fn);
         }
       }
@@ -42,19 +43,25 @@
 
       event click $(#show-detached) {
 
+        if (body && !video.parent) {
+          // recreate element
+          video = body.$append(<video class="generator" />);
+        }
+
         // It creates a new window and moves the current video element to it.
         if( this.value )
         {
           host = view.window {
-            type:View.TOOL_WINDOW,
-            html: $(html > head > .template > html).html,
-            width : 640,
-            height : 480,
-            alignment: 5
+            type: View.TOOL_WINDOW,
+            html: $(#templates).text,
+            width: 640,
+            height: 480,
+            alignment: 5,
           };
           body = video.parent;
           video.detach();
           host.root.$(body).append(video);
+
         } else {
 
           // and back
@@ -66,26 +73,27 @@
 
     </script>
 
-    <frame class="template">
-    <html window-resizable>
-      <head>
-        <title>Hosted element</title>
-        <style>
+    <script id="templates" type="text/html+template">
 
-          video.generator {
-            display:block;
-            behavior: video-generator video;
-            size: *;
-            foreground-size:contain;
-          }
+      <html window-resizable>
+        <head>
+          <title>Hosted element</title>
+          <style>
+            body { margin: 0; padding: 0; }
 
-        </style>
-        <script type="text/tiscript"></script>
-      </head>
-    <body>
-    </body>
-    </html>
-    </frame>
+            video.generator {
+              display: block;
+              behavior: video-generator video;
+              size: *;
+              foreground-size: contain;
+            }
+          </style>
+        </head>
+      <body>
+      </body>
+      </html>
+
+    </script>
 
   </head>
 <body>
@@ -99,7 +107,7 @@
   </div>
 
   <div>
-    <form>pixels <output name=width /> x <output name=height /></form>
+    <form>frame size: <output name=width /> x <output name=height /></form>
   </div>
 
   <video class="generator" />

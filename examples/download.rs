@@ -49,8 +49,9 @@ impl Drop for Handler {
 }
 
 fn main() {
-	use sciter::window;
-	let mut frame = window::Window::with_size((1024,768), window::Flags::main_window(true));
+  let mut frame = sciter::WindowBuilder::main_window()
+  	.with_size((1024, 768))
+  	.create();
 	let handler = Handler { host: Rc::downgrade(&frame.get_host()) };
 	frame.sciter_handler(handler);
 	frame.set_title("Download sample");

@@ -170,6 +170,6 @@ fn main() {
 	let handler = EventHandler { root: None };
 	let mut frame = sciter::Window::new();
 	frame.event_handler(handler);
-	frame.load_html(html, None);
+	frame.load_html(html, Some("example://interop.htm"));
 	frame.run_app();
 }

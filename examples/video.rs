@@ -155,11 +155,11 @@ fn main() {
     std::process::exit(126);
   }
 
-  use sciter::window;
-
-  let mut frame = window::Window::with_size((750, 750), window::Flags::main_window(true));
+  let mut frame = sciter::WindowBuilder::main_window()
+  	.with_size((750, 750))
+  	.create();
   frame.set_title("Video renderer sample");
   frame.register_behavior("video-generator", || Box::new(VideoGen::new()));
-  frame.load_html(include_bytes!("video.htm"), None);
+  frame.load_html(include_bytes!("video.htm"), Some("example://video.htm"));
   frame.run_app();
 }

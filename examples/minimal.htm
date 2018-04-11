@@ -5,12 +5,15 @@
 
       html {
         background: radial-gradient(75% 75%, circle farthest-side, white, orange, rgb(0,0,204));
-        color:#fff;
+        color: #fff;
       }
 
       html:rtl {
         mapping: left-to-right(background);
       }
+
+      a { color: white; }
+      code { font-weight: bold; }
 
     </style>
     <script type="text/tiscript">
@@ -33,6 +36,16 @@
         $(body).$append(<h1#test>{fn}</h1>);
       });
 
+      // Some tricks with hyperlinks:
+      $(a).on("click", function() {
+        Sciter.launch(this.attributes["href"]);
+        return true;
+      });
+
+      for (var a in $$(a)) {
+        a.attributes["title"] = a.attributes["href"];
+      }
+
     </script>
   </head>
 <body>
@@ -43,10 +56,16 @@
   <button #append>Append</button>
   <button #open>Open</button>
   <select>
-    <option>First</option>
-    <option>Second</option>
-    <option>Third</option>
+    <option>Some</option>
+    <option>Items</option>
+    <option>in select</option>
   </select>
+
+  <section class=footer>
+    <p>You can inspect this window in the <a href="https://sciter.com/developers/development-tools/">Inspector tool</a>
+    from the <a href="https://sciter.com/download/">Sciter SDK</a>.</p>
+    <p>Run the Inspector first and then press <code>CTRL+SHIFT+I</code> in this window.</p>
+  </section>
 
 </body>
 </html>

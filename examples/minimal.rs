@@ -1,28 +1,27 @@
 //! Minimalistic Sciter sample.
 
-// Uncomment to build this example with a Windows subsystem,
-// which eliminates console window. Requires Rust 1.18.
-
-// #![windows_subsystem="windows"]
+// Specify the Windows subsystem to eliminate console window.
+// Requires Rust 1.18.
+#![windows_subsystem="windows"]
 
 extern crate sciter;
 
 fn main() {
-	// Step 1: Include the 'minimal.html' file to a byte array.
-	// Hint: Take a look into 'minimal.html' which contains tiscript
-	// rust Macro from std (`std::include_bytes!`).
+	// Step 1: Include the 'minimal.html' file as a byte array.
+	// Hint: Take a look into 'minimal.html' which contains some tiscript code.
 	let html = include_bytes!("minimal.htm");
 
-	// Step 2: Create a new main sciter window of type sciter::Window
-	// Hint: The sciter Window wrapper (/src/window.rs) contains more
-	// interesting functions to open or attach a scriter window.
+	// Step 2: Create a new main sciter window of type `sciter::Window`.
+	// Hint: The sciter Window wrapper (src/window.rs) contains more
+	// interesting functions to open or attach to another existing window.
 	let mut frame = sciter::Window::new();
 
-	// Step 3: Load HTML byte array from memory to sciter::Window.
-	// Hint: second parameter is a optional uri (here: None).
-	// Also you can use load_file, but it requires an absolute path
-	// of root loaded document to resolve HTML resources properly.
-	frame.load_html(html, None);
+	// Step 3: Load HTML byte array from memory to `sciter::Window`.
+	// Hint: second parameter is an optional uri, it can be `None` in simple cases,
+	// but it is useful for debugging purposes (check the Inspector tool from the Sciter SDK).
+	// Also you can use a `load_file` method, but it requires an absolute path
+	// of the main document to resolve HTML resources properly.
+	frame.load_html(html, Some("example://minimal.htm"));
 
 	// Step 4: Show window and run the main app message loop until window been closed.
 	frame.run_app();

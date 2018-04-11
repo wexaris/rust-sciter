@@ -204,17 +204,12 @@ impl sciter::EventHandler for Handler {
 	}
 }
 
-
-fn testing_dom() {
-	use sciter::window;
-	let mut frame = window::Window::with_size((750,750), window::Flags::main_window(true));
-	let handler = Handler::default();
-	frame.event_handler(handler);
+fn main() {
+  let mut frame = sciter::WindowBuilder::main_window()
+  	.with_size((750, 950))
+  	.create();
+	frame.event_handler(Handler::default());
 	frame.set_title("DOM sample");
 	frame.load_file("http://httpbin.org/html");
 	frame.run_app();
-}
-
-fn main() {
-	testing_dom();
 }

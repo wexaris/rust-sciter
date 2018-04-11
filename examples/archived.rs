@@ -41,7 +41,11 @@ fn main() {
   // just to be sure
   assert!(handler.archive.get("index.htm").is_some(), "no `index.htm`?");
 
-  let mut frame = sciter::Window::with_size((600, 400), sciter::window::Flags::main_window(false));
+  let mut frame = sciter::WindowBuilder::main_window()
+  	.fixed()
+  	.with_size((600, 400))
+  	.create();
+
   frame.sciter_handler(handler);
   frame.load_file("this://app/index.htm");
   frame.run_app();
