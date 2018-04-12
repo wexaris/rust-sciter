@@ -9,16 +9,21 @@ impl EventHandler {
 	fn exec_task(&self, task_no: i32, progress: sciter::Value, done: sciter::Value) -> bool {
 
 		use std::{thread, time};
-		thread::spawn(move || {
 
+		// make values thread-safe
+		let progress = progress.isolate();
+		let done = done.isolate();
+
+		thread::spawn(move || {
+			// and use them here:
 			for i in 1..100 {
 				// call `onProgress` callback
 				thread::sleep(time::Duration::from_millis(100));
-				progress.call(None, &make_args!(i), None).unwrap();
+				progress.call(None, &make_args!(i), Some(file!())).unwrap();
 			}
 
 			// call `onDone` callback
-			done.call(None, &make_args!(task_no), None).unwrap();
+			done.call(None, &make_args!(task_no), Some(file!())).unwrap();
 		});
 		true
 	}

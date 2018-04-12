@@ -132,6 +132,24 @@ v.set_item("three", 3);
 assert!(v.get_item("one").is_int());
 ```
 
+## Thread safety
+
+[`Send`](https://doc.rust-lang.org/stable/std/marker/trait.Send.html)
+
+Essentially, `sciter::Value` is a reference to a certain resource of the single-threaded script VM
+(besides simple cases like integers or floating point values), so it should be accessed from GUI thread only.
+
+To eliminate this restriction, [`Value.isolate()`](struct.Value.html#method.isolate) is used to isolate the value
+from the VM and convert it to plain JSON types.
+
+[Isolated values](struct.IsolatedValue.html) can be moved between threads safely.
+
+[`Sync`](https://doc.rust-lang.org/stable/std/marker/trait.Sync.html)
+
+At any given moment of time only one thread shall be an owner/operator of corresponding Sciter value.
+Therefore you can pass [`isolate`](struct.Value.html#method.isolate)d Sciter values safely between threads,
+but only one thread shall access/mutate it.
+
 .
 */
 
@@ -151,9 +169,6 @@ pub struct Value
 	data: VALUE,
 	tmp: * mut Value,
 }
-
-/// `sciter::Value` can be transferred across thread boundaries.
-unsafe impl Send for Value {}
 
 impl Value {
 
@@ -261,9 +276,11 @@ impl Value {
 	}
 
 	/// Convert `T_OBJECT` value type to JSON `T_MAP` or `T_ARRAY` types.
-	/// Also must be used if you need to pass values between different threads.
-	pub fn isolate(&mut self) {
+	///
+	/// Also must be used to pass values between different threads.
+	pub fn isolate(mut self) -> IsolatedValue {
 		(_API.ValueIsolate)(self.as_ptr());
+		IsolatedValue(self)
 	}
 
 	/// Clear the value. It deallocates all assosiated structures that are not used anywhere else.
@@ -1059,6 +1076,49 @@ impl<'a> ::std::iter::IntoIterator for &'a Value {
 }
 
 
+/// Used to pass values between threads.
+///
+/// `sciter::Value` can not be transferred across thread boundaries,
+/// because essentially it is the reference to a certain resource of the single-threaded script VM.
+///
+/// [`Value.isolate()`](struct.Value.html#method.isolate) is used to convert `T_OBJECT` value type
+/// to plain `T_MAP` or `T_ARRAY` JSON types.
+/// Isolated value does not contain references to the DOM anymore and therefore is not required
+/// to be accessed from GUI thread only.
+/// That said, you can move such values between threads.
+///
+/// # Example:
+///
+/// ```rust
+/// let mut v = sciter::Value::map();
+/// v.set_item("seven", 7);
+///
+/// let charon = v.isolate();
+/// let tid = std::thread::spawn(move || {
+/// 	let mut v = charon;
+/// 	assert_eq!(v.len(), 1);
+/// });
+/// tid.join().unwrap();
+/// ```
+pub struct IsolatedValue(Value);
+
+/// Isolated value can be moved to another thread.
+unsafe impl Send for IsolatedValue {}
+
+/// Dereference to `&Value`.
+impl ::std::ops::Deref for IsolatedValue {
+	type Target = Value;
+	fn deref(&self) -> &Value {
+		&self.0
+	}
+}
+
+/// Dereference to `&mut Value`.
+impl ::std::ops::DerefMut for IsolatedValue {
+	fn deref_mut(&mut self) -> &mut Value {
+		&mut self.0
+	}
+}
 
 
 #[cfg(test)]

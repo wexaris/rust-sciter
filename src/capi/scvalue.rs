@@ -78,6 +78,18 @@ pub enum VALUE_UNIT_TYPE_STRING
 	SYMBOL = 0xffff,   // symbol in tiscript sense
 }
 
+// Sciter or TIScript specific
+#[repr(C)]
+#[derive(Debug, PartialOrd, PartialEq)]
+pub enum VALUE_UNIT_TYPE_OBJECT
+{
+	ARRAY  = 0,   // type T_OBJECT of type Array
+	OBJECT = 1,   // type T_OBJECT of type Object
+	CLASS  = 2,   // type T_OBJECT of type Class (class or namespace)
+	NATIVE = 3,   // type T_OBJECT of native Type with data slot (LPVOID)
+	FUNCTION = 4, // type T_OBJECT of type Function
+	ERROR = 5,    // type T_OBJECT of type Error
+}
 
 pub type NATIVE_FUNCTOR_INVOKE = extern "C" fn (tag: LPVOID, argc: UINT, argv: *const VALUE, retval: * mut VALUE);
 pub type NATIVE_FUNCTOR_RELEASE = extern "C" fn (tag: LPVOID);

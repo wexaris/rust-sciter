@@ -69,11 +69,13 @@ macro_rules! pack_args {
 /// [`Host.call_function()`](host/struct.Host.html#method.call_function),
 /// [`Value.call()`](value/struct.Value.html#method.call).
 ///
-/// ### Example:
+/// ## Example:
 ///
-/// ```rust
-/// # let value = sciter::Value::new();
-/// let result = value.call( &make_args!(1, "2", 3.0) ).unwrap();
+/// ```rust,ignore
+/// # #![doc(test(no_crate_inject))]
+/// # #[macro_use] extern crate sciter;
+/// let value = sciter::Value::new();
+/// let result = value.call(None, &make_args!(1, "2", 3.0), Some(file!())).unwrap();
 /// ```
 #[macro_export]
 macro_rules! make_args {

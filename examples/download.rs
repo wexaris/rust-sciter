@@ -28,8 +28,7 @@ impl HostHandler for Handler {
 			let result = host.eval_script("[Sciter.userName(), Sciter.machineName(true)].join(`@`)");
 			match result {
 				Ok(mut name) => {
-					name.isolate();
-					println!("running on {:?}", name);
+					println!("running on {:?}", *name.isolate());
 				},
 				Err(e) => {
 					println!("error! {}", e.as_string().unwrap_or_else(|| "?".to_string()));
