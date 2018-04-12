@@ -1100,6 +1100,7 @@ impl<'a> ::std::iter::IntoIterator for &'a Value {
 /// });
 /// tid.join().unwrap();
 /// ```
+#[derive(Debug)]
 pub struct IsolatedValue(Value);
 
 /// Isolated value can be moved to another thread.
