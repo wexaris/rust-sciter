@@ -251,7 +251,9 @@ impl Host {
 		(_API.SciterDataReadyAsync)(self.hwnd, s.as_ptr(), data.as_ptr(), data.len() as UINT, req);
 	}
 
-	/// Evaluate script in context of current document.
+	/// Evaluate the given script in context of the current document.
+	///
+	/// This function returns `Result<Value,Value>` with script function result value or with sciter script error.
 	pub fn eval_script(&self, script: &str) -> ::std::result::Result<Value, Value> {
 		let (s,n) = s2w!(script);
 		let mut rv = Value::new();
@@ -259,10 +261,12 @@ impl Host {
 		ok_or!(ok, rv, rv)
 	}
 
-	/// Call scripting function defined in the global namespace.
+	/// Call a script function defined in the global namespace.
 	///
 	/// This function returns `Result<Value,Value>` with script function result value or with sciter script error.
-	/// You can use the `make_args!(a,b,c)` macro which help you construct script arguments from Rust types.
+	///
+	/// You can use the [`make_args!(args...)`](../macro.make_args.html) macro which helps you
+	/// to construct script arguments from Rust types.
 	pub fn call_function(&self, name: &str, args: &[Value]) -> ::std::result::Result<Value, Value> {
 		let mut rv = Value::new();
 		let (s,_) = s2u!(name);

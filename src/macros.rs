@@ -62,7 +62,19 @@ macro_rules! pack_args {
 	};
 }
 
-/// Make `[Value]` sequence to call the sciter script function. Used in `call_function()` and `call_method()` calls.
+/// Pack arguments into a `[Value]` array to call sciter script functions.
+///
+/// Used in [`Element.call_function()`](dom/struct.Element.html#method.call_function),
+/// [`Element.call_method()`](dom/struct.Element.html#method.call_method),
+/// [`Host.call_function()`](host/struct.Host.html#method.call_function),
+/// [`Value.call()`](value/struct.Value.html#method.call).
+///
+/// ### Example:
+///
+/// ```rust
+/// # let value = sciter::Value::new();
+/// let result = value.call( &make_args!(1, "2", 3.0) ).unwrap();
+/// ```
 #[macro_export]
 macro_rules! make_args {
 	() => { { let args : [$crate::value::Value; 0] = []; args } };
