@@ -9,7 +9,7 @@ use sciter::utf;
 use std::rc::{Rc, Weak};
 
 struct Handler {
-  host: Weak<sciter::Host>,
+	host: Weak<sciter::Host>,
 }
 
 impl sciter::EventHandler for Handler {
@@ -30,23 +30,23 @@ impl sciter::EventHandler for Handler {
 }
 
 impl sciter::HostHandler for Handler {
-  fn on_data_loaded(&mut self, pnm: &host::SCN_DATA_LOADED) {
-    println!("data loaded, uri: `{}`, {} bytes.", utf::w2s(pnm.uri), pnm.dataSize);
-  }
+	fn on_data_loaded(&mut self, pnm: &host::SCN_DATA_LOADED) {
+		println!("data loaded, uri: `{}`, {} bytes.", utf::w2s(pnm.uri), pnm.dataSize);
+	}
 
-  fn on_attach_behavior(&mut self, pnm: &mut host::SCN_ATTACH_BEHAVIOR) -> bool {
-    let el = sciter::Element::from(pnm.element);
-    let name = utf::u2s(pnm.name);
-    println!("{}: behavior {}", el, name);
-
-    false
-  }
+	fn on_attach_behavior(&mut self, pnm: &mut host::SCN_ATTACH_BEHAVIOR) -> bool {
+		let el = sciter::Element::from(pnm.element);
+		let name = utf::u2s(pnm.name);
+		println!("{}: behavior {}", el, name);
+		false
+	}
 }
 
 impl Drop for Handler {
-  fn drop(&mut self) {
-    println!("Good bye, window");
-  }
+	fn drop(&mut self) {
+		// called 2 times because it is created 2 times
+		println!("Good bye, window");
+	}
 }
 
 fn main() {
@@ -56,14 +56,14 @@ fn main() {
   let handler = Handler {
     host: Rc::downgrade(&frame.get_host()),
   };
-  frame.sciter_handler(handler);
+	frame.sciter_handler(handler);
 
   let handler = Handler {
     host: Rc::downgrade(&frame.get_host()),
   };
   frame.event_handler(handler);
 
-  frame.set_title("Download sample");
-  frame.load_file("http://httpbin.org/html");
-  frame.run_app();
+	frame.set_title("Download sample");
+	frame.load_file("http://httpbin.org/html");
+	frame.run_app();
 }

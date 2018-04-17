@@ -359,15 +359,9 @@ fn debug_works() {
 #[test]
 fn thread_works() {
 	let mut v = Value::map();
-	v.set_item("seven", 7);
-
-	let charon = v.isolate();
 	let tid = std::thread::spawn(move || {
-
-		let mut v = charon;
-		v.set_item("five", 5);
-
-		assert_eq!(v.len(), 2);
+		v.set_item("seven", 7);
+		assert_eq!(v.len(), 1);
 	});
 	tid.join().unwrap();
 }
