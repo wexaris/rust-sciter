@@ -53,7 +53,7 @@ and module-level sections for the guides about:
        html_favicon_url = "https://sciter.com/wp-content/themes/sciter/!images/favicon.ico")]
 
 // documentation test:
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 
 
 /* Clippy lints */
