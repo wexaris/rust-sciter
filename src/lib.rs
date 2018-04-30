@@ -53,11 +53,15 @@ and module-level sections for the guides about:
        html_favicon_url = "https://sciter.com/wp-content/themes/sciter/!images/favicon.ico")]
 
 // documentation test:
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
+
 
 /* Clippy lints */
 
-#![cfg_attr(feature = "cargo-clippy", allow(needless_return, let_and_return))]
+#![cfg_attr(feature = "cargo-clippy", allow(needless_return, let_and_return))] // past habits
+#![cfg_attr(feature = "cargo-clippy", allow(redundant_field_names))] // since Rust 1.17 and less readable
+// #![cfg_attr(feature = "cargo-clippy", allow(cast_ptr_alignment))] // 0.0.195 only
+
 
 /* Macros */
 
@@ -198,6 +202,7 @@ pub fn version() -> String {
 }
 
 /// Various global sciter engine options.
+#[derive(Copy, Clone)]
 pub enum RuntimeOptions<'a> {
 	/// global; value: milliseconds, connection timeout of http client.
 	ConnectionTimeout(u32),

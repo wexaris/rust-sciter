@@ -156,7 +156,7 @@ pub struct SciterGraphicsAPI {
     y1: SC_POS,
     x2: SC_POS,
     y2: SC_POS,
-    radii8: *const SC_DIM, /*SC_DIM[8] - four rx/ry pairs */
+    radii8: *const SC_DIM,
   ) -> GRAPHIN_RESULT,
 
   // Draws circle or ellipse using current lineColor/lineGradient and fillColor/fillGradient.
@@ -297,6 +297,7 @@ pub struct SciterGraphicsAPI {
   // SECTION: image rendering
 
   // draws img onto the graphics surface with current transformation applied (scale, rotation).
+  #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
   pub gDrawImage: extern "system" fn(
     hgfx: HGFX,
     himg: HIMG,
@@ -317,9 +318,9 @@ pub struct SciterGraphicsAPI {
   pub gScreenToWorld: extern "system" fn(hgfx: HGFX, inout_x: &mut SC_POS, inout_y: &mut SC_POS) -> GRAPHIN_RESULT,
 
   // SECTION: clipping
-  pub gPushClipBox: extern "system" fn(hgfx: HGFX, x1: SC_POS, y1: SC_POS, x2: SC_POS, y2: SC_POS, opacity: f32 /*=1.f*/) -> GRAPHIN_RESULT,
+  pub gPushClipBox: extern "system" fn(hgfx: HGFX, x1: SC_POS, y1: SC_POS, x2: SC_POS, y2: SC_POS, opacity: f32) -> GRAPHIN_RESULT,
 
-  pub gPushClipPath: extern "system" fn(hgfx: HGFX, hpath: HPATH, opacity: f32 /*=1.f*/) -> GRAPHIN_RESULT,
+  pub gPushClipPath: extern "system" fn(hgfx: HGFX, hpath: HPATH, opacity: f32) -> GRAPHIN_RESULT,
 
   // pop clip layer previously set by gPushClipBox or gPushClipPath
   pub gPopClip: extern "system" fn(hgfx: HGFX) -> GRAPHIN_RESULT,

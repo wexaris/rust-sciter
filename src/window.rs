@@ -42,6 +42,7 @@ pub use capi::scdef::{SCITER_CREATE_WINDOW_FLAGS};
 
 
 /// Per-window sciter engine options.
+#[derive(Copy, Clone)]
 pub enum Options {
 	/// value: `true` to enable, `false` to disable, enabled by default.
 	SmoothScroll(bool),
@@ -66,6 +67,8 @@ pub struct Window
 	host: Rc<Host>,
 }
 
+// `Window::new()` is rather expensive operation to make it default.
+#[cfg_attr(feature = "cargo-clippy", allow(new_without_default))]
 impl Window {
 
 	/// Create a new main window.

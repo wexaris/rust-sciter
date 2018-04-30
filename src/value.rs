@@ -245,11 +245,6 @@ impl Value {
 		&self.data as *const VALUE
 	}
 
-	#[doc(hidden)]
-	pub fn as_mut_ptr(&self) -> * mut VALUE {
-		unsafe { ::std::mem::transmute(self.as_cptr()) }
-	}
-
 	/// Get the inner type of the value.
 	pub fn get_type(&self) -> VALUE_TYPE {
 		return self.data.t;
@@ -526,6 +521,7 @@ impl Value {
 		return v;
 	}
 
+  #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
 	fn ensure_tmp_mut(&self) -> &mut Value {
 		let cp = self as *const Value;
 		let mp = cp as *mut Value;
@@ -731,7 +727,7 @@ impl ::std::ops::Index<usize> for Value {
 	type Output = Value;
 	fn index(&self, index: usize) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
-		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_mut_ptr());
+		(_API.ValueNthElementValue)(self.as_cptr(), index as INT, tmp.as_ptr());
 		return tmp;
 	}
 }
@@ -751,7 +747,7 @@ impl ::std::ops::Index<Value> for Value {
 	type Output = Value;
 	fn index(&self, key: Value) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
-		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), tmp.as_mut_ptr());
+		(_API.ValueGetValueOfKey)(self.as_cptr(), key.as_cptr(), tmp.as_ptr());
 		return tmp;
 	}
 }
@@ -761,7 +757,7 @@ impl ::std::ops::Index<&'static str> for Value {
 	type Output = Value;
 	fn index(&self, key: &'static str) -> &Self::Output {
 		let tmp = self.ensure_tmp_mut();
-		(_API.ValueGetValueOfKey)(self.as_cptr(), Value::from(key).as_cptr(), tmp.as_mut_ptr());
+		(_API.ValueGetValueOfKey)(self.as_cptr(), Value::from(key).as_cptr(), tmp.as_ptr());
 		return tmp;
 	}
 }

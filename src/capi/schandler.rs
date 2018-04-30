@@ -66,6 +66,7 @@ impl NativeHandler {
 		return boxed;
 	}
 
+  #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
 	pub fn get_data<T>(ptr: &LPVOID) -> &mut T {
 		assert!(!ptr.is_null());
 		let obj = *ptr as *mut T;

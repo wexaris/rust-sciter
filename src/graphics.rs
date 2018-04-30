@@ -15,6 +15,7 @@ pub use capi::scgraphics::{DRAW_PATH, LINE_CAP, LINE_JOIN};
 
 /// Supported image encodings for [`Image.save`](struct.Image.html#method.save).
 #[derive(Debug, PartialEq)]
+#[derive(Clone, Copy)]
 pub enum SaveImageEncoding {
   /// Raw bitmap in a `[a,b,g,r, a,b,g,r, ...]` form.
   Raw,
@@ -164,7 +165,7 @@ impl Image {
       SaveImageEncoding::Webp(q) => (WEBP, q),
     };
     let mut data = Vec::new();
-    let ok = (_GAPI.imageSave)(self.0, on_save, &mut data as *mut _ as LPVOID, enc, q as u32);
+    let ok = (_GAPI.imageSave)(self.0, on_save, &mut data as *mut _ as LPVOID, enc, u32::from(q));
     ok_or!(data, ok)
   }
 
