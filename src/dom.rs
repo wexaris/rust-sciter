@@ -159,11 +159,11 @@ use ::{_API};
 use capi::sctypes::*;
 use value::Value;
 
-pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML, ELEMENT_AREAS};
 use capi::scbehavior::{CLICK_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
 
-pub use dom::event::EventHandler;
-pub use dom::event::EventReason;
+pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML, ELEMENT_AREAS};
+pub use dom::event::{EventHandler, EventReason};
+
 
 /// A specialized `Result` type for DOM operations.
 pub type Result<T> = ::std::result::Result<T, SCDOM_RESULT>;
@@ -798,21 +798,22 @@ impl Element {
 
 	/// Call specified function for every element in a DOM that meets specified CSS selectors.
 	fn select_elements<T: ElementVisitor>(&self, selector: &str, callback: T) -> Result<Vec<Element>> {
-		use ::capi::schandler::NativeHandler;
 		extern "system" fn inner<T: ElementVisitor>(he: HELEMENT, param: LPVOID) -> BOOL {
-			let obj = NativeHandler::get_data::<T>(&param);
+      let p = param as *mut T;
+			let obj = unsafe { &mut *p };
 			let e = Element::from(he);
 			let stop = obj.on_element(e);
 			return stop as BOOL;
 		}
 		let (s,_) = s2u!(selector);
-		let handler = NativeHandler::from(callback);
-		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, handler.as_mut_ptr());
+		let handler = Box::new(callback);
+    let param = Box::into_raw(handler);
+		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, param as LPVOID);
+    let handler = unsafe { Box::from_raw(param) };
 		if ok != SCDOM_RESULT::OK {
 			return Err(ok);
 		}
-		let obj = handler.as_ref::<T>();
-		return Ok(obj.result());
+		return Ok(handler.result());
 	}
 
 	/// Will find first parent element starting from this satisfying given css selector(s).
@@ -920,20 +921,21 @@ impl ::std::fmt::Display for Element {
 		}
 		// "tag#id.class|type(name)"
 		// "tag#id.class"
-		let (t,n,i,c) = (self.get_attribute("type"), self.get_attribute("name"), self.get_attribute("id"), self.get_attribute("class"));
-		let tag = self.get_tag();
+
+    let tag = self.get_tag();
 		try!(f.write_str(&tag));
-		if i.is_some() {
-			try!(write!(f, "#{}", i.unwrap()));
+
+		if let Some(i) = self.get_attribute("id") {
+			try!(write!(f, "#{}", i));
 		}
-		if c.is_some() {
-			try!(write!(f, ".{}", c.unwrap()));
+    if let Some(c) = self.get_attribute("class") {
+			try!(write!(f, ".{}", c));
 		}
-		if t.is_some() {
-			try!(write!(f, "|{}", t.unwrap()));
+    if let Some(t) = self.get_attribute("type") {
+			try!(write!(f, "|{}", t));
 		}
-		if n.is_some() {
-			try!(write!(f, "({})", n.unwrap()));
+    if let Some(n) = self.get_attribute("name") {
+			try!(write!(f, "({})", n));
 		}
 		return Ok(());
 	}
