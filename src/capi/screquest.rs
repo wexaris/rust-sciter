@@ -4,7 +4,7 @@
 
 // use capi::sctypes::{LPVOID};
 
-MAKE_HANDLE!(HREQUEST, _HREQUEST);
+MAKE_HANDLE!(#[doc = "Request native handle."] HREQUEST, _HREQUEST);
 
 #[repr(C)]
 #[allow(missing_docs)]

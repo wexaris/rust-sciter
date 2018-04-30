@@ -8,8 +8,8 @@ use self::libc::*;
 
 
 // common
-MAKE_HANDLE!(HWINDOW, _HWINDOW); // HWND or NSView* or GtkWidget*
-MAKE_HANDLE!(HSARCHIVE, _HSARCHIVE);
+MAKE_HANDLE!(#[doc = "Window native handle."] HWINDOW, _HWINDOW); // HWND or NSView* or GtkWidget*
+MAKE_HANDLE!(#[doc = "Archive native handle."] HSARCHIVE, _HSARCHIVE);
 
 pub type BYTE = uint8_t;
 pub type INT = int32_t;

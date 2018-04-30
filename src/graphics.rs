@@ -13,9 +13,9 @@ use _GAPI;
 pub use capi::scgraphics::{HGFX, GRAPHIN_RESULT};
 pub use capi::scgraphics::{DRAW_PATH, LINE_CAP, LINE_JOIN};
 
-/// Supported image encodings for [`Image.save`](struct.Image.html#method.save).
-#[derive(Debug, PartialEq)]
+/// Supported image encodings for [`Image.save()`](struct.Image.html#method.save).
 #[derive(Clone, Copy)]
+#[derive(Debug, PartialEq)]
 pub enum SaveImageEncoding {
   /// Raw bitmap in a `[a,b,g,r, a,b,g,r, ...]` form.
   Raw,
@@ -40,7 +40,7 @@ macro_rules! ok_or {
 /// A specialized `Result` type for graphics operations.
 pub type Result<T> = ::std::result::Result<T, GRAPHIN_RESULT>;
 
-/// A color type in the `RGBA` form.
+/// Color type in the `RGBA` form.
 pub type Color = SC_COLOR;
 
 /// Position on a surface in `(x, y)` form.
@@ -49,10 +49,10 @@ pub type Pos = (SC_POS, SC_POS);
 /// Size in `(width, height)` form.
 pub type Size = (SC_DIM, SC_DIM);
 
-/// Angle (in radians).
+/// Angle type (in radians).
 pub type Angle = SC_ANGLE;
 
-/// Dimension.
+/// Dimension type.
 pub type Dim = SC_DIM;
 
 /// Graphics image object.
@@ -373,6 +373,8 @@ impl Path {
 // Graphics
 
 /// A graphics state guard.
+///
+/// Used to automatically restore a previous saved graphics attributes state.
 pub struct State<'a>(&'a mut Graphics);
 
 /// Restore graphics state.
@@ -453,6 +455,23 @@ impl Graphics {
   /// Save the current graphics attributes on top of the internal state stack.
   ///
   /// It will be restored automatically.
+  ///
+  /// # Example:
+  ///
+  /// ```rust
+  /// use sciter::graphics::{Image, rgb};
+  ///
+  /// let mut image = Image::new((100, 100), false).unwrap();
+  /// image.paint(|gfx, size| {
+  ///   let mut gfx = gfx.save_state()?;
+  ///   gfx
+  ///     .line_width(6.0)?
+  ///     .line_color(rgb(0xD4, 0, 0))?
+  ///     .fill_color(rgb(0xD4, 0, 0))?
+  ///     .line((-30., 0.), (83., 0.))?
+  ///     ;
+  ///   Ok(())
+  /// }).unwrap();
 	pub fn save_state(&mut self) -> Result<State> {
 		self.push_state().map(|gfx| State(gfx))
 	}
@@ -474,7 +493,7 @@ impl Graphics {
 ///
 /// All operations use the current fill and stroke brushes.
 impl Graphics {
-  /// Draws a line from the `start` to the `end`.
+  /// Draw a line from the `start` to the `end`.
   pub fn line(&mut self, start: Pos, end: Pos) -> Result<&mut Self> {
     let ok = (_GAPI.gLine)(self.0, start.0, start.1, end.0, end.1);
     ok_or!(self, ok)
@@ -581,13 +600,22 @@ impl Graphics {
     ok_or!(self, ok)
   }
 
-  /// Set the line cap (stroke dash ending style) for subsequent drawings.
+  /// Set the line cap mode (stroke dash ending style) for subsequent drawings.
+  ///
+  /// It determines how the end points of every line are drawn.
+  /// There are three possible values for this property and those are: `BUTT`, `ROUND` and `SQUARE`.
+  /// By default this property is set to `BUTT`.
   pub fn line_cap(&mut self, style: LINE_CAP) -> Result<&mut Self> {
     let ok = (_GAPI.gLineCap)(self.0, style);
     ok_or!(self, ok)
   }
 
-  /// Set the line width for subsequent drawings.
+  /// Set the line join mode for subsequent drawings.
+  ///
+  /// It determines how two connecting segments (of lines, arcs or curves)
+  /// with non-zero lengths in a shape are joined together
+  /// (degenerate segments with zero lengths, whose specified endpoints and control points
+  /// are exactly at the same position, are skipped).
   pub fn line_join(&mut self, style: LINE_JOIN) -> Result<&mut Self> {
     let ok = (_GAPI.gLineJoin)(self.0, style);
     ok_or!(self, ok)

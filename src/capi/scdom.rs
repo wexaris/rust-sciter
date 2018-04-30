@@ -4,8 +4,8 @@
 
 use capi::sctypes::*;
 
-MAKE_HANDLE!(HELEMENT, _HELEMENT);
-MAKE_HANDLE!(HNODE, _HNODE);
+MAKE_HANDLE!(#[doc = "Element native handle."] HELEMENT, _HELEMENT);
+MAKE_HANDLE!(#[doc = "Node native handle."] HNODE, _HNODE);
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]

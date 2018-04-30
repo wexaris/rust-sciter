@@ -7,10 +7,10 @@ use capi::scdom::HELEMENT;
 use capi::sctypes::{BOOL, LPCBYTE, LPCWSTR, LPVOID, LPWSTR, UINT};
 use capi::scvalue::VALUE;
 
-MAKE_HANDLE!(HGFX, _HGFX);
-MAKE_HANDLE!(HIMG, _HIMG);
-MAKE_HANDLE!(HPATH, _HPATH);
-MAKE_HANDLE!(HTEXT, _HTEXT);
+MAKE_HANDLE!(#[doc = "Graphics native handle."] HGFX, _HGFX);
+MAKE_HANDLE!(#[doc = "Image native handle."] HIMG, _HIMG);
+MAKE_HANDLE!(#[doc = "Path native handle."] HPATH, _HPATH);
+MAKE_HANDLE!(#[doc = "Text native handle."] HTEXT, _HTEXT);
 
 pub type SC_REAL = f32;
 pub type SC_POS = SC_REAL;
@@ -36,28 +36,44 @@ pub enum GRAPHIN_RESULT {
   NOTSUPPORTED = 3,
 }
 
+/// Path drawing mode.
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum DRAW_PATH {
+  /// Draw without outline line.
   FILL_ONLY = 1,
+  /// Draw outline without fill.
   STROKE_ONLY = 2,
+  /// Draw outlined and filled path.
   FILL_AND_STROKE = 3,
 }
 
+/// Line drawing join mode.
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum LINE_JOIN {
+  /// Specifies a mitered join. This produces a sharp corner or a clipped corner,
+  /// depending on whether the length of the miter exceeds the miter limit (`10.0`).
   MITER = 0,
+  /// Specifies a circular join. This produces a smooth, circular arc between the lines.
   ROUND = 1,
+  /// Specifies a beveled join. This produces a diagonal corner.
   BEVEL = 2,
+  /// Specifies a mitered join. This produces a sharp corner or a beveled corner,
+  /// depending on whether the length of the miter exceeds the miter limit (`10.0`).
   MITER_OR_BEVEL = 3,
 }
 
+/// Line drawing cap mode.
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum LINE_CAP {
+  /// The ends of lines are squared off at the endpoints.
   BUTT = 0,
+  /// The ends of lines are squared off by adding a box with an equal width
+  /// and half the height of the line's thickness.
   SQUARE = 1,
+  /// The ends of lines are rounded.
   ROUND = 2,
 }
 

@@ -93,14 +93,15 @@ macro_rules! make_args {
 	};
 }
 
-/// Declare handle type (native pointer).
 #[doc(hidden)]
 #[macro_export]
+/// Declare handle type (native pointer).
 macro_rules! MAKE_HANDLE {
-	($name:ident, $inner:ident) => {
-		#[repr(C)]
+	($(#[$attrs:meta])* $name:ident, $inner:ident) => {
+		#[repr(C)] #[doc(hidden)]
 		pub struct $inner { _unused: usize }
-		pub type $name = *mut $inner;
+    $(#[$attrs])*
+    pub type $name = *mut $inner;
 	};
 }
 
