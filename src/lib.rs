@@ -83,6 +83,7 @@ mod eventhandler;
 pub mod dom;
 pub mod graphics;
 pub mod host;
+pub mod tiscript;
 pub mod types;
 pub mod utf;
 pub mod value;
@@ -113,6 +114,7 @@ pub type WindowBuilder = window::Builder;
 pub use capi::scapi::{ISciterAPI};
 use capi::scgraphics::SciterGraphicsAPI;
 use capi::screquest::SciterRequestAPI;
+use capi::sctiscript::tiscript_native_interface;
 
 #[cfg(windows)]
 mod ext {
@@ -349,6 +351,7 @@ lazy_static! {
 	static ref _API: &'static ISciterAPI = { SciterAPI() };
 	static ref _GAPI: &'static SciterGraphicsAPI = { unsafe { &*(SciterAPI().GetSciterGraphicsAPI)() } };
 	static ref _RAPI: &'static SciterRequestAPI = { unsafe { &*(SciterAPI().GetSciterRequestAPI)() } };
+  static ref _TAPI: &'static tiscript_native_interface = { unsafe { &*(SciterAPI().TIScriptAPI)() } };
 }
 
 /// Set a custom path to the Sciter dynamic library.

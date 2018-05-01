@@ -243,3 +243,6 @@ type tiscript_object_enum = extern "C" fn(c: HVM, key: tiscript_value, tiscript_
 
 /// callback for `post`.
 type tiscript_callback = extern "C" fn(HVM, prm: LPVOID);
+
+/// The entry point of TIScript Extnension Library.
+pub type TIScriptLibraryInitFunc = extern "system" fn(vm: HVM, tiscript_api: &tiscript_native_interface);
