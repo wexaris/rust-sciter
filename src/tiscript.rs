@@ -6,21 +6,32 @@ pub use capi::sctiscript::{HVM, tiscript_value};
 
 pub struct Value(pub tiscript_value);
 
-pub struct Runtime(pub HVM);
+pub struct Vm(HVM);
 
-impl Drop for Runtime {
+impl Drop for Vm {
   fn drop(&mut self) {
     destroy_vm(self.0);
   }
 }
 
-impl Runtime {
-  pub fn new() -> Runtime {
-    Runtime(create_vm(None, None, None).unwrap())
+impl From<HVM> for Vm {
+  fn from(vm: HVM) -> Self {
+    assert!(!vm.is_null());
+    Vm(vm)
+  }
+}
+
+impl Vm {
+  pub fn new() -> Vm {
+    Vm(create_vm(None, None, None).unwrap())
   }
 
-  pub fn with_features(features: SCRIPT_RUNTIME_FEATURES) -> Runtime {
-    Runtime(create_vm(Some(features as u32), None, None).unwrap())
+  pub fn with_features(features: SCRIPT_RUNTIME_FEATURES) -> Vm {
+    Vm(create_vm(Some(features as u32), None, None).unwrap())
+  }
+
+  pub fn current() -> Option<Vm> {
+    get_current_vm().map(|h| Vm(h))
   }
 }
 
