@@ -1,5 +1,7 @@
 //! Platform-dependent windows support.
 
+extern crate winapi;
+
 use capi::sctypes::*;
 
 
@@ -20,12 +22,37 @@ pub trait BaseWindow {
 	fn quit_app(&self);
 }
 
+pub enum TrayEvents {
+  Unknown(usize),
+
+  ContextMenu(i32, i32),
+
+  MouseMove(i32, i32),
+
+  LButtonDown(i32, i32),
+  LButtonUp(i32, i32),
+  LButtonDblClick(i32, i32),
+
+  RButtonDown(i32, i32),
+  RButtonUp(i32, i32),
+  RButtonDblClick(i32, i32),
+
+  MButtonDown(i32, i32),
+  MButtonUp(i32, i32),
+  MButtonDblClick(i32, i32),
+}
+
+pub type OnTrayIcon = fn(event: TrayEvents) -> Option<usize>;
+
 #[cfg(windows)]
 mod windows {
 
 	use ::{_API};
+  use platform::{OnTrayIcon};
+  use platform::winapi::um::shellapi::{NOTIFYICONDATAW};
 	use capi::sctypes::*;
 	use capi::scdef::*;
+  use ::std::ptr;
 
 
 	#[link(name="user32")]
@@ -52,22 +79,148 @@ mod windows {
 	{
 		hwnd: HWINDOW,
 		flags: UINT,
+    recreate_msg: UINT,
+    tray_msg: UINT,
+    tray_data: Option<NOTIFYICONDATAW>,
+    tray_callback: Option<OnTrayIcon>,
 	}
 
 	impl OsWindow {
 
 		pub fn new() -> OsWindow {
-			OsWindow { hwnd: 0 as HWINDOW, flags: 0 }
+			OsWindow {
+        hwnd: 0 as HWINDOW,
+        flags: 0,
+        tray_callback: None,
+        tray_data: None,
+        tray_msg: 0,
+        recreate_msg: 0,
+      }
 		}
 
 		pub fn from(hwnd: HWINDOW) -> OsWindow {
-			OsWindow { hwnd: hwnd, flags: 0 }
+      let mut me = OsWindow::new();
+      me.hwnd = hwnd;
+			me
 		}
 
 		fn init_app() {
-			unsafe { OleInitialize(::std::ptr::null()) };
+			unsafe { OleInitialize(ptr::null()) };
 		}
 
+    pub fn notify_icon(&mut self, title: &str, on_tray: OnTrayIcon) -> bool {
+      unsafe {
+        use ::std::mem;
+        use platform::winapi::shared::windef::{HWND};
+        use platform::winapi::um::winuser::{RegisterWindowMessageW};
+        use platform::winapi::um::shellapi::{NOTIFYICON_VERSION_4, NIF_TIP, NIF_ICON, NIF_MESSAGE};
+
+        let (s,_) = s2w!("TaskbarCreated");
+        self.recreate_msg = RegisterWindowMessageW(s.as_ptr());
+
+        let (sz_tip, cb_tip) = s2w!(title);
+
+        let mut ni: NOTIFYICONDATAW = mem::zeroed();
+        ni.cbSize = mem::size_of::<NOTIFYICONDATAW>() as u32;
+        ni.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
+        ni.hWnd = self.hwnd as HWND;
+        ni.uID = self.hwnd as usize as u32;
+        ni.uCallbackMessage = 0x7AA1;
+        *ni.u.uVersion_mut() = NOTIFYICON_VERSION_4;
+        ptr::copy(sz_tip.as_ptr(), ni.szTip.as_mut_ptr(), cb_tip as usize);
+
+        self.tray_msg = ni.uCallbackMessage;
+        self.tray_data = Some(ni);
+        self.tray_callback = Some(on_tray);
+
+        self.add_icon()
+      }
+    }
+
+    fn add_icon(&mut self) -> bool {
+      use platform::winapi::um::shellapi::{Shell_NotifyIconW, NIM_ADD, NIM_SETVERSION};
+      unsafe {
+        if self.tray_data.is_none() {
+          return false;
+        }
+        let ni = self.tray_data.as_mut().unwrap();
+        let ni = ni as *mut _;
+        let ok = Shell_NotifyIconW(NIM_ADD, ni);
+        Shell_NotifyIconW(NIM_SETVERSION, ni);
+        return ok != 0;
+      }
+    }
+
+    fn remove_icon(&mut self) -> bool {
+      use platform::winapi::um::shellapi::{Shell_NotifyIconW, NIM_DELETE};
+      unsafe {
+        if self.tray_data.is_none() {
+          return false;
+        }
+        let ni = self.tray_data.as_mut().unwrap();
+        let ok = Shell_NotifyIconW(NIM_DELETE, ni as *mut _);
+        return ok != 0;
+      }
+    }
+
+    extern "system" fn on_message(hwnd: HWINDOW, msg: UINT, wparam: WPARAM, lparam: LPARAM,
+      param: LPVOID, handled: *mut BOOL) -> LRESULT
+    {
+      assert!(!param.is_null());
+      let me = param as *mut OsWindow;
+      let me = unsafe { &mut *me };
+
+      if msg == me.recreate_msg {
+        me.add_icon();
+      }
+
+      if msg == me.tray_msg && me.tray_callback.is_some() {
+        use platform::winapi::shared::windef::{HWND, POINT};
+        use platform::winapi::shared::minwindef::{LOWORD, HIWORD};
+        use platform::winapi::um::winuser::*;
+
+        let msg = LOWORD(lparam as u32) as u32;
+        let _id = HIWORD(lparam as u32);
+        let cx = LOWORD(wparam as u32) as i16 as i32;
+        let cy = HIWORD(wparam as u32) as i16 as i32;
+
+        let mut pt = POINT {
+          x: cx,
+          y: cy,
+        };
+        unsafe { MapWindowPoints(HWND_DESKTOP, hwnd as HWND, &mut pt as *mut _, 1) };
+
+        let cx = pt.x;
+        let cy = pt.y;
+
+        use platform::TrayEvents::*;
+        let evt = match msg {
+          WM_CONTEXTMENU => ContextMenu(cx, cy),
+
+          WM_LBUTTONDOWN => LButtonDown(cx, cy),
+          WM_LBUTTONUP => LButtonUp(cx, cy),
+          WM_LBUTTONDBLCLK => LButtonDblClick(cx, cy),
+
+          WM_RBUTTONDOWN => RButtonDown(cx, cy),
+          WM_RBUTTONUP => RButtonUp(cx, cy),
+          WM_RBUTTONDBLCLK => RButtonDblClick(cx, cy),
+
+          WM_MBUTTONDOWN => MButtonDown(cx, cy),
+          WM_MBUTTONUP => MButtonUp(cx, cy),
+          WM_MBUTTONDBLCLK => MButtonDblClick(cx, cy),
+
+          _ => Unknown(wparam),
+        };
+
+        let callback = me.tray_callback.as_ref().unwrap();
+        if let Some(result) = callback(evt) {
+          assert!(!handled.is_null());
+          unsafe { *handled = true as BOOL };
+          return result as LRESULT;
+        }
+      }
+      return 0 as LRESULT;
+    }
 	}
 
 	impl super::BaseWindow for OsWindow {
@@ -87,9 +240,11 @@ mod windows {
 			let (x,y,w,h) = rect;
 			let rc = RECT { left: x, top: y, right: x + w, bottom: y + h };
 
-			let cb = ::std::ptr::null();
+			let msg_cb = Some(&(OsWindow::on_message as SciterWindowDelegate));
+      let msg_param = self as *mut _ as LPVOID;
+
 			self.flags = flags;
-			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, msg_cb, msg_param, parent);
 			if self.hwnd.is_null() {
 				panic!("Failed to create window!");
 			}
@@ -133,7 +288,7 @@ mod windows {
 		fn run_app(&self) {
 			let mut msg = MSG { hwnd: 0 as HWINDOW, message: 0, wParam: 0, lParam: 0, time: 0, pt: POINT { x: 0, y: 0 } };
 			let pmsg: LPMSG = &mut msg;
-			let null: HWINDOW = ::std::ptr::null_mut();
+			let null: HWINDOW = ptr::null_mut();
 			unsafe {
 				while GetMessageW(pmsg, null, 0, 0) != 0 {
 					TranslateMessage(pmsg);

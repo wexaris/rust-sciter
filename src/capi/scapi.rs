@@ -78,7 +78,7 @@ pub struct ISciterAPI
 	pub SciterCreateWidget: extern "system" fn (frame: LPRECT) -> HWINDOW, // returns GtkWidget
   // #endif
 
-	pub SciterCreateWindow: extern "system" fn (creationFlags: UINT, frame: LPCRECT, delegate: * const SciterWindowDelegate, delegateParam: LPVOID, parent: HWINDOW) -> HWINDOW,
+	pub SciterCreateWindow: extern "system" fn (creationFlags: UINT, frame: LPCRECT, delegate: Option<&SciterWindowDelegate>, delegateParam: LPVOID, parent: HWINDOW) -> HWINDOW,
 	pub SciterSetupDebugOutput: extern "system" fn (hwndOrNull: HWINDOW, param: LPVOID, pfOutput: DEBUG_OUTPUT_PROC),
 
 	//|
