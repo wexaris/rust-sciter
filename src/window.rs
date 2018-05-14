@@ -256,6 +256,7 @@ pub struct Builder {
 	flags: Flags,
 	rect: RECT,
 	parent: Option<HWINDOW>,
+  title: Option<String>,
 }
 
 // Note: https://rust-lang-nursery.github.io/api-guidelines/type-safety.html#non-consuming-builders-preferred
@@ -267,14 +268,14 @@ impl Builder {
 		Builder::main()
 			.resizeable()
 			.closeable()
-			.with_title()
+			.with_title(None)
 	}
 
 	/// Popup window (with min/max buttons and title).
 	pub fn popup_window() -> Self {
 		Builder::popup()
 			.closeable()
-			.with_title()
+			.with_title(None)
 	}
 
 	/// Child window style. if this flag is set all other flags are ignored.
@@ -345,7 +346,8 @@ impl Builder {
 	}
 
 	/// Top level window, has titlebar.
-	pub fn with_title(self) -> Self {
+	pub fn with_title(mut self, title: Option<&str>) -> Self {
+    self.title = title.map(|s| s.to_owned());
 		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR)
 	}
 
@@ -373,6 +375,12 @@ impl Builder {
 	pub fn alpha(self) -> Self {
 		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_ALPHA)
 	}
+
+  /// Set title of native window.
+  pub fn set_title(mut self, title: &str) -> Self {
+    self.title = Some(title.to_owned());
+    self
+  }
 
 	fn or(mut self, flag: Flags) -> Self {
 		self.flags = self.flags | flag;

@@ -116,6 +116,7 @@ macro_rules! dispatch_script_call {
 
 	(
 		$(
+      $(#[$attrs:meta])*
 			fn $name:ident ( $( $argt:ident ),* );
 		 )*
 	) => {

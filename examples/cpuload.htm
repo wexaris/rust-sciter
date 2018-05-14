@@ -1,0 +1,269 @@
+<html>
+<head>
+  <title>CPU Load</title>
+  <style type="text/css">
+    [frame] { outline: 1px solid orange; }
+
+    .content {
+      size: *;
+    }
+
+    .footer {
+      flow: horizontal;
+      height: max-content;
+      width: *;
+      border-spacing: 10dip;
+      behavior: form;
+    }
+    .footer > fieldset { height: *; }
+
+    dl {
+      flow: row(dt, dd);
+      border-spacing: 3dip;
+      padding-left: 6dip;
+      padding-right: 6dip;
+      min-width: 100dip;
+    }
+    fieldset[name="delta"] dd { width: 1em; }
+
+    @import url(micro-chart.css);
+
+    .graphs, .cores {
+      size: *;
+      flow: h-flow;
+      border-spacing: 10dip;
+    }
+    .total {
+      margin-left: 20dip;
+      margin-right: 30dip;
+    }
+
+    div.stack { flow:stack; width: 50dip; height: *; min-height: 300dip; }
+    div.stack > svg { display:block; background: transparent; /*border:1px solid; size:*;*/ }
+
+
+    .total > div.stack { width: 50dip; background-color: black; }
+    .core > div.stack { width: 100dip; background-color: black; }
+
+    .graphs svg.chart { height: 300dip; }
+    .graphs svg.chart.bar { width: 50dip; }
+    .graphs svg.chart.line { width: 100dip; }
+
+    svg.chart.bar[name="kernel"] {
+      aspect: MicroChart.Bar(
+        fill: #ff8080 #ff8080,
+        stroke: #ff0000,
+        stroke-width: 2dip,
+        padding: 0,
+        min: 0, max: 100,
+      ) url(micro-chart.tis);
+    }
+    svg.chart.bar[name="user"] {
+      aspect: MicroChart.Bar(
+        fill: #9eca9e #9eca9e,
+        stroke: #3c943c,
+        stroke-width: 2dip,
+        padding: 0,
+        min: 0, max: 100,
+      ) url(micro-chart.tis);
+    }
+
+    svg.chart.line[name="kernel"] {
+      aspect: MicroChart.Line(
+        fill: #ff8080,
+        stroke: #ff0000,
+        stroke-width: 2dip,
+        min: 0, max: 100,
+      ) url(micro-chart.tis);
+    }
+    svg.chart.line[name="user"] {
+      aspect: MicroChart.Line(
+        fill: #9eca9e,
+        stroke: #3c943c,
+        stroke-width: 2dip,
+        min: 0, max: 100,
+      ) url(micro-chart.tis);
+    }
+
+  </style>
+  <script type="text/tiscript">
+    var footer = $(.footer);
+    var data;
+
+    function init_cpu() {
+      const cores = 8;
+
+      var list = $(.graphs > .cores);
+      var template = $(#templates).text;
+      for (var i = list.length; i < cores; i++) {
+        list.append(template);
+      }
+
+      setIcon();
+    }
+
+    function update() {
+      try {
+        // data = view.getCpuLoad();
+      }
+      catch(e) {
+      }
+      footer.value = data;
+    }
+
+    function self.ready() {
+      init_cpu();
+      update();
+    }
+
+    $(body).timer(1s, function() {
+      update();
+      data.delta.context = rand(30000);
+      return true;
+    });
+
+    data = {
+      topology: {
+        sockets: 1,
+        cores: 4,
+        threads: 8,
+      },
+
+      cpu: {
+        total: {
+          kernel: 3,
+          user: 14,
+        },
+        cores: [
+          { kernel: 3, user: 14 },
+          { kernel: 0, user: 3},
+          { kernel: 0, user: 3},
+          { kernel: 0, user: 3},
+        ]
+      },
+
+      delta: {
+        context: 17615,
+        interrupt: 8808,
+        dpc: 527,
+      },
+
+      clocks: {
+        current: 2200,
+        max: 4000,
+        limit: 4000,
+        idle: 10,
+        maxidle: 44,
+      },
+
+      totals: {
+        processes: 110,
+        threads: 1749,
+        handles: 37633,
+      },
+
+    };
+
+
+    // update window icon
+    function setIcon() {
+      var clock = $(.content);
+
+      // get clock element size
+      var (w, h) = clock.box(#dimension, #border);
+      if (w == 0 || h == 0)
+        return;
+
+      // make a snapshot of it with 32x32 size
+      var img = new Image(clock, w, h, 32, 32);
+      var png = img.toBytes();
+      img.destroy();
+
+      // make an icon from the snapshot
+      var icon = Image.fromBytes(png);
+      view.windowIcon = icon;
+
+      return true; // continue to update icon ;)
+    }
+    self.timer(5000, setIcon);
+
+  </script>
+
+
+  <script id="templates" type="text/html+template">
+    <div class="core">
+      <div class="stack graph">
+        <svg class="chart line" name="user" value="0" />
+        <svg class="chart line" name="kernel" value="0" />
+      </div>
+    </div>
+  </script>
+</head>
+<body>
+  <div class="content">
+    <div>CPU</div>
+    <div class="graphs">
+
+      <div class="total">
+        <div class="stack graph">
+          <svg class="chart bar" name="user" value="75" />
+          <svg class="chart bar" name="kernel" value="25" />
+        </div>
+        <label><output value="10.83"></output><span>%</span></label>
+      </div>
+
+      <div class="cores">
+        <div class="core">
+          <div class="stack graph">
+            <svg class="chart line" name="user" value="100,100,50,50,36,40,13,13,13,50,0" />
+            <svg class="chart line" name="kernel" value="100,100,25,25,18,22,15,5,5,100,0" />
+          </div>
+        </div>
+        <div class="core">
+          <div class="stack graph">
+            <svg class="chart line" name="user" value="100,100,50,50,36,40,13,13,13,50,0" />
+            <svg class="chart line" name="kernel" value="100,100,25,25,18,22,15,5,5,100,0" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <fieldset name="totals">
+      <legend>Totals</legend>
+      <dl>
+        <dt>Handles</dt><dd name="handles">0</dd>
+        <dt>Threads</dt><dd name="threads">0</dd>
+        <dt>Processes</dt><dd name="processes">0</dd>
+      </dl>
+    </fieldset>
+    <fieldset name="delta">
+      <legend>CPU</legend>
+      <dl>
+        <dt>Context switch</dt><dd name="context">0</dd>
+        <dt>Interrupt</dt><dd name="interrupt">0</dd>
+        <dt>DPC</dt><dd name="dpc">0</dd>
+      </dl>
+    </fieldset>
+    <fieldset name="topology">
+      <legend>Topology</legend>
+      <dl>
+        <dt>Sockets</dt><dd name="sockets">0</dd>
+        <dt>Cores</dt><dd name="cores">0</dd>
+        <dt>Logical</dt><dd name="threads">0</dd>
+      </dl>
+    </fieldset>
+    <fieldset name="clocks">
+      <legend>Clocks</legend>
+      <dl>
+        <dt>CurrentMhz</dt><dd name="current">0</dd>
+        <dt>MaxMhz</dt><dd name="max">0</dd>
+        <dt>CurrentIdleState</dt><dd name="idle">0</dd>
+        <dt>MaxIdleState</dt><dd name="maxidle">0</dd>
+      </dl>
+    </fieldset>
+  </div>
+</body>
+</html>

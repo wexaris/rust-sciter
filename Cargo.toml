@@ -41,7 +41,6 @@ lazy_static = "1.0"
 objc = "0.2"
 objc-foundation = "0.1"
 
-
 [[example]]
 name = "first"
 path = "examples/first.rs"
@@ -81,3 +80,7 @@ path = "examples/video.rs"
 [[example]]
 name = "clock"
 path = "examples/clock.rs"
+
+[[example]]
+name = "cpuload"
+path = "examples/cpuload.rs"
