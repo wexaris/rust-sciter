@@ -120,6 +120,13 @@ impl Window {
 		self.host.attach_handler(handler);
 	}
 
+  /// Register an archive produced by `packfolder`.
+  ///
+  /// See documentation of the [`Archive`](../host/struct.Archive.html).
+  pub fn archive_handler(&mut self, resource: &[u8]) -> Result<(), ()> {
+    self.host.register_archive(resource)
+  }
+
 	/// Register a native event handler for the specified behavior name.
 	///
 	/// Behavior is a named event handler which is created for a particular DOM element.

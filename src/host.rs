@@ -65,7 +65,7 @@ pub trait HostHandler {
 	/// or save them (including `request_id`) for later usage and answer here with `LOAD_RESULT::LOAD_DELAYED` code.
 	///
 	/// Also you can discard request (data will not be loaded at document) or take care about this request completely (via request API).
-	fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> LOAD_RESULT { return LOAD_RESULT::LOAD_DEFAULT; }
+	fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> Option<LOAD_RESULT> { return None; }
 
 	/// This notification indicates that external data (for example image) download process completed.
 	fn on_data_loaded(&mut self, pnm: &SCN_DATA_LOADED) { }
@@ -130,12 +130,14 @@ use std::cell::RefCell;
 
 type BehaviorList = Vec<(String, Box<Fn() -> Box<EventHandler>>)>;
 type SharedBehaviorList = Rc<RefCell<BehaviorList>>;
+type SharedArchive = Rc<RefCell<Option<Archive>>>;
 
 #[repr(C)]
 struct HostCallback<Callback> {
 	sig: u32,
 	behaviors: SharedBehaviorList,
 	handler: Callback,
+  archive: SharedArchive,
 }
 
 /// Sciter host runtime support.
@@ -143,6 +145,7 @@ pub struct Host {
 	hwnd: HWINDOW,
 	behaviors: SharedBehaviorList,
 	handler: RefCell<NativeHandler>,
+  archive: SharedArchive,
 }
 
 impl Host {
@@ -156,7 +159,12 @@ impl Host {
 	/// or by calling `SciterCreateOnDirectXWindow`.
 	pub fn attach(hwnd: HWINDOW) -> Host {
 		// Host with default debug handler installed
-		let host = Host { hwnd: hwnd, behaviors: Default::default(), handler: Default::default() };
+		let host = Host {
+      hwnd: hwnd,
+      behaviors: Default::default(),
+      handler: Default::default(),
+      archive: Default::default(),
+    };
 		host.setup_callback(DefaultHandler::default());
 		return host;
 	}
@@ -178,6 +186,7 @@ impl Host {
 		let payload: HostCallback<Callback> = HostCallback {
 			sig: 17,
 			behaviors: Rc::clone(&self.behaviors),
+      archive: Rc::clone(&self.archive),
 			handler: handler,
 		};
 
@@ -197,6 +206,14 @@ impl Host {
 		let pair = (name.to_owned(), make);
 		self.behaviors.borrow_mut().push(pair);
 	}
+
+  /// Register an archive produced by `packfolder`.
+  ///
+  /// See documentation of the [`Archive`](struct.Archive.html).
+  pub fn register_archive(&self, resource: &[u8]) -> Result<()> {
+    *self.archive.borrow_mut() = Some(Archive::open(resource)?);
+    Ok(())
+  }
 
 	/// Set debug mode for specific window or globally.
 	pub fn enable_debug(&self, enable: bool) {
@@ -351,8 +368,22 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 	let result: UINT = match code {
 		SCITER_NOTIFICATION::SC_LOAD_DATA => {
 			let scnm = pnm as *mut SCN_LOAD_DATA;
-			let re = me.on_data_load(unsafe { &mut *scnm} );
-			re as UINT
+      let scnm = unsafe { &mut *scnm};
+			let mut re = me.on_data_load(scnm);
+      if re.is_none() {
+        if let Some(archive) = callback.archive.borrow().as_ref() {
+          let uri = w2s!(scnm.uri);
+          if uri.starts_with("this://app/") {
+            if let Some(data) = archive.get(&uri) {
+              me.data_ready(scnm.hwnd, &uri, data, None);
+            } else {
+              eprintln!("[sciter] error: can't load {:?}", uri);
+            }
+          }
+          re = Some(LOAD_RESULT::LOAD_DEFAULT);
+        }
+      }
+			re.unwrap_or(LOAD_RESULT::LOAD_DEFAULT) as UINT
 		},
 
 		SCITER_NOTIFICATION::SC_DATA_LOADED => {
@@ -424,7 +455,7 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 ///
 /// ```rust,ignore
 /// let archived = include_bytes!("target/assets.rc");
-/// let assets = sciter::host::Archive::open(archived);
+/// let assets = sciter::host::Archive::open(archived).expect("Unable to load archive.");
 ///
 /// // access `assets/index.htm`
 /// let html_data = assets.get("index.htm").unwrap();
@@ -440,9 +471,13 @@ impl Drop for Archive {
 
 impl Archive {
   /// Open archive blob.
-  pub fn open(archived: &[u8]) -> Self {
+  pub fn open(archived: &[u8]) -> Result<Self> {
     let p = (_API.SciterOpenArchive)(archived.as_ptr(), archived.len() as u32);
-    Archive(p)
+    if !p.is_null() {
+      Ok(Archive(p))
+    } else {
+      Err(())
+    }
   }
 
   /// Get an archive item.
