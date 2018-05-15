@@ -1,6 +1,6 @@
 /*! Rust interface to the [`sciter::value`](https://github.com/c-smile/sciter-sdk/blob/master/include/value.h).
 
-Sciter `Value` holds superset of JSON objects.
+Sciter [`Value`](struct.Value.html) holds superset of JSON objects.
 
 It can contain as pure JSON objects (numbers, strings, maps and arrays) as internal objects like DOM elements,
 proxies of script functions, objects and arrays.
@@ -8,7 +8,7 @@ proxies of script functions, objects and arrays.
 
 ## Basic usage
 
-You can create an empty (undefined) Sciter `Value` with `new()`:
+You can create an empty (undefined) Sciter [`Value`](struct.Value.html) with `new()`:
 
 ```
 use sciter::Value;
@@ -79,7 +79,29 @@ assert_eq!(v.len(), 3);
 assert_eq!(v[0], Value::from("1"));
 ```
 
-To access its contents you should use one of `to_` methods:
+And also there is a couple of macros for container literals with specific type
+which are just shorthands for manual construction using the
+[`set_item()`](struct.Value.html#method.set_item) and [`push()`](struct.Value.html#method.push)
+methods:
+
+```
+# #[macro_use] extern crate sciter;
+# fn main() {
+let map = vmap! {
+  "one" => 1,
+  "two" => 2.0,
+  "three" => "",
+};
+assert!(map.is_map());
+assert_eq!(map.len(), 3);
+
+let array = varray![1, 2.0, "three"];
+assert!(array.is_array());
+assert_eq!(array.len(), 3);
+# }
+```
+
+To access its contents you should use one of [`to_`](struct.Value.html#method.to_int) methods:
 
 ```
 use sciter::Value;
@@ -328,6 +350,7 @@ impl Value {
 	/// * `T_OBJECT` - names of key/value properties in the object;
 	/// * `T_FUNCTION` - names of arguments of the function (if any).
 	///
+  /// The iterator element type is `Value` (as a key).
 	pub fn keys(&self) -> KeyIterator {
 		KeyIterator {
 			base: self,
@@ -343,6 +366,7 @@ impl Value {
 	/// * `T_OBJECT` - values of key/value properties in the object;
 	/// * `T_FUNCTION` - values of arguments of the function.
 	///
+  /// The iterator element type is `Value`.
 	pub fn values(&self) -> SeqIterator {
 		SeqIterator {
 			base: self,
@@ -353,8 +377,9 @@ impl Value {
 
 	/// An iterator visiting all key-value pairs in arbitrary order.
 	///
+  /// The `Value` must has a key-value type (map, object, function).
+  ///
 	/// The iterator element type is `(Value, Value)`.
-	/// The `Value` must has a key-value type (map, object, function).
 	pub fn items(&self) -> Vec<(Value, Value)> {
 		type Pair = Vec<(Value, Value)>;
 		let result = Box::new(Vec::with_capacity(self.len()));
@@ -888,12 +913,40 @@ impl<'a> From<&'a [u8]> for Value {
 	}
 }
 
+// /// Value from sequence of items satisfying `Into<Value>`.
+// impl ::std::iter::FromIterator<Into<Value>> for Value {
+//   fn from_iter<I: IntoIterator<Item=Into<Value>>>(iterator: I) -> Self {
+//     let iterator = iterator.into_iter();
+//     let capacity = iterator.size_hint().0;
+//     let mut v = Value::array(capacity);
+//     for i in iterator {
+//       v.push(Value::from(i));
+//     }
+//     return v;
+//   }
+// }
+
+/// Value from sequence of `Value`.
+impl ::std::iter::FromIterator<Value> for Value {
+  fn from_iter<I: IntoIterator<Item=Value>>(iterator: I) -> Self {
+    let iterator = iterator.into_iter();
+    let capacity = iterator.size_hint().0;
+    let mut v = Value::array(capacity);
+    for (i, m) in iterator.enumerate() {
+      v.set(i, Value::from(m));
+    }
+    return v;
+  }
+}
+
 /// Value from sequence of `i32`.
 impl ::std::iter::FromIterator<i32> for Value {
 	fn from_iter<I: IntoIterator<Item=i32>>(iterator: I) -> Self {
-		let mut v = Value::new();
-		for i in iterator {
-			v.push(Value::from(i));
+    let iterator = iterator.into_iter();
+    let capacity = iterator.size_hint().0;
+		let mut v = Value::array(capacity);
+    for (i, m) in iterator.enumerate() {
+      v.set(i, Value::from(m));
 		}
 		return v;
 	}
@@ -902,9 +955,11 @@ impl ::std::iter::FromIterator<i32> for Value {
 /// Value from sequence of `f64`.
 impl ::std::iter::FromIterator<f64> for Value {
 	fn from_iter<I: IntoIterator<Item=f64>>(iterator: I) -> Self {
-		let mut v = Value::new();
-		for i in iterator {
-			v.push(Value::from(i));
+    let iterator = iterator.into_iter();
+    let capacity = iterator.size_hint().0;
+    let mut v = Value::array(capacity);
+    for (i, m) in iterator.enumerate() {
+      v.set(i, Value::from(m));
 		}
 		return v;
 	}
@@ -913,9 +968,11 @@ impl ::std::iter::FromIterator<f64> for Value {
 /// Value from sequence of `&str`.
 impl<'a> ::std::iter::FromIterator<&'a str> for Value {
 	fn from_iter<I: IntoIterator<Item=&'a str>>(iterator: I) -> Self {
-		let mut v = Value::new();
-		for i in iterator {
-			v.push(Value::from(i));
+    let iterator = iterator.into_iter();
+    let capacity = iterator.size_hint().0;
+    let mut v = Value::array(capacity);
+    for (i, m) in iterator.enumerate() {
+      v.set(i, Value::from(m));
 		}
 		return v;
 	}
@@ -924,9 +981,11 @@ impl<'a> ::std::iter::FromIterator<&'a str> for Value {
 /// Value from sequence of `String`.
 impl ::std::iter::FromIterator<String> for Value {
 	fn from_iter<I: IntoIterator<Item=String>>(iterator: I) -> Self {
-		let mut v = Value::new();
-		for i in iterator {
-			v.push(Value::from(i));
+    let iterator = iterator.into_iter();
+    let capacity = iterator.size_hint().0;
+    let mut v = Value::array(capacity);
+    for (i, m) in iterator.enumerate() {
+      v.set(i, Value::from(m));
 		}
 		return v;
 	}
@@ -1011,6 +1070,7 @@ impl FromValue for String {
 
 
 /// An iterator visiting all keys of key/value pairs in the map-like `Value` objects.
+#[doc(hidden)]
 pub struct KeyIterator<'a> {
 	base: &'a Value,
 	index: usize,
@@ -1054,6 +1114,7 @@ impl<'a> ::std::iter::DoubleEndedIterator for KeyIterator<'a> {
 
 
 /// An iterator over the sub-elements of a `Value`.
+#[doc(hidden)]
 pub struct SeqIterator<'a> {
 	base: &'a Value,
 	index: usize,

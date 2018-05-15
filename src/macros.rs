@@ -169,3 +169,69 @@ macro_rules! dispatch_script_call {
 		}
 	};
 }
+
+
+/// Create a `sciter::Value` (of map type) from a list of key-value pairs.
+///
+/// # Example
+///
+/// ```rust
+/// # #[macro_use] extern crate sciter;
+/// # fn main() {
+/// let v: sciter::Value = vmap! {
+///   "one" => 1,
+///   "two" => 2.0,
+///   "three" => "",
+/// };
+/// assert!(v.is_map());
+/// assert_eq!(v.len(), 3);
+/// # }
+/// ```
+#[macro_export]
+macro_rules! vmap {
+  ( $($key:expr => $value:expr,)+ ) => { vmap!($($key => $value),+)  };
+  ( $($key:expr => $value:expr),* ) => {
+    {
+      let mut _v = $crate::Value::map();
+      $(
+        _v.set_item($key, $value);
+      )*
+      _v
+    }
+  };
+}
+
+/// Creates a `sciter::Value` (of array type) containing the arguments.
+///
+/// # Example
+///
+/// ```rust
+/// # #[macro_use] extern crate sciter;
+/// # fn main() {
+/// let v: sciter::Value = varray![1, 2.0, "three"];
+/// assert!(v.is_array());
+/// assert_eq!(v.len(), 3);
+/// # }
+/// ```
+#[macro_export]
+macro_rules! varray {
+  ( $($value:expr,)+ ) => { varray!($($value),+) };
+  ( $($value:expr),* ) => {
+    {
+      // args count
+      let mut _i = 0;
+      $(
+        let _ = &$value;
+        _i += 1;
+      )*
+      let argc = _i;
+      let mut _v = $crate::Value::array(argc);
+      let mut _i = 0;
+      $(
+        _v.set(_i, $value);
+        _i += 1;
+      )*
+      _v
+    }
+  };
+}
