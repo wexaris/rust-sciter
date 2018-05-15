@@ -13,6 +13,41 @@ fn new_works() {
 	assert!(!v.is_null());
 }
 
+#[test]
+fn varray_works() {
+  let val = varray![];
+  assert!(val.is_array());
+  assert_eq!(val.len(), 0);
+
+  let val = varray![42];
+  assert!(val.is_array());
+  assert_eq!(val.len(), 1);
+
+  let val = varray![1, 2.0, "three"];
+  assert!(val.is_array());
+  assert_eq!(val.len(), 3);
+}
+
+#[test]
+fn vmap_works() {
+  let map = vmap!{};
+  assert!(map.is_map());
+  assert_eq!(map.len(), 0);
+
+  let map = vmap! {
+    "one" => 1,
+  };
+  assert!(map.is_map());
+  assert_eq!(map.len(), 1);
+
+  let map = vmap! {
+    "one" => 1,
+    "two" => 2.0,
+    "three" => "",
+  };
+  assert!(map.is_map());
+  assert_eq!(map.len(), 3);
+}
 
 #[test]
 fn null_works() {
