@@ -87,16 +87,56 @@
 
   </style>
   <script type="text/tiscript">
+    include "log.tis";
+
     var footer = $(.footer);
     var data;
 
+    class Graph {
+      function this(he, limit = 10) {
+        this.user = he.$(svg[name="user"]);
+        this.kernel = he.$(svg[name="kernel"]);
+        this.limit = limit;
+        this.user_times = [];
+        this.kernel_times = [];
+      }
+
+      function push(pair) {
+        const limit = this.limit;
+        function rotate(a, v) {
+          a.push(v);
+          if (a.length > limit)
+            a.shift();
+          return a;
+        }
+        this.user.value = rotate(this.user_times, pair.user);
+        this.kernel.value = rotate(this.kernel_times, pair.kernel);
+      }
+    }
+
+    var isDesign = false;
+    var total_graph;
+    var core_graph = [];
+
     function init_cpu() {
-      const cores = 8;
+      var cores;
+      try {
+        cores = view.get_cpu_cores();
+        stdout.printf("init: %d cores\n", cores);
+      }
+      catch(e) {
+        isDesign = true;
+        cores = 2;
+      }
+
+      total_graph = new Graph($(.graphs > .total), 1);
 
       var list = $(.graphs > .cores);
       var template = $(#templates).text;
+      list.clear();
       for (var i = list.length; i < cores; i++) {
         list.append(template);
+        core_graph.push(new Graph(list.last));
       }
 
       setIcon();
@@ -104,10 +144,20 @@
 
     function update() {
       try {
-        // data = view.getCpuLoad();
+        data = view.get_cpu_data();
+        stdout.println(".");
       }
       catch(e) {
+        log.f("oops: " + e.toString());
       }
+      for (var(i,v) in data.cpu.cores) {
+        if (i == 0 || i == 1) {
+          stdout.printf("core %d: %v\n", i, v);
+        }
+        core_graph[i].push(v);
+      }
+      stdout.printf("total:  %v\n", data.cpu.total);
+      total_graph.push(data.cpu.total);
       footer.value = data;
     }
 
@@ -118,15 +168,23 @@
 
     $(body).timer(1s, function() {
       update();
-      data.delta.context = rand(30000);
+
+      if(isDesign) {
+        data.delta.context = rand(30000);
+        data.cpu.total.user = rand(80);
+        data.cpu.total.kernel = rand(25);
+        var c0 = data.cpu.cores[0];
+        c0.user = rand(80);
+        c0.kernel = rand(25);
+      }
       return true;
     });
 
     data = {
       topology: {
         sockets: 1,
-        cores: 4,
-        threads: 8,
+        cores: 1,
+        threads: 2,
       },
 
       cpu: {
