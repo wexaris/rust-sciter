@@ -12,13 +12,13 @@ struct LoadHandler {
 impl LoadHandler {
   fn new(archive: &[u8]) -> Self {
     Self {
-      archive: Archive::open(archive),
+      archive: Archive::open(archive).expect("Unable to load archived resources"),
     }
   }
 }
 
 impl sciter::HostHandler for LoadHandler {
-  fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> LOAD_RESULT {
+  fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> Option<LOAD_RESULT> {
     let uri = w2s!(pnm.uri);
     eprintln!("[handler] loading {:?}", uri);
 
@@ -29,7 +29,7 @@ impl sciter::HostHandler for LoadHandler {
         eprintln!("[handler] error: can't load {:?}", uri);
       }
     }
-    return LOAD_RESULT::LOAD_DEFAULT;
+    return Some(LOAD_RESULT::LOAD_DEFAULT);
   }
 }
 

@@ -108,7 +108,7 @@ fn process_events(me: &mut EventHandler, he: HELEMENT, evtg: UINT, params: LPVOI
 	let evtg : EVENT_GROUPS = unsafe { ::std::mem::transmute(evtg) };
 	// assert!(!he.is_null() || evtg == EVENT_GROUPS::SUBSCRIPTIONS_REQUEST);
 	if he.is_null() && evtg != EVENT_GROUPS::SUBSCRIPTIONS_REQUEST {
-		println!("warning! null element for {:?}", evtg);
+		eprintln!("[sciter] warning! null element for {:?}", evtg);
 	}
 
 	let result = match evtg {
@@ -165,7 +165,7 @@ fn process_events(me: &mut EventHandler, he: HELEMENT, evtg: UINT, params: LPVOI
 			};
 
 			if he.is_null() {
-				println!("warning! null element for {:?}:{:?}", evtg, code);
+				eprintln!("[sciter] warning! null element for {:?}:{:?}", evtg, code);
 			}
 
 			if phase == PHASE_MASK::SINKING {	// catch this only once
