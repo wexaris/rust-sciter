@@ -31,7 +31,7 @@ crate-type = ["rlib"]
 [features]
 default = []
 nightly = []
-shared = []
+dynamic = []
 
 [dependencies]
 libc = "0.2"

@@ -29,12 +29,12 @@ environment:
   - TARGET: x86_64-pc-windows-msvc
     CHANNEL: stable
     ARCH: 64
-    FEATURES: --features "shared"
+    FEATURES: --features "dynamic"
 
   - TARGET: i686-pc-windows-msvc
     CHANNEL: stable
     ARCH: 32
-    FEATURES: --features "shared"
+    FEATURES: --features "dynamic"
 
   - TARGET: x86_64-pc-windows-msvc
     CHANNEL: nightly

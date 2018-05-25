@@ -85,8 +85,8 @@ script:
 
   - cargo build --example first --verbose
   - cargo run --example first
-  - cargo run --example first --features shared
-  - cargo run --example first --features shared -- "$SDK_DLL"
+  - cargo run --example first --features "dynamic"
+  - cargo run --example first --features "dynamic" -- "$SDK_DLL"
 
   - cargo build --all
   - cargo build --all --release

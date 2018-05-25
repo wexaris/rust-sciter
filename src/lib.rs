@@ -65,7 +65,7 @@ and module-level sections for the guides about:
 
 /* Macros */
 
-#[cfg(target_os="macos")]
+#[cfg(target_os = "macos")]
 #[macro_use] extern crate objc;
 #[macro_use] extern crate lazy_static;
 
@@ -157,7 +157,7 @@ mod ext {
       let mut dll = unsafe { LoadLibraryA(b"sciter.dll\0".as_ptr() as LPCSTR) };
       if dll.is_null() {
         // try to load with old names
-        let alternate = if cfg!(target_arch="x86_64") { b"sciter64.dll\0" } else { b"sciter32.dll\0" };
+        let alternate = if cfg!(target_arch = "x86_64") { b"sciter64.dll\0" } else { b"sciter32.dll\0" };
         dll = unsafe { LoadLibraryA(alternate.as_ptr() as LPCSTR) };
       }
       if !dll.is_null() {
@@ -190,7 +190,7 @@ mod ext {
       let get_api: FuncType = unsafe { std::mem::transmute(sym) };
       return Ok(get_api());
     }
-    let sdkbin = if cfg!(target_arch="x86_64") { "bin/64" } else { "bin/32" };
+    let sdkbin = if cfg!(target_arch = "x86_64") { "bin/64" } else { "bin/32" };
     let msg = format!("Please verify that Sciter SDK is installed and its binaries (from SDK/{}) are available in PATH.", sdkbin);
     Err(format!("error: '{}' was not found neither in PATH nor near the current executable.\n  {}", "sciter.dll", msg))
   }
@@ -203,17 +203,17 @@ mod ext {
 	}
 }
 
-#[cfg(all(feature = "shared", unix))]
+#[cfg(all(feature = "dynamic", unix))]
 mod ext {
   #![allow(non_snake_case, non_camel_case_types)]
   extern crate libc;
 
   pub static mut CUSTOM_DLL_PATH: Option<String> = None;
 
-  #[cfg(target_os="linux")]
+  #[cfg(target_os = "linux")]
   const DLL_NAMES: &'static [&'static str] = &[ "libsciter-gtk.so" ];
 
-  #[cfg(all(target_os="macos", target_arch="x86_64"))]
+  #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
   const DLL_NAMES: &'static [&'static str] = &[ "sciter-osx-64.dylib" ];
 
   use capi::scapi::ISciterAPI;
@@ -258,7 +258,7 @@ mod ext {
         return dll;
       }
 
-      if cfg!(target_os="macos") && dir.is_some() {
+      if cfg!(target_os = "macos") && dir.is_some() {
         // "(bundle folder)/Contents/Frameworks/"
         let mut path = dir.unwrap().to_owned();
         path.push("../Frameworks/sciter-osx-64.dylib");
@@ -303,7 +303,7 @@ mod ext {
       let get_api: FuncType = unsafe { std::mem::transmute(sym) };
       return Ok(get_api());
     }
-    let sdkbin = if cfg!(target_os="macos") { "bin.osx" } else { "bin.gtk" };
+    let sdkbin = if cfg!(target_os = "macos") { "bin.osx" } else { "bin.gtk" };
     let msg = format!("Please verify that Sciter SDK is installed and its binaries (from {}) are available in PATH.", sdkbin);
     Err(format!("error: '{}' was not found neither in PATH nor near the current executable.\n  {}", DLL_NAMES[0], msg))
   }
@@ -317,19 +317,19 @@ mod ext {
 }
 
 
-#[cfg(all(target_os="linux", not(feature = "shared")))]
+#[cfg(all(target_os = "linux", not(feature = "dynamic")))]
 mod ext {
 	// Note:
 	// Since 4.1.4 library name has been changed to "libsciter-gtk" (without 32/64 suffix).
 	// Since 3.3.1.6 library name was changed to "libsciter".
 	// However CC requires `-l sciter` form.
-	#[link(name="sciter-gtk")]
+	#[link(name = "sciter-gtk")]
 	extern "system" { pub fn SciterAPI() -> *const ::capi::scapi::ISciterAPI;	}
 }
 
-#[cfg(all(target_os="macos", target_arch="x86_64", not(feature = "shared")))]
+#[cfg(all(target_os = "macos", target_arch = "x86_64", not(feature = "dynamic")))]
 mod ext {
-	#[link(name="sciter-osx-64", kind = "dylib")]
+	#[link(name = "sciter-osx-64", kind = "dylib")]
 	extern "system" { pub fn SciterAPI() -> *const ::capi::scapi::ISciterAPI;	}
 }
 
@@ -364,12 +364,12 @@ lazy_static! {
 /// }
 /// ```
 pub fn set_library(custom_path: &str) -> ::std::result::Result<(), String> {
-  #[cfg(not(feature="shared"))]
+  #[cfg(not(feature = "dynamic"))]
   fn set_impl(_: &str) -> ::std::result::Result<(), String> {
     Err("Don't use `sciter::set_library()` in static builds.\n  Build with feature \"shared\" instead.".to_owned())
   }
 
-  #[cfg(feature="shared")]
+  #[cfg(feature = "dynamic")]
   fn set_impl(path: &str) -> ::std::result::Result<(), String> {
     unsafe {
       ext::CUSTOM_DLL_PATH = Some(path.to_owned());
