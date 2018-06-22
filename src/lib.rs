@@ -382,10 +382,15 @@ pub fn set_library(custom_path: &str) -> ::std::result::Result<(), String> {
 
 
 /// Sciter engine version number (e.g. `0x03030200`).
+///
+/// Note: does not return the `build` part because it isn't fit in `0..255` byte range.
+/// Use [`sciter::version()`](fn.version.html) instead which returns complete version string.
 pub fn version_num() -> u32 {
 	let v1 = (_API.SciterVersion)(true);
 	let v2 = (_API.SciterVersion)(false);
-	let num = ((v1 >> 16) << 24) | ((v1 & 0xFFFF) << 16) | ((v2 >> 16) << 8) | (v2 & 0xFFFF);
+	let (major, minor, revision, _build) = (v1 >> 16 & 0xFF, v1 & 0xFF, v2 >> 16 & 0xFF, v2 & 0xFF);
+	let num = (major << 24) | (minor << 16) | (revision << 8);
+	// let num = ((v1 >> 16) << 24) | ((v1 & 0xFFFF) << 16) | ((v2 >> 16) << 8) | (v2 & 0xFFFF);
 	return num;
 }
 
