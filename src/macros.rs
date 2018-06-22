@@ -11,7 +11,7 @@
 ///
 #[macro_export]
 macro_rules! s2u {
-	($s:expr) => ( $crate::utf::s2un($s) )
+	($s:expr) => ( $crate::utf::s2un($s.as_ref()) )
 }
 
 
@@ -26,7 +26,7 @@ macro_rules! s2u {
 ///
 #[macro_export]
 macro_rules! s2w {
-	($s:expr) => ( $crate::utf::s2vecn($s) )
+	($s:expr) => ( $crate::utf::s2vecn($s.as_ref()) )
 }
 
 
