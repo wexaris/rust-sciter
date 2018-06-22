@@ -294,6 +294,12 @@ pub struct SciterGraphicsAPI {
   pub textCreate:
     extern "system" fn(ptext: &mut HTEXT, text: LPCWSTR, textLength: UINT, format: *const TEXT_FORMAT) -> GRAPHIN_RESULT,
 
+  // since 4.1.10
+  pub textAddRef: extern "system" fn(text: HTEXT) -> GRAPHIN_RESULT,
+
+  // since 4.1.10
+  pub textRelease: extern "system" fn(text: HTEXT) -> GRAPHIN_RESULT,
+
   pub textGetMetrics: extern "system" fn(
     text: HTEXT,
     minWidth: &mut SC_DIM,

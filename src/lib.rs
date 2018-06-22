@@ -347,7 +347,12 @@ pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 
 lazy_static! {
 	static ref _API: &'static ISciterAPI = { SciterAPI() };
-	static ref _GAPI: &'static SciterGraphicsAPI = { unsafe { &*(SciterAPI().GetSciterGraphicsAPI)() } };
+	static ref _GAPI: &'static SciterGraphicsAPI = {
+		if version_num() < 0x04010A00 {
+			panic!("Graphics API is incompatible since 4.1.10 (your version is {})", version());
+		}
+		unsafe { &*(SciterAPI().GetSciterGraphicsAPI)() }
+	};
 	static ref _RAPI: &'static SciterRequestAPI = { unsafe { &*(SciterAPI().GetSciterRequestAPI)() } };
 }
 
