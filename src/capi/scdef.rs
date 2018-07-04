@@ -104,8 +104,10 @@ pub enum SCITER_RT_OPTIONS
   /// That UX theme is not using OS primitives for rendering input elements.
   /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
   SCITER_SET_UX_THEMING = 11,
-  ///value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window).
+  /// value - TRUE/FALSE - window uses per pixel alpha (e.g. WS_EX_LAYERED/UpdateLayeredWindow() window).
   SCITER_ALPHA_WINDOW  = 12,
+  /// global; value: UTF-8 encoded script source to be loaded into each view before any other script execution.
+  SCITER_SET_INIT_SCRIPT = 13,
 }
 
 /// Window flags

@@ -434,6 +434,8 @@ pub enum RuntimeOptions<'a> {
 	OnHttpsError(u8),
 	/// global; value: json with GPU black list, see the `gpu-blacklist.json` resource.
 	GpuBlacklist(&'a str),
+	/// global; value: script source to be loaded into each view before any other script execution.
+	InitScript(&'a str),
 }
 
 /// Set various sciter engine global options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
@@ -444,6 +446,7 @@ pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 		ConnectionTimeout(ms) => (SCITER_CONNECTION_TIMEOUT, ms as usize),
 		OnHttpsError(behavior) => (SCITER_HTTPS_ERROR, behavior as usize),
 		GpuBlacklist(json) => (SCITER_SET_GPU_BLACKLIST, json.as_bytes().as_ptr() as usize),
+		InitScript(script) => (SCITER_SET_INIT_SCRIPT, script.as_bytes().as_ptr() as usize),
 		ScriptFeatures(mask) => (SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
 		GfxLayer(backend) => (SCITER_SET_GFX_LAYER, backend as usize),
 		DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
