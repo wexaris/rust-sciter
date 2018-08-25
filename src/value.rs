@@ -842,7 +842,16 @@ impl ::std::ops::IndexMut<Value> for Value {
 	}
 }
 
-/// Value from native `VALUE` object.
+/// Value from nothing (`()`) for empty return values.
+///
+/// Returns `undefined` value.
+impl From<()> for Value {
+	fn from(_: ()) -> Self {
+		Value::new()
+	}
+}
+
+/// Value from a native `VALUE` object.
 impl<'a> From<&'a VALUE> for Value {
   fn from(val: &'a VALUE) -> Self {
     unsafe { Value::copy_from(val as *const _) }
