@@ -371,7 +371,7 @@ impl Builder {
 		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_CONTROLS)
 	}
 
-	/// Glassy window.
+	/// Glassy window ("Acrylic" on Windows and "Vibrant" on macOS).
 	pub fn glassy(self) -> Self {
 		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_GLASSY)
 	}
