@@ -409,8 +409,9 @@ pub fn set_library(custom_path: &str) -> ::std::result::Result<(), String> {
 /// Note: does not return the `build` part because it isn't fit in `0..255` byte range.
 /// Use [`sciter::version()`](fn.version.html) instead which returns complete version string.
 pub fn version_num() -> u32 {
-	let v1 = (_API.SciterVersion)(true);
-	let v2 = (_API.SciterVersion)(false);
+	use types::BOOL;
+	let v1 = (_API.SciterVersion)(true as BOOL);
+	let v2 = (_API.SciterVersion)(false as BOOL);
 	let (major, minor, revision, _build) = (v1 >> 16 & 0xFF, v1 & 0xFF, v2 >> 16 & 0xFF, v2 & 0xFF);
 	let num = (major << 24) | (minor << 16) | (revision << 8);
 	// let num = ((v1 >> 16) << 24) | ((v1 & 0xFFFF) << 16) | ((v2 >> 16) << 8) | (v2 & 0xFFFF);
@@ -419,8 +420,9 @@ pub fn version_num() -> u32 {
 
 /// Sciter engine version string (e.g. "`3.3.2.0`").
 pub fn version() -> String {
-	let v1 = (_API.SciterVersion)(true);
-	let v2 = (_API.SciterVersion)(false);
+	use types::BOOL;
+	let v1 = (_API.SciterVersion)(true as BOOL);
+	let v2 = (_API.SciterVersion)(false as BOOL);
 	let num = [v1 >> 16, v1 & 0xFFFF, v2 >> 16, v2 & 0xFFFF];
 	let version = format!("{}.{}.{}.{}", num[0], num[1], num[2], num[3]);
 	return version;
