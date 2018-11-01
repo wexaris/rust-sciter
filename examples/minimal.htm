@@ -20,6 +20,16 @@
       view.caption = $(head > title).value;
 
       $(#machine).text = Sciter.machineName();
+      $(#version).text = String.printf("%d.%d.%d.%d",
+        (Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
+        (Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff);
+
+      try {
+        // since 4.2.5.0
+        $(#revision).text = Sciter.BUILD.toString();
+      } catch(e) {
+        $(#revision).text = "N/A";
+      }
 
       var counter = 0;
 
@@ -52,6 +62,7 @@
 
   <h1>Minimal Sciter Application</h1>
   <p>Running on <em #machine /> machine</p>
+  <p>Sciter version <span #version /> rev <span #revision /></p>
 
   <button #append>Append</button>
   <button #open>Open</button>
