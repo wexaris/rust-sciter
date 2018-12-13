@@ -123,10 +123,16 @@ impl From<Image> for Value {
 
 impl Image {
   /// Create a new blank image.
-  pub fn new((width, height): (u32, u32), with_alpha: bool) -> Result<Image> {
+  pub fn create((width, height): (u32, u32), with_alpha: bool) -> Result<Image> {
     let mut h = null_mut();
     let ok = (_GAPI.imageCreate)(&mut h, width, height, with_alpha as BOOL);
     ok_or!(Image(h), ok)
+  }
+
+  /// Create a new blank image.
+  #[deprecated(note="Use `Image::create` instead.")]
+  pub fn new((width, height): (u32, u32), with_alpha: bool) -> Result<Image> {
+  	Self::create((width, height), with_alpha)
   }
 
   /// Create image from `BGRA` data. Size of the pixmap is `width * height * 4` bytes.
@@ -299,10 +305,16 @@ impl From<Path> for Value {
 
 impl Path {
   /// Create a new empty path.
-  pub fn new() -> Result<Path> {
+  pub fn create() -> Result<Path> {
     let mut h = null_mut();
     let ok = (_GAPI.pathCreate)(&mut h);
     ok_or!(Path(h), ok)
+  }
+
+  /// Create a new empty path.
+  #[deprecated(note="Use `Path::create()` instead.")]
+  pub fn new() -> Result<Path> {
+  	Self::create()
   }
 
   /// Close the current path/figure.
