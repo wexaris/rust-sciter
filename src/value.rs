@@ -942,7 +942,7 @@ impl ::std::iter::FromIterator<Value> for Value {
     let capacity = iterator.size_hint().0;
     let mut v = Value::array(capacity);
     for (i, m) in iterator.enumerate() {
-      v.set(i, Value::from(m));
+      v.set(i, m);
     }
     return v;
   }
