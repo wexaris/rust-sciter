@@ -1016,10 +1016,10 @@ impl ::std::fmt::Debug for Element {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		if f.alternate() {
 			use self::ELEMENT_STATE_BITS;
-			use ::std::mem::transmute;
+			use ::std::mem;
 
-			fn state_name(value: ELEMENT_STATE_BITS) -> &'static str {
-				match value {
+			fn state_name(value: &ELEMENT_STATE_BITS) -> &'static str {
+				match *value {
 					ELEMENT_STATE_BITS::STATE_LINK => "link",
 					ELEMENT_STATE_BITS::STATE_HOVER => "hover",
 					ELEMENT_STATE_BITS::STATE_ACTIVE => "active",
@@ -1064,8 +1064,8 @@ impl ::std::fmt::Debug for Element {
 			for i in 0..31 {
 				let bit = state & (1 << i);
 				if bit != 0 {
-					let state_bit: ELEMENT_STATE_BITS = unsafe { transmute(bit) };
-					let name = state_name(state_bit);
+					let state_bit: ELEMENT_STATE_BITS = unsafe { mem::transmute(bit) };
+					let name = state_name(&state_bit);
 					if !name.is_empty() {
 						write!(f, ":{}", name)?;
 					}

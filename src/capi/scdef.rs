@@ -94,7 +94,7 @@ pub enum SCITER_RT_OPTIONS
   SCITER_TRANSPARENT_WINDOW = 6,
   /// global; value = LPCBYTE, json - GPU black list, see: gpu-blacklist.json resource.
   /// Note: is not used since Sciter 4.
-  #[deprecated(since="4.0.1.1", note="This option isn't working since Sciter 4.0.1.1.")]
+  #[deprecated(since="4.0.1", note="This option isn't working since Sciter 4.0.1.1.")]
   SCITER_SET_GPU_BLACKLIST  = 7,
   /// global or per-window; value - combination of [SCRIPT_RUNTIME_FEATURES](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
   SCITER_SET_SCRIPT_RUNTIME_FEATURES = 8,
