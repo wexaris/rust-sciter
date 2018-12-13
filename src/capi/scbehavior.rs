@@ -215,7 +215,12 @@ pub enum EDIT_CHANGED_REASON
 	/// Character range (selection) deletion.
 	BY_DEL_CHARS,
 	/// Undo/redo.
-	BY_UNDO_REDO
+	BY_UNDO_REDO,
+	/// Single char insertion, previous character was inserted in previous position.
+	CHANGE_BY_INS_CONSECUTIVE_CHAR,
+	/// Single char removal, previous character was removed in previous position
+	CHANGE_BY_DEL_CONSECUTIVE_CHAR,
+	CHANGE_BY_CODE,
 }
 
 #[repr(C)]
@@ -291,9 +296,24 @@ pub enum BEHAVIOR_EVENTS
 	/// generic change
 	CHANGE = 0x17,
 
+	/// media changed (screen resolution, number of displays, etc.)
+	MEDIA_CHANGED = 0x18,
+	/// input language has changed, data is iso lang-country string
+	INPUT_LANGUAGE_CHANGED = 0x19,
+	/// editable content has changed
+	CONTENT_MODIFIED = 0x1A,
+	/// a broadcast notification being posted to all elements of some container
+	/// that changes its `:read-only` state.
+	READONLY_STATUS_CHANGED = 0x1B,
+	/// change in `aria-live="polite|assertive"`
+	ARIA_LIVE_AREA_CHANGED = 0x1C,
+
 	// "grey" event codes  - notfications from behaviors from this SDK
 	/// hyperlink click
 	HYPERLINK_CLICK = 0x80,
+
+	PASTE_TEXT = 0x8E,
+	PASTE_HTML = 0x8F,
 
 	/// element was collapsed, so far only behavior:tabs is sending these two to the panels
 	ELEMENT_COLLAPSED = 0x90,
@@ -336,7 +356,7 @@ pub enum BEHAVIOR_EVENTS
 	/// close popup request,
 	CLOSE_POPUP,
 	/// request tooltip, `evt.source` <- is the tooltip element.
-	REQUEST_TOOLTIP,
+	TOOLTIP_REQUEST,
 
 	/// animation started (`reason=1`) or ended(`reason=0`) on the element.
 	ANIMATION         = 0xA0,
