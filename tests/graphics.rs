@@ -19,16 +19,16 @@ macro_rules! assert_ok {
 }
 
 fn get() -> Image {
-  Image::new((100, 100), true).expect("Can't create a `100x100` image")
+  Image::create((100, 100), true).expect("Can't create a `100x100` image")
 }
 
 #[test]
 #[ignore]
 fn image_new() {
-  let ok = Image::new((100, 100), false);
+  let ok = Image::create((100, 100), false);
   assert_ok!(OK, ok);
 
-  let ok = Image::new((100, 100), true);
+  let ok = Image::create((100, 100), true);
   assert_ok!(OK, ok);
 }
 
@@ -186,7 +186,7 @@ fn make_color() {
 #[test]
 #[ignore]
 fn paint() {
-  let mut image = Image::new((100, 100), false).unwrap();
+  let mut image = Image::create((100, 100), false).unwrap();
   let ok = image.paint(|gfx, size| {
     gfx.rectangle((5.0, 5.0), (size.0 - 5.0, size.1 - 5.0))?;
     Ok(())
