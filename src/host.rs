@@ -84,7 +84,13 @@ pub trait HostHandler {
 	/// This output function will be used for reporting problems found while loading html and css documents.
 	fn on_debug_output(&mut self, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, message: &str) {
 		if !message.is_empty() {
-			println!("{:?}:{:?}: {}", severity, subsystem, message);
+			if severity == OUTPUT_SEVERITY::INFO {
+				// e.g. `stdout.println` in TIScript
+				println!("{:?}:{:?}: {}", severity, subsystem, message);
+			} else {
+				// e.g. `stderr.println` or CSS/script errors and warnings.
+				eprintln!("{:?}:{:?}: {}", severity, subsystem, message);
+			}
 		}
 	}
 
