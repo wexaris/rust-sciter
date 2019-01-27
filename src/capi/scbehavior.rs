@@ -117,6 +117,8 @@ pub enum DRAW_EVENTS {
 	DRAW_BACKGROUND = 0,
 	DRAW_CONTENT,
 	DRAW_FOREGROUND,
+	/// Note: since 4.2.3.
+	DRAW_OUTLINE,
 }
 
 
