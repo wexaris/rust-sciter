@@ -221,7 +221,7 @@ impl Host {
     Ok(())
   }
 
-	/// Set debug mode for specific window or globally.
+	/// Set debug mode for this window.
 	pub fn enable_debug(&self, enable: bool) {
 		let hwnd = 0 as HWINDOW;
 		(_API.SciterSetOption)(hwnd, SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as UINT_PTR);
@@ -237,13 +237,13 @@ impl Host {
 		::dom::Element::from_window(self.hwnd).ok()
 	}
 
-	/// Load HTML document from file.
+	/// Load an HTML document from file.
 	pub fn load_file(&self, uri: &str) {
 		let (s,_) = s2w!(uri);
 		(_API.SciterLoadFile)(self.hwnd, s.as_ptr());
 	}
 
-	/// Load HTML document from memory.
+	/// Load an HTML document from memory.
 	pub fn load_html(&self, html: &[u8], uri: Option<&str>) {
 		match uri {
 			Some(uri) => {

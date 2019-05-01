@@ -169,12 +169,17 @@ impl Window {
 		self.host.register_behavior(name, factory);
 	}
 
-	/// Load HTML document from file.
+	/// Load an HTML document from file.
+	///
+	/// The specified `uri` should be either an absolute file path,
+	/// or a full URL to the HTML to load.
+	///
+	/// Supported URL schemes are: `http://`, `file://`, `this://app/` (when used with [`archive_handler`](#archive_handler)).
 	pub fn load_file(&mut self, uri: &str) {
 		self.host.load_file(uri)
 	}
 
-	/// Load HTML document from memory.
+	/// Load an HTML document from memory.
 	pub fn load_html(&mut self, html: &[u8], uri: Option<&str>) {
 		self.host.load_html(html, uri)
 	}
