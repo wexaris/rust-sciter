@@ -11,13 +11,24 @@ use capi::scgraphics::{HGFX};
 #[repr(C)]
 pub struct BEHAVIOR_EVENT_PARAMS
 {
+	/// Behavior event code. See [`BEHAVIOR_EVENTS`](enum.BEHAVIOR_EVENTS.html).
 	pub cmd: UINT,
+
+	/// Target element handler.
 	pub heTarget: HELEMENT,
 
+	/// Source element.
 	pub he: HELEMENT,
+
+	/// UI action causing change.
 	pub reason: UINT_PTR,
 
-	pub data:   VALUE,
+	/// Auxiliary data accompanied with the event.
+	pub data: VALUE,
+
+	/// Name of the custom event (when `cmd` is [`BEHAVIOR_EVENTS::CUSTOM`](enum.BEHAVIOR_EVENTS.html#variant.CUSTOM)).
+	/// Since 4.2.8.
+	pub name: LPCWSTR,
 }
 
 
@@ -400,6 +411,10 @@ pub enum BEHAVIOR_EVENTS
 	PAGINATION_PAGE,
 	/// `behavior:pager` end pagination, reason -> total pages
 	PAGINATION_ENDS,
+
+	/// event with custom name.
+	/// Since 4.2.8.
+	CUSTOM						 = 0xF0,
 
 	/// all custom event codes shall be greater than this number. All codes below this will be used
 	/// solely by application - Sciter will not intrepret it and will do just dispatching.
