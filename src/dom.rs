@@ -467,6 +467,7 @@ impl Element {
 			he: source.unwrap_or(self.he),
 			heTarget: self.he,
 			data: Default::default(),
+			name: 0 as LPCWSTR,
 		};
 		if data.is_some() {
 			data.unwrap().pack_to(&mut params.data);
