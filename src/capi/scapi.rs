@@ -122,7 +122,7 @@ pub struct ISciterAPI
 	pub SciterGetElementUID: extern "system" fn (he: HELEMENT, puid: * mut UINT) -> SCDOM_RESULT,
 	pub SciterGetElementByUID: extern "system" fn (hwnd: HWINDOW, uid: UINT, phe: * mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterShowPopup: extern "system" fn (hePopup: HELEMENT, heAnchor: HELEMENT, placement: UINT) -> SCDOM_RESULT,
-	pub SciterShowPopupAt: extern "system" fn (hePopup: HELEMENT, pos: POINT, animate: BOOL) -> SCDOM_RESULT,
+	pub SciterShowPopupAt: extern "system" fn (hePopup: HELEMENT, pos: POINT, placement: UINT) -> SCDOM_RESULT,
 	pub SciterHidePopup: extern "system" fn (he: HELEMENT) -> SCDOM_RESULT,
 	pub SciterGetElementState: extern "system" fn (he: HELEMENT, pstateBits: * mut UINT) -> SCDOM_RESULT,
 	pub SciterSetElementState: extern "system" fn (he: HELEMENT, stateBitsToSet: UINT, stateBitsToClear: UINT, updateView: BOOL) -> SCDOM_RESULT,
