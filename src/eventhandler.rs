@@ -31,8 +31,6 @@ fn is_detach_event(evtg: UINT, params: LPVOID) -> bool {
 
 pub extern "system" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, _he: ::capi::scdom::HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
-	use capi::scdom::HELEMENT;
-
 	let boxed = tag as *mut WindowHandler<T>;
 	let tuple: &mut WindowHandler<T> = unsafe { &mut *boxed };
 
@@ -215,7 +213,7 @@ fn process_events(me: &mut EventHandler, he: HELEMENT, evtg: UINT, params: LPVOI
 
         // unpack method parameters
         use dom::event::MethodParams;
-        let mut reason = match code {
+        let reason = match code {
           DO_CLICK => {
             MethodParams::Click
           },

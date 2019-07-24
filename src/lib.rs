@@ -138,7 +138,6 @@ mod ext {
 	}
 
   pub fn try_load_library(permanent: bool) -> ::std::result::Result<ApiType, String> {
-    use ::std;
     use std::ffi::CString;
     use std::path::Path;
 

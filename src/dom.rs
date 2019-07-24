@@ -1016,7 +1016,6 @@ impl ::std::fmt::Display for Element {
 impl ::std::fmt::Debug for Element {
 	fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
 		if f.alternate() {
-			use self::ELEMENT_STATE_BITS;
 			use ::std::mem;
 
 			fn state_name(value: &ELEMENT_STATE_BITS) -> &'static str {
