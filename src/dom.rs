@@ -446,7 +446,7 @@ impl Element {
 		let mut handled = false as BOOL;
 		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
 		let s = source.unwrap_or(self.he);
-		let ok = (_API.SciterSendEvent)(self.he, code as u32, s, r as u32, &mut handled);
+		let ok = (_API.SciterSendEvent)(self.he, code as u32, s, r as UINT_PTR, &mut handled);
 		ok_or!(handled != 0, ok)
 	}
 
@@ -454,7 +454,7 @@ impl Element {
 	pub fn post_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>) -> Result<()> {
 		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
 		let s = source.unwrap_or(self.he);
-		let ok = (_API.SciterPostEvent)(self.he, code as u32, s, r as u32);
+		let ok = (_API.SciterPostEvent)(self.he, code as u32, s, r as UINT_PTR);
 		ok_or!((), ok)
 	}
 
