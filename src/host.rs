@@ -134,7 +134,7 @@ impl HostHandler for DefaultHandler {
 use std::rc::Rc;
 use std::cell::RefCell;
 
-type BehaviorList = Vec<(String, Box<Fn() -> Box<EventHandler>>)>;
+type BehaviorList = Vec<(String, Box<dyn Fn() -> Box<dyn EventHandler>>)>;
 type SharedBehaviorList = Rc<RefCell<BehaviorList>>;
 type SharedArchive = Rc<RefCell<Option<Archive>>>;
 
@@ -206,9 +206,9 @@ impl Host {
 	/// Register a native event handler for the specified behavior name.
 	pub fn register_behavior<Factory>(&self, name: &str, factory: Factory)
 	where
-		Factory: Fn() -> Box<EventHandler> + 'static
+		Factory: Fn() -> Box<dyn EventHandler> + 'static
 	{
-		let make: Box<Fn() -> Box<EventHandler>> = Box::new(factory);
+		let make: Box<dyn Fn() -> Box<dyn EventHandler>> = Box::new(factory);
 		let pair = (name.to_owned(), make);
 		self.behaviors.borrow_mut().push(pair);
 	}

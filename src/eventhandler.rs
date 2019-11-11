@@ -13,7 +13,7 @@ pub struct WindowHandler<T>
 
 #[repr(C)]
 pub struct BoxedHandler {
-	pub handler: Box<EventHandler>,
+	pub handler: Box<dyn EventHandler>,
 }
 
 fn is_detach_event(evtg: UINT, params: LPVOID) -> bool {
@@ -101,7 +101,7 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 	process_events(me, he, evtg, params)
 }
 
-fn process_events(me: &mut EventHandler, he: HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
+fn process_events(me: &mut dyn EventHandler, he: HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
 	let evtg : EVENT_GROUPS = unsafe { ::std::mem::transmute(evtg) };
 	// assert!(!he.is_null() || evtg == EVENT_GROUPS::SUBSCRIPTIONS_REQUEST);

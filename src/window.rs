@@ -164,7 +164,7 @@ impl Window {
 	/// ```
 	pub fn register_behavior<Factory>(&mut self, name: &str, factory: Factory)
 	where
-		Factory: Fn() -> Box<EventHandler> + 'static
+		Factory: Fn() -> Box<dyn EventHandler> + 'static
 	{
 		self.host.register_behavior(name, factory);
 	}
