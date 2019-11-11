@@ -319,7 +319,7 @@ pub struct SciterGraphicsAPI {
   // SECTION: image rendering
 
   // draws img onto the graphics surface with current transformation applied (scale, rotation).
-  #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+  #[allow(clippy::type_complexity)]
   pub gDrawImage: extern "system" fn(
     hgfx: HGFX,
     himg: HIMG,

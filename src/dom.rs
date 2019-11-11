@@ -820,7 +820,7 @@ impl Element {
 	}
 
 	/// Append element as last child of this element.
-	#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
+	#[allow(clippy::needless_pass_by_value)]
 	pub fn push(&mut self, element: Element) {
 		self.append(&element).expect("Could not append element.");
 	}

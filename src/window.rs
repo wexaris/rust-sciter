@@ -79,7 +79,7 @@ pub struct Window
 }
 
 // `Window::new()` is rather expensive operation to make it default.
-#[cfg_attr(feature = "cargo-clippy", allow(new_without_default))]
+#[allow(clippy::new_without_default)]
 impl Window {
 
 	/// Create a new main window.

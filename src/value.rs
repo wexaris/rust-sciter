@@ -546,7 +546,7 @@ impl Value {
 		return v;
 	}
 
-  #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
+  #[allow(clippy::mut_from_ref)]
 	fn ensure_tmp_mut(&self) -> &mut Value {
 		let cp = self as *const Value;
 		let mp = cp as *mut Value;

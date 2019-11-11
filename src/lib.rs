@@ -58,9 +58,9 @@ and module-level sections for the guides about:
 
 /* Clippy lints */
 
-#![cfg_attr(feature = "cargo-clippy", allow(needless_return, let_and_return))] // past habits
-#![cfg_attr(feature = "cargo-clippy", allow(redundant_field_names))] // since Rust 1.17 and less readable
-// #![cfg_attr(feature = "cargo-clippy", allow(cast_ptr_alignment))] // 0.0.195 only
+#![allow(clippy::needless_return, clippy::let_and_return)] // past habits
+#![allow(clippy::redundant_field_names)] // since Rust 1.17 and less readable
+// #![allow(clippy::cast_ptr_alignment)] // 0.0.195 only
 
 
 /* Macros */
@@ -223,7 +223,6 @@ mod ext {
 
 
   pub fn try_load_library(permanent: bool) -> ::std::result::Result<ApiType, String> {
-    use ::std;
     use std::ffi::CString;
     use std::os::unix::ffi::OsStrExt;
     use std::path::{Path, PathBuf};
