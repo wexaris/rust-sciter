@@ -11,12 +11,12 @@ use self::libc::*;
 MAKE_HANDLE!(#[doc = "Window native handle."] HWINDOW, _HWINDOW); // HWND or NSView* or GtkWidget*
 MAKE_HANDLE!(#[doc = "Archive native handle."] HSARCHIVE, _HSARCHIVE);
 
-pub type BYTE = uint8_t;
-pub type INT = int32_t;
-pub type LONG = int32_t;
-pub type UINT = uint32_t;
-pub type INT64 = int64_t;
-pub type UINT64 = uint64_t;
+pub type BYTE = u8;
+pub type INT = i32;
+pub type LONG = i32;
+pub type UINT = u32;
+pub type INT64 = i64;
+pub type UINT64 = u64;
 
 pub type FLOAT_VALUE = f64;
 
@@ -30,7 +30,7 @@ pub type CHAR = c_char;
 pub type LPSTR = *mut CHAR;
 pub type LPCSTR = *const CHAR;
 
-pub type WCHAR = uint16_t;
+pub type WCHAR = u16;
 pub type LPWSTR = *mut WCHAR;
 pub type LPCWSTR = *const WCHAR;
 
@@ -42,10 +42,10 @@ pub type LPVOID = *mut VOID;
 pub type LPCVOID = *const VOID;
 
 #[cfg(windows)]
-pub type BOOL = int32_t;
+pub type BOOL = i32;
 
 #[cfg(not(windows))]
-pub type BOOL = int8_t;
+pub type BOOL = i8;
 
 pub type PBOOL = *mut BOOL;
 
