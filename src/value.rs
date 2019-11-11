@@ -746,8 +746,8 @@ impl ::std::fmt::Debug for Value {
 			// tname.push_str(":");
 			// tname.push_str(&self.data.u.to_string());
 		}
-		try!(f.write_str(&tname[2..].to_lowercase()));
-		try!(f.write_str(":"));
+		f.write_str(&tname[2..].to_lowercase())?;
+		f.write_str(":")?;
 		write!(f, "{}", &self)
 	}
 }

@@ -994,19 +994,19 @@ impl ::std::fmt::Display for Element {
 		// "tag#id.class"
 
     let tag = self.get_tag();
-		try!(f.write_str(&tag));
+		f.write_str(&tag)?;
 
 		if let Some(i) = self.get_attribute("id") {
-			try!(write!(f, "#{}", i));
+			write!(f, "#{}", i)?;
 		}
     if let Some(c) = self.get_attribute("class") {
-			try!(write!(f, ".{}", c));
+			write!(f, ".{}", c)?;
 		}
     if let Some(t) = self.get_attribute("type") {
-			try!(write!(f, "|{}", t));
+			write!(f, "|{}", t)?;
 		}
     if let Some(n) = self.get_attribute("name") {
-			try!(write!(f, "({})", n));
+			write!(f, "({})", n)?;
 		}
 		return Ok(());
 	}
