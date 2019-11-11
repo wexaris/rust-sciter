@@ -343,7 +343,7 @@ mod windows {
 		fn init_app() {
 			// By default, unbundled apps start with `NSApplicationActivationPolicyProhibited` (no dock, no menu).
 			let app = OsWindow::get_app();
-			unsafe { msg_send!(app, setActivationPolicy:NSApplicationActivationPolicy::Regular) };
+			let _: () = unsafe { msg_send!(app, setActivationPolicy:NSApplicationActivationPolicy::Regular) };
 		}
 
 		fn view(&self) -> *mut Object {
@@ -395,10 +395,10 @@ mod windows {
 		fn collapse(&self, hide: bool) {
 			let wnd = self.window();
 			if hide {
-				unsafe { msg_send!(wnd, orderOut:0) };
+				let _: () = unsafe { msg_send!(wnd, orderOut:0) };
 			} else {
 				let hwnd = self.view();
-				unsafe { msg_send!(wnd, performMiniaturize:hwnd) };
+				let _: () = unsafe { msg_send!(wnd, performMiniaturize:hwnd) };
 			}
 		}
 
@@ -407,28 +407,28 @@ mod windows {
 			let wnd = self.window();
 			if (self.flags & SCITER_CREATE_WINDOW_FLAGS::SW_TITLEBAR as UINT) != 0 {
 				let app = OsWindow::get_app();
-				unsafe { msg_send!(app, activateIgnoringOtherApps:true) };
+				let _: () = unsafe { msg_send!(app, activateIgnoringOtherApps:true) };
 			}
 			unsafe {
-				msg_send!(wnd, makeKeyAndOrderFront:0);
+				let _: () = msg_send!(wnd, makeKeyAndOrderFront:0);
 				// msg_send!(wnd, orderFrontRegardless);
 			}
 			if maximize {
-				unsafe { msg_send!(wnd, performZoom:0) };
+				let _: () = unsafe { msg_send!(wnd, performZoom:0) };
 			}
 		}
 
 		/// Close window.
 		fn dismiss(&self) {
 			let wnd = self.window();
-			unsafe { msg_send!(wnd, close) };
+			let _: () = unsafe { msg_send!(wnd, close) };
 		}
 
 		/// Set native window title.
 		fn set_title(&mut self, title: &str) {
 			let s = NSString::from_str(title);
 			let wnd = self.window();
-			unsafe { msg_send!(wnd, setTitle:s) };
+			let _: () = unsafe { msg_send!(wnd, setTitle:s) };
 		}
 
 		/// Get native window title.
@@ -439,14 +439,14 @@ mod windows {
 		/// Run the main app message loop until window been closed.
 		fn run_app(&self) {
 			let app = OsWindow::get_app();
-			unsafe { msg_send!(app, finishLaunching) };
-			unsafe { msg_send!(app, run) };
+			let _: () = unsafe { msg_send!(app, finishLaunching) };
+			let _: () = unsafe { msg_send!(app, run) };
 		}
 
 		/// Post app quit message.
 		fn quit_app(&self) {
 			let app = OsWindow::get_app();
-			unsafe { msg_send!(app, terminate:app) };
+			let _: () = unsafe { msg_send!(app, terminate:app) };
 		}
 	}
 
