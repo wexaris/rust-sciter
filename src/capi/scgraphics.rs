@@ -4,7 +4,7 @@
 #![allow(dead_code)]
 
 use capi::scdom::HELEMENT;
-use capi::sctypes::{BOOL, LPCBYTE, LPCWSTR, LPVOID, LPWSTR, UINT};
+use capi::sctypes::{BOOL, LPCBYTE, LPCWSTR, LPVOID, UINT};
 use capi::scvalue::VALUE;
 
 MAKE_HANDLE!(#[doc = "Graphics native handle."] HGFX, _HGFX);
@@ -79,24 +79,6 @@ pub enum LINE_CAP {
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
-pub enum TEXT_ALIGNMENT {
-  DEFAULT,
-  START,
-  END,
-  CENTER,
-}
-
-#[repr(C)]
-#[derive(Debug, PartialEq)]
-pub enum TEXT_DIRECTION {
-  DEFAULT,
-  LTR,
-  RTL,
-  TTB,
-}
-
-#[repr(C)]
-#[derive(Debug, PartialEq)]
 pub enum IMAGE_ENCODING {
   RAW, // [a,b,g,r,a,b,g,r,...] vector
   PNG,
@@ -111,19 +93,6 @@ pub struct SC_COLOR_STOP {
   pub offset: f32,
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TEXT_FORMAT {
-  pub fontFamily: LPWSTR,
-  pub fontWeight: UINT,
-  pub fontItalic: BOOL, // 100...900, 400 - normal, 700 - bold
-  pub fontSize: f32,    // dips
-  pub lineHeight: f32,  // dips
-  pub textDirection: TEXT_DIRECTION,
-  pub textAlignment: TEXT_ALIGNMENT,
-  pub lineAlignment: TEXT_ALIGNMENT, // horizontal alignment
-  pub localeName: LPWSTR,                   // a.k.a. vertical alignment for roman writing systems
-}
 
 #[repr(C)]
 #[allow(missing_docs)]
@@ -287,12 +256,12 @@ pub struct SciterGraphicsAPI {
 
   // SECTION: text
 
-  // create text layout using element's styles
-  pub textCreateForElement: extern "system" fn(ptext: &mut HTEXT, text: LPCWSTR, textLength: UINT, he: HELEMENT) -> GRAPHIN_RESULT,
+  // create text layout for host element
+  pub textCreateForElement: extern "system" fn(ptext: &mut HTEXT, text: LPCWSTR, textLength: UINT, he: HELEMENT, classNameOrNull: LPCWSTR) -> GRAPHIN_RESULT,
 
-  // create text layout using explicit format declaration
-  pub textCreate:
-    extern "system" fn(ptext: &mut HTEXT, text: LPCWSTR, textLength: UINT, format: *const TEXT_FORMAT) -> GRAPHIN_RESULT,
+  // create text layout using explicit style declaration
+  pub textCreateForElementAndStyle:
+    extern "system" fn(ptext: &mut HTEXT, text: LPCWSTR, textLength: UINT, he: HELEMENT, style: LPCWSTR, styleLength: UINT) -> GRAPHIN_RESULT,
 
   // since 4.1.10
   pub textAddRef: extern "system" fn(text: HTEXT) -> GRAPHIN_RESULT,
@@ -313,7 +282,7 @@ pub struct SciterGraphicsAPI {
   pub textSetBox: extern "system" fn(text: HTEXT, width: SC_DIM, height: SC_DIM) -> GRAPHIN_RESULT,
 
   // draw text with position (1..9 on MUMPAD) at px,py
-  // Ex: gDrawText( 100,100,5) will draw text box with its center at 100,100 px
+  // Ex: gDrawText(100,100,5) will draw text box with its center at 100,100 px
   pub gDrawText: extern "system" fn(hgfx: HGFX, text: HTEXT, px: SC_POS, py: SC_POS, position: UINT) -> GRAPHIN_RESULT,
 
   // SECTION: image rendering

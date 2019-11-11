@@ -40,6 +40,21 @@
       min-width: 150dip;
       min-height: 150dip;
     }
+
+    .native-text {
+      behavior: native-text;
+      display: block;
+      min-height: 100dip;
+      min-width: 100dip;
+      outline: 1px solid orange;
+    }
+
+    .italic {
+      font-style: italic;
+    }
+    .bold {
+      font-weight: bold;
+    }
   </style>
   <script type="text/tiscript">
 
@@ -132,6 +147,13 @@
         <widget type="time" value="now" id="edit-time" title="Change time of the drawn clock" />
         <widget type="button" id="set-time" title="Reset back to local time">=</widget>
       </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="city">
+      <caption>Text</caption>
+      <div class="native-text">static text</div>
     </div>
   </div>
 

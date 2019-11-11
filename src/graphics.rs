@@ -4,10 +4,12 @@ Used in custom behaviors / event handlers to draw on element's surface in native
 Essentially this mimics [`Graphics`](https://sciter.com/docs/content/sciter/Graphics.htm) scripting object as close as possible.
 
 */
-use capi::scgraphics::{HIMG, HPATH, SC_ANGLE, SC_COLOR, SC_COLOR_STOP, SC_DIM, SC_POS};
+use capi::scgraphics::{HTEXT, HIMG, HPATH};
+use capi::scgraphics::{SC_ANGLE, SC_COLOR, SC_COLOR_STOP, SC_DIM, SC_POS};
 use capi::sctypes::{BOOL, LPCBYTE, LPVOID, POINT, SIZE, UINT};
-use std::ptr::null_mut;
+use std::ptr::{null_mut, null};
 use value::{FromValue, Value};
+use dom::Element;
 use _GAPI;
 
 pub use capi::scgraphics::{HGFX, GRAPHIN_RESULT};
@@ -55,15 +57,6 @@ pub type Angle = SC_ANGLE;
 /// Dimension type.
 pub type Dim = SC_DIM;
 
-/// Graphics image object.
-pub struct Image(HIMG);
-
-/// Graphics path object.
-pub struct Path(HPATH);
-
-/// Graphics object. Represents graphic surface of the element.
-pub struct Graphics(HGFX);
-
 /// Construct a color value (in `RGBA` form) from the `red`, `green` and `blue` components.
 pub fn rgb(red: u8, green: u8, blue: u8) -> Color {
   (_GAPI.RGBA)(u32::from(red), u32::from(green), u32::from(blue), 255)
@@ -77,7 +70,123 @@ pub fn rgba((r, g, b): (u8, u8, u8), opacity: u8) -> Color {
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Text
+/// Metrics of a text layout object.
+#[derive(Debug, Default)]
+pub struct TextMetrics {
+	/// Minimum width, is a width of the widest word (non-breakable sequence) in the text.
+	pub min_width: Dim,
+	/// Maximum width, is the width of the text without wrapping.
+	///
+	/// If the text contains new line sequences then function returns width of widest string.
+	pub max_width: Dim,
+	/// Computed height of the Text object and box height.
+	pub height: Dim,
+	pub ascent: Dim,
+	pub descent: Dim,
+	/// Mumber of lines in text layout.
+	///
+	/// To get meaningful values you should set width of the text layout object
+	/// (with [`Text.set_box`](struct.Text.html#method.set_box), for example).
+	pub lines: u32,
+}
+
+/// Text layout object.
+pub struct Text(HTEXT);
+
+/// Destroy pointed text object.
+impl Drop for Text {
+	fn drop(&mut self) {
+		(_GAPI.textRelease)(self.0);
+	}
+}
+
+/// Copies text object.
+///
+/// All allocated objects are reference counted so copying is just a matter of increasing reference counts.
+impl Clone for Text {
+  fn clone(&self) -> Self {
+    let dst = Text(self.0);
+    (_GAPI.textAddRef)(dst.0);
+    dst
+  }
+}
+
+/// Get a `Text` object contained in the `Value`.
+impl FromValue for Text {
+  fn from_value(v: &Value) -> Option<Text> {
+    let mut h = null_mut();
+    let ok = (_GAPI.vUnWrapText)(v.as_cptr(), &mut h);
+    if ok == GRAPHIN_RESULT::OK {
+	(_GAPI.textAddRef)(h);
+      Some(Text(h))
+    } else {
+      None
+    }
+  }
+}
+
+/// Store the `Text` object as a `Value`.
+impl From<Text> for Value {
+  fn from(i: Text) -> Value {
+    let mut v = Value::new();
+    let ok = (_GAPI.vWrapText)(i.0, v.as_ptr());
+    assert!(ok == GRAPHIN_RESULT::OK);
+    v
+  }
+}
+
+impl Text {
+	/// Create a text layout object on top of a host element.
+	pub fn create(e: &Element, text: &str) -> Result<Text> {
+		let (t, tn) = s2w!(text);
+		let mut h = null_mut();
+		let ok = (_GAPI.textCreateForElement)(&mut h, t.as_ptr(), tn, e.as_ptr(), null());
+		ok_or!(Text(h), ok)
+	}
+
+	/// Create a text layout object on top of a host element with the specified `class` attribute.
+	pub fn with_class(e: &Element, text: &str, class: &str) -> Result<Text> {
+		let (t, tn) = s2w!(text);
+		let (c, _cn) = s2w!(class);
+		let mut h = null_mut();
+		let ok = (_GAPI.textCreateForElement)(&mut h, t.as_ptr(), tn, e.as_ptr(), c.as_ptr() );
+		ok_or!(Text(h), ok)
+	}
+
+	/// Create a text layout object on top of a host element with the specified `style` attribute.
+	pub fn with_style(e: &Element, text: &str, styles: &str) -> Result<Text> {
+		let (t, tn) = s2w!(text);
+		let (s, sn) = s2w!(styles);
+		let mut h = null_mut();
+		let ok = (_GAPI.textCreateForElementAndStyle)(&mut h, t.as_ptr(), tn, e.as_ptr(), s.as_ptr(), sn);
+		ok_or!(Text(h), ok)
+	}
+
+	/// Sets the box `width` and `height` of the text object.
+	pub fn set_box(&mut self, size: Size) -> Result<()> {
+		let ok = (_GAPI.textSetBox)(self.0, size.0, size.1);
+		ok_or!((), ok)
+	}
+
+	/// Returns metrics of the text layout object.
+	pub fn get_metrics(&self) -> Result<TextMetrics> {
+		let mut tm = TextMetrics::default();
+		let ok = (_GAPI.textGetMetrics)(self.0,
+				&mut tm.min_width, &mut tm.max_width,
+				&mut tm.height,
+				&mut tm.ascent, &mut tm.descent,
+				&mut tm.lines,
+			);
+		ok_or!(tm, ok)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Image
+
+/// Graphics image object.
+pub struct Image(HIMG);
 
 /// Destroy pointed image object.
 impl Drop for Image {
@@ -261,6 +370,9 @@ impl Image {
 ///////////////////////////////////////////////////////////////////////////////
 // Path
 
+/// Graphics path object.
+pub struct Path(HPATH);
+
 /// Destroy pointed path object.
 impl Drop for Path {
   fn drop(&mut self) {
@@ -410,6 +522,9 @@ impl<'a> ::std::ops::DerefMut for State<'a> {
 		self.0
 	}
 }
+
+/// Graphics object. Represents graphic surface of the element.
+pub struct Graphics(HGFX);
 
 /// Destroy pointed graphics object.
 impl Drop for Graphics {
@@ -876,6 +991,17 @@ impl Graphics {
 
 /// Image and path rendering.
 impl Graphics {
+	/// Renders a text layout object at the position `(x,y)`.
+	///
+	/// `point_of`: number in the range `1..9`,
+	/// defines what part of text layout corresponds to point `(x,y)`.
+	/// For meaning of numbers see the numeric pad on keyboard.
+	///
+	pub fn draw_text(&mut self, text: &Text, pos: Pos, point_of: u32) -> Result<&mut Self> {
+		let ok = (_GAPI.gDrawText)(self.0, text.0, pos.0, pos.1, point_of);
+		ok_or!(self, ok)
+	}
+
   /// Draw the path object using current fill and stroke brushes.
   pub fn draw_path(&mut self, path: &Path, mode: DRAW_PATH) -> Result<&mut Self> {
     let ok = (_GAPI.gDrawPath)(self.0, path.0, mode);

@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 
 #[macro_use]
 extern crate sciter;
@@ -142,11 +142,12 @@ impl sciter::EventHandler for Clock {
       // draw content only
       // leave the back- and foreground to be default
       let mut gfx = Graphics::from(gfx);
-      let ok = self.draw_clock(&mut gfx, &area);
-      if let Err(err) = ok {
-        println!("error in draw_clock: {:?}", err);
-      }
-    }
+			self
+				.draw_clock(&mut gfx, &area)
+				.map_err(|e| println!("error in draw_clock: {:?}", e) )
+				.ok();
+		}
+
     // allow default drawing anyway
     return false;
   }
@@ -223,7 +224,7 @@ impl Clock {
     self.draw_outline(&mut *gfx)?;
 
     // draw clock sticks
-    self.draw_time(&mut *gfx)?;
+		self.draw_time(&mut *gfx)?;
 
     Ok(())
   }
@@ -303,9 +304,65 @@ impl Clock {
   }
 }
 
+
+////////////////////////////////////
+#[derive(Default)]
+struct Text;
+
+impl sciter::EventHandler for Text {
+  fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
+    Some(EVENT_GROUPS::HANDLE_DRAW)
+  }
+
+  fn attached(&mut self, _root: HELEMENT) {
+	}
+
+	fn on_draw(&mut self, _root: HELEMENT, gfx: HGFX, area: &RECT, layer: DRAW_EVENTS) -> bool {
+    if layer == DRAW_EVENTS::DRAW_CONTENT {
+      // draw content only
+      // leave the back- and foreground to be default
+			let mut gfx = Graphics::from(gfx);
+			let e = Element::from(_root);
+			self
+				.draw_text(&e, &mut gfx, &area)
+				.map_err(|e| println!("error in draw_clock: {:?}", e) )
+				.ok();
+
+				return true;
+		}
+
+    // allow default drawing anyway
+    return false;
+  }
+}
+
+impl Text {
+  fn draw_text(&mut self, e: &Element, gfx: &mut Graphics, area: &RECT) -> graphics::Result<()> {
+
+    // save previous state
+    let mut gfx = gfx.save_state()?;
+
+		// setup our attributes
+    // let left = area.left as f32;
+    // let top = area.top as f32;
+    // let width = area.width() as f32;
+		// let height = area.height() as f32;
+
+		// println!("text::draw on {} at {} {} {} {}", e, left, top, width, height);
+
+		use sciter::graphics::Text;
+
+		let t = Text::with_style(&e, "native text", "font-style: italic")?;
+		gfx.draw_text(&t, (area.left as f32, area.top as f32), 7)?;
+
+		Ok(())
+	}
+}
+
 fn main() {
   let mut frame = sciter::WindowBuilder::main_window().with_size((800, 600)).create();
   frame.register_behavior("native-clock", || Box::new(Clock::default()));
+  frame.register_behavior("native-text", || Box::new(Text::default()));
   frame.load_html(include_bytes!("clock.htm"), Some("example://clock.htm"));
   frame.run_app();
 }
