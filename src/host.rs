@@ -446,7 +446,7 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 	// let me = unsafe { &mut *(param as *mut HostCallback<T>) };
 	let me = NativeHandler::get_data::<HostCallback<T>>(&param);
 	let message = ::utf::w2s(text).replace("\r", "\n");
-	me.handler.on_debug_output(subsystem, severity, message.trim_right());
+	me.handler.on_debug_output(subsystem, severity, message.trim_end());
 }
 
 
