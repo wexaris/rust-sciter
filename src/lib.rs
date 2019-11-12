@@ -458,6 +458,8 @@ pub enum RuntimeOptions<'a> {
 	// GpuBlacklist(&'a str),
 	/// global; value: script source to be loaded into each view before any other script execution.
 	InitScript(&'a str),
+	/// global; value - max request length in megabytes (1024*1024 bytes), since 4.3.0.15.
+	MaxHttpDataLength(usize),
 }
 
 /// Set various sciter engine global options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
@@ -473,6 +475,7 @@ pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 		GfxLayer(backend) => (SCITER_SET_GFX_LAYER, backend as usize),
 		DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
 		UxTheming(enable) => (SCITER_SET_UX_THEMING, enable as usize),
+		MaxHttpDataLength(value) => (SCITER_SET_MAX_HTTP_DATA_LENGTH, value),
     LibraryPath(path) => {
       return set_library(path).map_err(|_|());
     }

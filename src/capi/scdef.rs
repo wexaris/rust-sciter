@@ -112,6 +112,8 @@ pub enum SCITER_RT_OPTIONS
 	SCITER_SET_INIT_SCRIPT = 13,
 	/// per-window; value - TRUE/FALSE - window is main, will destroy all other dependent windows on close.
 	SCITER_SET_MAIN_WINDOW = 14,
+	/// global; value - max request length in megabytes (1024*1024 bytes).
+	SCITER_SET_MAX_HTTP_DATA_LENGTH = 15,
 }
 
 /// Window flags
