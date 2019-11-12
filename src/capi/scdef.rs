@@ -109,7 +109,9 @@ pub enum SCITER_RT_OPTIONS
   /// value - TRUE/FALSE - window uses per pixel alpha (e.g. `WS_EX_LAYERED`/`UpdateLayeredWindow()` window).
   SCITER_ALPHA_WINDOW  = 12,
   /// global; value: UTF-8 encoded script source to be loaded into each view before any other script execution.
-  SCITER_SET_INIT_SCRIPT = 13,
+	SCITER_SET_INIT_SCRIPT = 13,
+	/// per-window; value - TRUE/FALSE - window is main, will destroy all other dependent windows on close.
+	SCITER_SET_MAIN_WINDOW = 14,
 }
 
 /// Window flags

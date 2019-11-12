@@ -67,7 +67,10 @@ pub enum Options {
   DebugMode(bool),
 
   /// global or per-window; value: combination of [`SCRIPT_RUNTIME_FEATURES`](../enum.SCRIPT_RUNTIME_FEATURES.html) flags.
-  ScriptFeatures(u8),
+	ScriptFeatures(u8),
+
+	/// Window is main, will destroy all other dependent windows on close, since 4.3.0.12
+	MainWindow(bool),
 }
 
 
@@ -223,8 +226,9 @@ impl Window {
 			FontSmoothing(technology) => (SCITER_FONT_SMOOTHING, technology as usize),
 			TransparentWindow(enable) => (SCITER_TRANSPARENT_WINDOW, enable as usize),
 			AlphaWindow(enable) => (SCITER_ALPHA_WINDOW, enable as usize),
+			MainWindow(enable) => (SCITER_SET_MAIN_WINDOW, enable as usize),
       DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
-      ScriptFeatures(mask) => (SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
+			ScriptFeatures(mask) => (SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
 		};
 		let ok = (_API.SciterSetOption)(self.get_hwnd(), option, value);
 		if ok != 0 {
