@@ -20,11 +20,11 @@ environment:
 
   - TARGET: x86_64-pc-windows-msvc
     CHANNEL: stable
-    ARCH: skia64
+    ARCH: 64skia
 
   - TARGET: i686-pc-windows-msvc
     CHANNEL: stable
-    ARCH: skia32
+    ARCH: 32skia
 
   - TARGET: x86_64-pc-windows-msvc
     CHANNEL: stable
