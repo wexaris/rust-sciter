@@ -166,7 +166,9 @@ pub enum SCITER_NOTIFICATION {
   SC_ATTACH_BEHAVIOR = 4,
   SC_ENGINE_DESTROYED = 5,
   SC_POSTED_NOTIFICATION = 6,
-  SC_GRAPHICS_CRITICAL_FAILURE = 7,
+	SC_GRAPHICS_CRITICAL_FAILURE = 7,
+	SC_KEYBOARD_REQUEST = 8,
+	SC_INVALIDATE_RECT = 9,
 }
 
 #[repr(C)]
@@ -260,6 +262,32 @@ pub struct SCN_ATTACH_BEHAVIOR
   pub elementTag: LPVOID,
 }
 
+#[repr(C)]
+/// This notification is issued when keyboard needs to be shown –
+/// mobiles can show soft keyboard by handling it.
+pub struct SCN_KEYBOARD_REQUEST
+{
+	/// `SC_KEYBOARD_REQUEST` here.
+  pub code: UINT,
+  /// `HWINDOW` of the window this callback was attached to.
+	pub hwnd: HWINDOW,
+
+	pub keyboard_mode: UINT,
+}
+
+#[repr(C)]
+/// This notification is sent when a specific window area
+/// needs to be redrawn.
+pub struct SCN_INVALIDATE_RECT
+{
+	/// `SC_INVALIDATE_RECT` here.
+  pub code: UINT,
+  /// `HWINDOW` of the window this callback was attached to.
+  pub hwnd: HWINDOW,
+
+	/// Coordinates of the invalidated area.
+	pub invalid_rect: RECT,
+}
 
 #[repr(C)]
 pub struct SCITER_CALLBACK_NOTIFICATION
