@@ -22,13 +22,14 @@ pub struct ISciterAPI
 
 	pub SciterClassName: extern "system" fn () -> LPCWSTR,
 	pub SciterVersion: extern "system" fn (major: BOOL) -> UINT,
+
 	pub SciterDataReady: extern "system" fn (hwnd: HWINDOW, uri: LPCWSTR, data: LPCBYTE, dataLength: UINT) -> BOOL,
 	pub SciterDataReadyAsync: extern "system" fn (hwnd: HWINDOW, uri: LPCWSTR, data: LPCBYTE, dataLength: UINT, requestId: HREQUEST) -> BOOL,
 
   // #ifdef WINDOWS
-  #[cfg(windows)]
+  #[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterProc: extern "system" fn (hwnd: HWINDOW, msg: UINT, wParam: WPARAM, lParam: LPARAM) -> LRESULT,
-	#[cfg(windows)]
+	#[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterProcND: extern "system" fn (hwnd: HWINDOW, msg: UINT, wParam: WPARAM, lParam: LPARAM, pbHandled: * mut BOOL) -> LRESULT,
   // #endif
 
@@ -48,7 +49,7 @@ pub struct ISciterAPI
 	pub SciterUpdateWindow: extern "system" fn (hwnd: HWINDOW) -> VOID,
 
   // #ifdef WINDOWS
-  #[cfg(windows)]
+  #[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterTranslateMessage: extern "system" fn (lpMsg: * mut MSG) -> BOOL,
   // #endif
 
@@ -57,11 +58,11 @@ pub struct ISciterAPI
 	pub SciterGetViewExpando: extern "system" fn (hwnd: HWINDOW, pval: * mut VALUE) -> BOOL,
 
   // #ifdef WINDOWS
-  #[cfg(windows)]
+  #[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterRenderD2D: extern "system" fn (hWndSciter: HWINDOW, prt: * mut ID2D1RenderTarget) -> BOOL,
-	#[cfg(windows)]
+	#[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterD2DFactory: extern "system" fn (ppf: * mut* mut ID2D1Factory) -> BOOL,
-	#[cfg(windows)]
+	#[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterDWFactory: extern "system" fn (ppf: * mut* mut IDWriteFactory) -> BOOL,
   // #endif
 
@@ -69,16 +70,18 @@ pub struct ISciterAPI
 	pub SciterSetHomeURL: extern "system" fn (hWndSciter: HWINDOW, baseUrl: LPCWSTR) -> BOOL,
 
   // #if defined(OSX)
-  #[cfg(target_os="macos")]
+	#[cfg(all(target_os="macos", not(feature = "windowless")))]
 	pub SciterCreateNSView: extern "system" fn (frame: LPRECT) -> HWINDOW, // returns NSView*
   // #endif
 
   // #if defined(LINUX)
-  #[cfg(target_os="linux")]
+	#[cfg(all(target_os="linux", not(feature = "windowless")))]
 	pub SciterCreateWidget: extern "system" fn (frame: LPRECT) -> HWINDOW, // returns GtkWidget
   // #endif
 
+	#[cfg(not(feature = "windowless"))]
 	pub SciterCreateWindow: extern "system" fn (creationFlags: UINT, frame: LPCRECT, delegate: * const SciterWindowDelegate, delegateParam: LPVOID, parent: HWINDOW) -> HWINDOW,
+
 	pub SciterSetupDebugOutput: extern "system" fn (hwndOrNull: HWINDOW, param: LPVOID, pfOutput: DEBUG_OUTPUT_PROC),
 
 	//|
@@ -243,11 +246,11 @@ pub struct ISciterAPI
 
   // #ifdef WINDOWS
   // since 3.3.1.4
-  #[cfg(windows)]
+  #[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterCreateOnDirectXWindow: extern "system" fn (hwnd: HWINDOW, pSwapChain: * mut IDXGISwapChain) -> BOOL,
-	#[cfg(windows)]
+	#[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterRenderOnDirectXWindow: extern "system" fn (hwnd: HWINDOW, elementToRenderOrNull: HELEMENT, frontLayer: BOOL) -> BOOL,
-	#[cfg(windows)]
+	#[cfg(all(windows, not(feature = "windowless")))]
 	pub SciterRenderOnDirectXTexture: extern "system" fn (hwnd: HWINDOW, elementToRenderOrNull: HELEMENT, surface: * mut IDXGISurface) -> BOOL,
   // #endif
 

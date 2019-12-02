@@ -84,12 +84,23 @@ mod windows {
 				OsWindow::init_app();
 			}
 
-			let cb = ::std::ptr::null();
 			self.flags = flags;
-			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
-			if self.hwnd.is_null() {
-				panic!("Failed to create window!");
+
+			#[cfg(not(feature = "windowless"))]
+			{
+				let cb = ::std::ptr::null();
+				self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+				if self.hwnd.is_null() {
+					panic!("Failed to create window!");
+				}
 			}
+			#[cfg(feature = "windowless")]
+			{
+				let _ = rc;
+				let _ = parent;
+				let _ = &(_API.SciterVersion);
+			}
+
 			return self.hwnd;
 		}
 
@@ -218,11 +229,21 @@ mod windows {
 				OsWindow::init_app();
 			}
 
-			let cb = ptr::null();
 			self.flags = flags;
-			self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
-			if self.hwnd.is_null() {
-				panic!("Failed to create window!");
+
+			#[cfg(not(feature = "windowless"))]
+			{
+				let cb = ptr::null();
+				self.hwnd = (_API.SciterCreateWindow)(flags, &rc, cb, 0 as LPVOID, parent);
+				if self.hwnd.is_null() {
+					panic!("Failed to create window!");
+				}
+			}
+			#[cfg(feature = "windowless")]
+			{
+				let _ = rect;
+				let _ = parent;
+				let _ = &(_API.SciterVersion);
 			}
 			return self.hwnd;
 		}
@@ -368,17 +389,29 @@ mod windows {
 				OsWindow::init_app();
 			}
 
-			let prc: *const RECT = if rc.width() > 0 && rc.height() > 0 {
-				&rc
-			} else {
-				0 as *const RECT
-			};
-
-			let cb = 0 as *const SciterWindowDelegate;
 			self.flags = flags;
-			self.hwnd = (_API.SciterCreateWindow)(flags, prc, cb, 0 as LPVOID, parent);
-			if self.hwnd.is_null() {
-				panic!("Failed to create window!");
+
+			#[cfg(not(feature = "windowless"))]
+			{
+				let w = rc.right - rc.left;
+				let h = rc.bottom - rc.top;
+				let prc: *const RECT = if w > 0 && h > 0 {
+					&rc
+				} else {
+					0 as *const RECT
+				};
+
+				let cb = 0 as *const SciterWindowDelegate;
+				self.hwnd = (_API.SciterCreateWindow)(flags, prc, cb, 0 as LPVOID, parent);
+				if self.hwnd.is_null() {
+					panic!("Failed to create window!");
+				}
+			}
+			#[cfg(feature = "windowless")]
+			{
+				let _ = rect;
+				let _ = parent;
+				let _ = &(_API.SciterVersion);
 			}
 			return self.hwnd;
 		}

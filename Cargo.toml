@@ -1,6 +1,6 @@
 [package]
 name = "sciter-rs"
-version = "0.5.47"
+version = "0.5.48"
 description = "Rust bindings for Sciter - Embeddable HTML/CSS/script engine (cross-platform desktop GUI toolkit). Also capable with DirectX / OpenGL."
 keywords = ["gui", "gtk", "cocoa", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]
@@ -32,6 +32,7 @@ crate-type = ["rlib"]
 default = ["dynamic"]
 nightly = []
 dynamic = []
+windowless = []
 
 [dependencies]
 libc = "0.2"

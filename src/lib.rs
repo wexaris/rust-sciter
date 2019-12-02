@@ -357,6 +357,16 @@ pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 		let p = ext::SciterAPI();
 		&*p
 	};
+
+	let abi = ap.version;
+
+
+	if cfg!(feature = "windowless") {
+		assert!(abi >= 0x0001_0001, "Incompatible Sciter build and \"windowless\" feature");
+	}
+	if cfg!(not(feature = "windowless")) {
+		assert!(abi < 0x0001_0000, "Incompatible Sciter build and \"windowless\" feature");
+	}
 	return ap;
 }
 
