@@ -426,6 +426,20 @@ pub fn version() -> String {
 	return version;
 }
 
+/// Sciter API version.
+///
+/// Returns `0x0000_0001` for regular builds and
+/// `0x0001_0001` for windowless builds.
+/// Since 4.4.0.3.
+pub fn api_version() -> u32 {
+	_API.version
+}
+
+/// Returns true for windowless builds.
+pub fn is_windowless() -> bool {
+	api_version() >= 0x0001_0001
+}
+
 /// Various global sciter engine options.
 ///
 /// Used by [`sciter::set_options()`](fn.set_options.html).
