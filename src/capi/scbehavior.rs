@@ -199,6 +199,85 @@ pub enum PHASE_MASK
 #[repr(C)]
 #[derive(Copy, Clone)]
 #[derive(Debug, PartialOrd, PartialEq)]
+/// Mouse buttons.
+pub enum MOUSE_BUTTONS
+{
+	NONE = 0,
+
+	/// Left button.
+	MAIN = 1,
+	/// Right button.
+	PROP = 2,
+	/// Middle button.
+	MIDDLE = 3,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
+/// Keyboard modifier buttons state.
+pub enum KEYBOARD_STATES
+{
+	CONTROL_KEY_PRESSED = 0x01,
+	SHIFT_KEY_PRESSED = 0x02,
+	ALT_KEY_PRESSED = 0x04,
+}
+
+impl std::convert::From<u32> for KEYBOARD_STATES {
+	fn from(u: u32) -> Self {
+		unsafe { std::mem::transmute(u) }
+	}
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
+/// Keyboard input events.
+pub enum KEY_EVENTS
+{
+	KEY_DOWN = 0,
+	KEY_UP,
+	KEY_CHAR,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
+/// Mouse events.
+pub enum MOUSE_EVENTS
+{
+	MOUSE_ENTER = 0,
+	MOUSE_LEAVE,
+	MOUSE_MOVE,
+	MOUSE_UP,
+	MOUSE_DOWN,
+	MOUSE_DCLICK,
+	MOUSE_WHEEL,
+	/// mouse pressed ticks
+	MOUSE_TICK,
+	/// mouse stay idle for some time
+	MOUSE_IDLE,
+
+	/// item dropped, target is that dropped item
+	DROP        = 9,
+	/// drag arrived to the target element that is one of current drop targets.
+	DRAG_ENTER  = 0xA,
+	/// drag left one of current drop targets. target is the drop target element.
+	DRAG_LEAVE  = 0xB,
+	/// drag src notification before drag start. To cancel - return true from handler.
+	DRAG_REQUEST = 0xC,
+
+	/// mouse click event
+	MOUSE_CLICK = 0xFF,
+
+	/// This flag is `OR`ed with `MOUSE_ENTER..MOUSE_DOWN` codes if dragging operation is in effect.
+	/// E.g. event `DRAGGING | MOUSE_MOVE` is sent to underlying DOM elements while dragging.
+	DRAGGING = 0x100,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[derive(Debug, PartialOrd, PartialEq)]
 #[allow(missing_docs)]
 /// General event source triggers
 pub enum CLICK_REASON

@@ -1,4 +1,4 @@
-//! Sciter's platform independent graphics interface.
+//! Sciter.Lite interface.
 
 #![allow(non_camel_case_types, non_snake_case)]
 #![allow(dead_code)]
@@ -6,6 +6,8 @@
 use capi::sctypes::*;
 use capi::scdef::{GFX_LAYER, ELEMENT_BITMAP_RECEIVER};
 use capi::scdom::HELEMENT;
+use capi::scbehavior::{MOUSE_BUTTONS, MOUSE_EVENTS, KEY_EVENTS};
+
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -16,16 +18,29 @@ pub enum SCITER_X_MSG_CODE
   SXM_DESTROY = 1,
   SXM_SIZE    = 2,
   SXM_PAINT   = 3,
+  SXM_RESOLUTION = 4,
+  SXM_HEARTBIT = 5,
+  SXM_MOUSE = 6,
+  SXM_KEY = 7,
+  SXM_FOCUS = 8,
 }
 
 #[repr(C)]
+#[derive(Debug)]
 /// Common header of message structures passed to `SciterProcX`.
 pub struct SCITER_X_MSG
 {
 	pub msg: SCITER_X_MSG_CODE,
 }
 
+impl From<SCITER_X_MSG_CODE> for SCITER_X_MSG {
+	fn from(code: SCITER_X_MSG_CODE) -> Self {
+		Self { msg: code }
+	}
+}
+
 #[repr(C)]
+#[derive(Debug)]
 /// Message to create the specific Sciter backend.
 pub struct SCITER_X_MSG_CREATE
 {
@@ -35,6 +50,7 @@ pub struct SCITER_X_MSG_CREATE
 }
 
 #[repr(C)]
+#[derive(Debug)]
 /// Message to destroy the current Sciter backend.
 pub struct SCITER_X_MSG_DESTROY
 {
@@ -42,6 +58,7 @@ pub struct SCITER_X_MSG_DESTROY
 }
 
 #[repr(C)]
+#[derive(Debug)]
 /// Message to notify Sciter about view resize.
 pub struct SCITER_X_MSG_SIZE
 {
@@ -51,17 +68,75 @@ pub struct SCITER_X_MSG_SIZE
 }
 
 #[repr(C)]
+#[derive(Debug)]
+/// Message to notify Sciter about screen resolution change.
+pub struct SCITER_X_MSG_RESOLUTION
+{
+	pub header: SCITER_X_MSG,
+
+	/// Pixels per inch.
+	pub ppi: UINT,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+/// Message to notify Sciter about mouse input.
+pub struct SCITER_X_MSG_MOUSE
+{
+	pub header: SCITER_X_MSG,
+
+	pub event: MOUSE_EVENTS,
+	pub button: MOUSE_BUTTONS,
+	pub modifiers: UINT,
+	pub pos: POINT,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+/// Message to notify Sciter about keyboard input.
+pub struct SCITER_X_MSG_KEY
+{
+	pub header: SCITER_X_MSG,
+
+	pub event: KEY_EVENTS,
+	pub code: UINT,
+	pub modifiers: UINT,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+/// Message to notify Sciter about window focus change.
+pub struct SCITER_X_MSG_FOCUS
+{
+	pub header: SCITER_X_MSG,
+
+	pub enter: BOOL,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+/// Give Sciter a chance to process animations, timers and other timed things.
+pub struct SCITER_X_MSG_HEARTBIT
+{
+	pub header: SCITER_X_MSG,
+
+	/// Absolute time in milliseconds.
+	pub time: UINT,
+}
+
+
+
+#[repr(C)]
 #[derive(Copy, Clone)]
 #[derive(Debug, PartialOrd, PartialEq)]
 /// `SCITER_X_MSG_PAINT` target identifier.
 pub enum SCITER_PAINT_TARGET_TYPE
 {
-	/** default rendering target - window surface */
+	/// default rendering target - OpenGL window surface
 	SPT_DEFAULT   = 0,
-	/** target::receiver fields are valid */
+
+	/// target::receiver
 	SPT_RECEIVER  = 1,
-	/** target::dc is valid */
-	SPT_DC        = 2,
 }
 
 /// Message to paint view to the provided target (HDC or callback).
@@ -76,6 +151,7 @@ pub struct SCITER_X_MSG_PAINT
 	// union {
 	// HDC or LPVOID
 	pub param: LPVOID,
-	pub callback: ELEMENT_BITMAP_RECEIVER,
+	pub callback: Option<ELEMENT_BITMAP_RECEIVER>,
 	// }
 }
+

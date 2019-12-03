@@ -42,6 +42,15 @@ lazy_static = "1.0"
 objc = "0.2"
 objc-foundation = "0.1"
 
+[dev-dependencies]
+winit = "0.19"
+winapi = { version = "0.3", features = [
+  "impl-default",
+  "winuser",
+  "wingdi",
+  "sysinfoapi",
+] }
+raw-window-handle = "0.3"
 
 [[example]]
 name = "first"
@@ -82,3 +91,7 @@ path = "examples/video.rs"
 [[example]]
 name = "clock"
 path = "examples/clock.rs"
+
+[[example]]
+name = "windowless"
+path = "examples/windowless.rs"

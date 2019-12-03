@@ -241,7 +241,7 @@ mod windows {
 			}
 			#[cfg(feature = "windowless")]
 			{
-				let _ = rect;
+				let _ = rc;
 				let _ = parent;
 				let _ = &(_API.SciterVersion);
 			}
@@ -409,7 +409,7 @@ mod windows {
 			}
 			#[cfg(feature = "windowless")]
 			{
-				let _ = rect;
+				let _ = rc;
 				let _ = parent;
 				let _ = &(_API.SciterVersion);
 			}
