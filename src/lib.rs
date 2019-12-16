@@ -466,7 +466,7 @@ pub enum RuntimeOptions<'a> {
   /// That UX theme is not using OS primitives for rendering input elements.
   /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
   UxTheming(bool),
-  /// global or per-window; enables Sciter Inspector for all windows, must be called before loading HTML.
+  /// global or per-window; enables Sciter Inspector for all windows, must be called before any window creation.
   DebugMode(bool),
   /// global or per-window; value: combination of [`SCRIPT_RUNTIME_FEATURES`](enum.SCRIPT_RUNTIME_FEATURES.html) flags.
   ///

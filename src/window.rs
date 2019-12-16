@@ -63,7 +63,7 @@ pub enum Options {
   /// (e.g. [`WS_EX_LAYERED`](https://msdn.microsoft.com/en-us/library/ms997507.aspx?f=255&MSPPError=-2147217396) window).
 	AlphaWindow(bool),
 
-  /// global or per-window; enables Sciter Inspector for all windows, must be called before loading HTML.
+  /// global or per-window; enables Sciter Inspector for this window, must be called before loading HTML.
   DebugMode(bool),
 
   /// global or per-window; value: combination of [`SCRIPT_RUNTIME_FEATURES`](../enum.SCRIPT_RUNTIME_FEATURES.html) flags.
@@ -408,6 +408,11 @@ impl Builder {
 	/// Transparent window.
 	pub fn alpha(self) -> Self {
 		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_ALPHA)
+	}
+
+	/// Can be debugged with Inspector.
+	pub fn debug(self) -> Self {
+		self.or(SCITER_CREATE_WINDOW_FLAGS::SW_ENABLE_DEBUG)
 	}
 
 	fn or(mut self, flag: Flags) -> Self {

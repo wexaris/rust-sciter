@@ -13,9 +13,12 @@ fn main() {
 
 	// Step 2: Enable the features we need in our tiscript code.
 	sciter::set_options(sciter::RuntimeOptions::ScriptFeatures(
-		sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_SYSINFO as u8 | // Enables Sciter.machineName()
-			sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_FILE_IO as u8 | // Enables opening file dialog (view.selectFile())
-			sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_SOCKET_IO as u8)).unwrap(); // Enables connecting to the inspector via Ctrl+Shift+I
+		sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_SYSINFO as u8 | // Enables `Sciter.machineName()`
+			sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_FILE_IO as u8 | // Enables opening file dialog (`view.selectFile()`)
+			sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_SOCKET_IO as u8)).unwrap(); // Enables connecting to the Inspector via Ctrl+Shift+I (not needed anymore)
+
+	// Enable debug mode for all windows, so that we can inspect them via Inspector.
+	sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
 
 	// Step 3: Create a new main sciter window of type `sciter::Window`.
 	// Hint: The sciter Window wrapper (src/window.rs) contains more

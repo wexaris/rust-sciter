@@ -187,7 +187,6 @@ impl Host {
 
 	/// Set callback for Sciter engine events.
 	pub(crate) fn setup_callback<Callback: HostHandler>(&self, handler: Callback) {
-		self.enable_debug(true);
 
 		let payload: HostCallback<Callback> = HostCallback {
 			sig: 17,
@@ -223,8 +222,7 @@ impl Host {
 
 	/// Set debug mode for this window.
 	pub fn enable_debug(&self, enable: bool) {
-		let hwnd = 0 as HWINDOW;
-		(_API.SciterSetOption)(hwnd, SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as UINT_PTR);
+		(_API.SciterSetOption)(self.hwnd, SCITER_RT_OPTIONS::SCITER_SET_DEBUG_MODE, enable as UINT_PTR);
 	}
 
 	/// Get native window handle.
