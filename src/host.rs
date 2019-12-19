@@ -9,7 +9,8 @@ use dom::event::EventHandler;
 use eventhandler::*;
 use value::{Value};
 
-pub use capi::scdef::{LOAD_RESULT, SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
+pub use capi::scdef::{LOAD_RESULT, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
+pub use capi::scdef::{SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, SCN_INVALIDATE_RECT};
 
 
 /// A specialized `Result` type for sciter host operations.
@@ -80,6 +81,9 @@ pub trait HostHandler {
 	/// This notification is sent when the engine encounters critical rendering error: e.g. DirectX gfx driver error.
   /// Most probably bad gfx drivers.
 	fn on_graphics_critical_failure(&mut self) { }
+
+	/// This notification is sent when the engine needs some area to be redrawn.
+	fn on_invalidate(&mut self, pnm: &SCN_INVALIDATE_RECT) {}
 
 	/// This output function will be used for reporting problems found while loading html and css documents.
 	fn on_debug_output(&mut self, subsystem: OUTPUT_SUBSYTEMS, severity: OUTPUT_SEVERITY, message: &str) {
@@ -173,6 +177,18 @@ impl Host {
     };
 		host.setup_callback(DefaultHandler::default());
 		return host;
+	}
+
+	/// Attach Sciter host to existing window with the given Host handler.
+	pub fn attach_with<Handler: HostHandler>(hwnd: HWINDOW, handler: Handler) -> Host {
+	  let host = Host {
+      hwnd: hwnd,
+      behaviors: Default::default(),
+      handler: Default::default(),
+      archive: Default::default(),
+    };
+	  host.setup_callback(handler);
+	  return host;
 	}
 
 	/// Attach `dom::EventHandler` to the Sciter window.
@@ -372,7 +388,7 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 	let result: UINT = match code {
 		SCITER_NOTIFICATION::SC_LOAD_DATA => {
 			let scnm = pnm as *mut SCN_LOAD_DATA;
-      let scnm = unsafe { &mut *scnm};
+      let scnm = unsafe { &mut *scnm };
 			let mut re = me.on_data_load(scnm);
       if re.is_none() {
         if let Some(archive) = callback.archive.borrow().as_ref() {
@@ -392,7 +408,7 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 
 		SCITER_NOTIFICATION::SC_DATA_LOADED => {
 			let scnm = pnm as *mut SCN_DATA_LOADED;
-			me.on_data_loaded(unsafe { &mut *scnm} );
+			me.on_data_loaded(unsafe { &mut *scnm } );
 			0 as UINT
 		},
 
@@ -429,6 +445,12 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 			me.on_graphics_critical_failure();
 			0 as UINT
 		},
+
+		SCITER_NOTIFICATION::SC_INVALIDATE_RECT => {
+			let scnm = pnm as *const SCN_INVALIDATE_RECT;
+			me.on_invalidate(unsafe { &*scnm });
+			0 as UINT
+		}
 
 		_ => 0,
 	};
