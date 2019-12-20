@@ -45,15 +45,15 @@ environment:
     ARCH: 32
 
   - TARGET: x86_64-pc-windows-msvc
-    CHANNEL: 1.32.0
+    CHANNEL: 1.36.0
     ARCH: 64
 
   - TARGET: i686-pc-windows-msvc
-    CHANNEL: 1.32.0
+    CHANNEL: 1.36.0
     ARCH: 32
 
   - TARGET: x86_64-pc-windows-msvc
-    CHANNEL: 1.32.0
+    CHANNEL: 1.36.0
     ARCH: 64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
@@ -83,6 +83,7 @@ build_script:
 
   - cmd: echo Building examples
   - cargo build --example first --verbose
+  - cargo build --example windowless --features windowless
   - cargo build --release --examples %FEATURES%
 
 test_script:

@@ -13,7 +13,7 @@ os:
 rust:
   - stable
   - nightly
-  - 1.32.0
+  - 1.36.0
 
 matrix:
   include:
@@ -89,6 +89,7 @@ script:
   - cargo build --all
   - cargo build --all --release
   - cargo build --examples --release
+  - cargo build --example windowless --features windowless
 
   - # can't test linux because of GCC Dual ABI absence on Ubuntu 14.
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cargo test --all; fi
