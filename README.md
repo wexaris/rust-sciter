@@ -3,6 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/cbrisyh792mmmd08/branch/master?svg=true)](https://ci.appveyor.com/project/pravic/rust-sciter)
 [![Build Status](https://img.shields.io/travis/sciter-sdk/rust-sciter/master.svg)](https://travis-ci.org/sciter-sdk/rust-sciter)
 [![Current Version](https://img.shields.io/crates/v/sciter-rs.svg)](https://crates.io/crates/sciter-rs)
+[![Documentation](https://docs.rs/sciter-rs/badge.svg)](https://docs.rs/sciter-rs)
 [![License](https://img.shields.io/crates/l/sciter-rs.svg)](https://crates.io/crates/sciter-rs)
 [![Join the forums at https://sciter.com/forums](https://img.shields.io/badge/forum-sciter.com-orange.svg)](https://sciter.com/forums)
 
