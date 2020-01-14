@@ -30,9 +30,18 @@ crate-type = ["rlib"]
 
 [features]
 default = ["dynamic"]
+
+# Enable nightly compiler features (currently doesn't use any).
 nightly = []
+
+# Load Sciter DLL dynamically from the path specified by `sciter::set_library`.
+# Otherwise, links statically to `libsciter-gtk.so` or `sciter-osx-64.dylib`.
 dynamic = []
+
+# Build this crate specifically for Sciter.Lite versions
+# which are incompatible with the regular ones.
 windowless = []
+
 
 [dependencies]
 libc = "0.2"

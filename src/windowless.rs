@@ -3,9 +3,10 @@
 use ::{_API};
 use capi::scdef::{GFX_LAYER};
 use capi::scdom::HELEMENT;
-pub use capi::scbehavior::{MOUSE_BUTTONS, MOUSE_EVENTS, KEYBOARD_STATES, KEY_EVENTS};
 use capi::sctypes::{HWINDOW, POINT, UINT, BOOL, RECT, LPCBYTE, LPVOID, INT};
 use capi::scmsg::*;
+
+pub use capi::scbehavior::{MOUSE_BUTTONS, MOUSE_EVENTS, KEYBOARD_STATES, KEY_EVENTS};
 
 
 /// Application-provided events to notify Sciter.

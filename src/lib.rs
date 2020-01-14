@@ -398,7 +398,7 @@ lazy_static! {
 pub fn set_library(custom_path: &str) -> ::std::result::Result<(), String> {
   #[cfg(not(feature = "dynamic"))]
   fn set_impl(_: &str) -> ::std::result::Result<(), String> {
-    Err("Don't use `sciter::set_library()` in static builds.\n  Build with feature \"shared\" instead.".to_owned())
+    Err("Don't use `sciter::set_library()` in static builds.\n  Build with the feature \"dynamic\" instead.".to_owned())
   }
 
   #[cfg(feature = "dynamic")]
