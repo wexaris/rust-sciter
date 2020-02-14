@@ -33,17 +33,23 @@
 
       var counter = 0;
 
-      $(button#append).on("click", function(){
-        $(body).$append(<h1#test>{++counter }</h1>);
+      $(button#append).on("click", function() {
+        $(body).$append(<h1#test>{ ++counter }</h1>);
       });
 
-      $(button#open).on("click", function(){
+      $(button#open).on("click", function() {
 
         var fn = view.selectFile(#open,
           "HTML Files (*.htm,*.html)|*.HTM;*.HTML|All Files (*.*)|*.*" , "html" );
 
+        // if the dialog was closed or
+        // filesystem interaction was disabled via `ALLOW_FILE_IO`
+        // the selected file `fn` would be `undefined`.
         stdout.println("selected file: " + fn);
-        $(body).$append(<h1#test>{fn}</h1>);
+
+        if (fn) {
+          $(body).$append(<h1#test>{fn}</h1>);
+        }
       });
 
       // Some tricks with hyperlinks:
