@@ -104,8 +104,10 @@ pub extern "system" fn _event_handler_proc<T: EventHandler>(tag: LPVOID, he: HEL
 fn process_events(me: &mut dyn EventHandler, he: HELEMENT, evtg: UINT, params: LPVOID) -> BOOL
 {
 	let evtg : EVENT_GROUPS = unsafe { ::std::mem::transmute(evtg) };
-	// assert!(!he.is_null() || evtg == EVENT_GROUPS::SUBSCRIPTIONS_REQUEST);
-	if he.is_null() && evtg != EVENT_GROUPS::SUBSCRIPTIONS_REQUEST {
+	if he.is_null()
+		&& evtg != EVENT_GROUPS::SUBSCRIPTIONS_REQUEST
+		&& evtg != EVENT_GROUPS::HANDLE_BEHAVIOR_EVENT
+	{
 		eprintln!("[sciter] warning! null element for {:?}", evtg);
 	}
 
@@ -162,7 +164,7 @@ fn process_events(me: &mut dyn EventHandler, he: HELEMENT, evtg: UINT, params: L
 				}
 			};
 
-			if he.is_null() {
+			if he.is_null() && code != BEHAVIOR_EVENTS::MEDIA_CHANGED {
 				eprintln!("[sciter] warning! null element for {:?}:{:?}", evtg, code);
 			}
 
