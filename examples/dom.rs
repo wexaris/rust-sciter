@@ -6,25 +6,15 @@ extern crate sciter;
 use sciter::{Value, Element, HELEMENT};
 use sciter::dom::event::*;
 
+
+
 #[derive(Default)]
-struct Handler {
-	progress: Option<Element>,
-	state: bool,
-}
+struct DocumentHandler;
 
-impl sciter::EventHandler for Handler {
+impl sciter::EventHandler for DocumentHandler {
 
-	fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
-		Some(default_events() | EVENT_GROUPS::HANDLE_TIMER)
-	}
-
-	fn attached(&mut self, root: sciter::HELEMENT) {
-		let root = Element::from(root);
-		println!("attached to {}", root);
-		if root.test("progress") {
-			self.progress = Some(root.clone());
-			self.state = false;
-		}
+	fn attached(&mut self, _root: sciter::HELEMENT) {
+		println!("attached");
 	}
 
 	fn detached(&mut self, root: sciter::HELEMENT) {
@@ -32,66 +22,9 @@ impl sciter::EventHandler for Handler {
 		println!("detaching from {}", root);
 	}
 
-	fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
-		if phase != PHASE_MASK::BUBBLING {
-			return false;
-		}
-
-		match code {
-			BEHAVIOR_EVENTS::BUTTON_CLICK => {
-
-				let source = Element::from(source);
-				let mut target = Element::from(target);
-
-				println!("button click on target {}", target);
-
-				if self.progress.is_some() && *self.progress.as_ref().unwrap() == target {
-					self.state = !self.state;
-
-					if self.state {
-						println!("starting timer");
-						target.set_value(Value::from(0));
-						target.start_timer(1000, 1).ok();
-					} else {
-						println!("stopping timer");
-						target.stop_timer(1);
-
-						let cur = target.get_value();
-						target.set_attribute("title", &format!("Current value is {}. Click to start timer again.", cur));
-					}
-				}
-
-				true
-			}
-			_ => false
-		}
-	}
-
-	fn on_timer(&mut self, root: HELEMENT, timer_id: u64) -> bool {
-		println!("timer {} tick on {}", timer_id, Element::from(root));
-		if timer_id == 1 && self.progress.is_some() {
-			let e = self.progress.as_mut().unwrap();
-			let max_attr = e.get_attribute("max").unwrap();
-			let max: f64 = max_attr.parse().unwrap();
-
-			let v = e.get_value();
-			let next = v.to_float().unwrap() + 5.0;
-
-			if next > max {
-				println!("that's enough, finish.");
-				self.state = false;
-				e.stop_timer(1);
-			}
-
-			e.set_value(Value::from(next));
-			e.set_attribute("title", &format!("Current value is {}. Click to stop timer, if need.", next));
-
-			return true;
-		}
-		false
-	}
-
 	fn document_complete(&mut self, root: sciter::HELEMENT, source: sciter::HELEMENT) {
+
+		println!("document is loaded.");
 
 		let root = Element::from(root);
 		assert_eq!(root.get_tag(), "html");
@@ -191,9 +124,10 @@ impl sciter::EventHandler for Handler {
 			progress.set_value(Value::from(42));
 			progress.set_style_attribute("behavior", "progress clickable");
 
-			// attach custom handler to this element
-			// since timers are not sinking/bubbling, we need to attach our handler to the target element directly.
-			let handler = Handler::default();
+			// attach a new handler to this element;
+			// since timers are not sinking/bubbling, we need to attach
+			// a dedicated handler to that element directly.
+			let handler = ProgressHandler::default();
 			progress.attach_handler(handler).expect("can't attach?");
 
 			let mut e = Element::with_text("span", " <-- check tooltip").unwrap();
@@ -202,14 +136,107 @@ impl sciter::EventHandler for Handler {
 			e.set_style_attribute("font-style", "italic");
 		}
 	}
+
+}
+
+#[derive(Default)]
+struct ProgressHandler {
+	progress: Option<Element>,
+	start_timer: bool,
+}
+
+impl sciter::EventHandler for ProgressHandler {
+
+	fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
+		Some(default_events() | EVENT_GROUPS::HANDLE_TIMER)
+	}
+
+	fn attached(&mut self, root: sciter::HELEMENT) {
+		let root = Element::from(root);
+		println!("attached an element event handler to {}", root);
+		if root.test("progress") {
+			self.progress = Some(root.clone());
+			self.start_timer = false;
+		}
+	}
+
+	fn detached(&mut self, root: sciter::HELEMENT) {
+		let root = Element::from(root);
+		println!("detaching from {}", root);
+	}
+
+	fn on_event(&mut self, root: HELEMENT, source: HELEMENT, target: HELEMENT, code: BEHAVIOR_EVENTS, phase: PHASE_MASK, reason: EventReason) -> bool {
+		if phase != PHASE_MASK::BUBBLING {
+			return false;
+		}
+
+		match code {
+			BEHAVIOR_EVENTS::BUTTON_CLICK => {
+
+				let source = Element::from(source);
+				let mut target = Element::from(target);
+
+				println!("button click on target {}", target);
+
+				if self.progress.is_some() && *self.progress.as_ref().unwrap() == target {
+					self.start_timer = !self.start_timer;
+
+					if self.start_timer {
+						println!("starting timer");
+						target.set_value(Value::from(0));
+						target.start_timer(1000, 1).ok();
+					} else {
+						println!("stopping timer");
+						target.stop_timer(1);
+
+						let cur = target.get_value();
+						target.set_attribute("title", &format!("Current value is {}. Click to start the timer again.", cur));
+					}
+				}
+
+				true
+			}
+			_ => false
+		}
+	}
+
+	fn on_timer(&mut self, root: HELEMENT, timer_id: u64) -> bool {
+		println!("timer {} tick on {}", timer_id, Element::from(root));
+		if timer_id == 1 && self.progress.is_some() {
+			let e = self.progress.as_mut().unwrap();
+			let max_attr = e.get_attribute("max").unwrap();
+			let max: f64 = max_attr.parse().unwrap();
+
+			let v = e.get_value();
+			let next = v.to_float().unwrap() + 5.0;
+
+			if next > max {
+				println!("that's enough, finish.");
+				self.start_timer = false;
+				e.stop_timer(1);
+			}
+
+			e.set_value(Value::from(next));
+			e.set_attribute("title", &format!("Current value is {}. Click to stop the timer if need.", next));
+
+			return true;
+		}
+		false
+	}
 }
 
 fn main() {
   let mut frame = sciter::WindowBuilder::main_window()
   	.with_size((750, 950))
-  	.create();
-	frame.event_handler(Handler::default());
+		.create();
+
+	println!("attaching an event handler for the whole window");
+	frame.event_handler(DocumentHandler::default());
 	frame.set_title("DOM sample");
+
+	println!("loading the page...");
 	frame.load_file("http://httpbin.org/html");
+
+	println!("running the app");
 	frame.run_app();
 }
