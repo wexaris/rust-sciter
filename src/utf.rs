@@ -185,13 +185,7 @@ pub fn s2un(s: &str) -> (CString, u32) {
 
 /// Rust string to UTF-16 conversion.
 pub fn s2vec(s: &str) -> Vec<u16> {
-	let cs = CString::new(s).unwrap();
-	let mut out = Vec::with_capacity(s.len() * 2);
-	towcs(cs.to_bytes(), &mut out);
-	if !out.is_empty() {
-		out.push(0);
-	}
-	return out;
+	s2vecn(s).0
 }
 
 /// Rust string to UTF-16 conversion.
@@ -206,8 +200,32 @@ pub fn s2vecn(s: &str) -> (Vec<u16>, u32) {
 	return (out, n);
 }
 
+use capi::sctypes::{UINT, LPVOID};
+
+/// Convert an incoming UTF-16 to `String`.
+pub(crate) extern "system" fn store_wstr(szstr: LPCWSTR, str_length: UINT, param: LPVOID) {
+	let s = self::w2sn(szstr, str_length as usize);
+	let out = param as *mut String;
+	unsafe { *out = s };
+}
+
+/// Convert an incoming UTF-8 to `String`.
+pub(crate) extern "system" fn store_astr(szstr: LPCSTR,  str_length: UINT, param: LPVOID) {
+	let s = self::u2sn(szstr, str_length as usize);
+	let out = param as *mut String;
+	unsafe { *out = s };
+}
+
+/// Convert an incoming html string (UTF-8 in fact) to `String`.
+pub(crate) extern "system" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
+	let s = unsafe { ::std::slice::from_raw_parts(szstr, str_length as usize) };
+	let pout = param as *mut Vec<u8>;
+	let out = unsafe {&mut *pout};
+	out.extend_from_slice(s);
+}
 
 
+#[cfg(test)]
 mod tests {
 	#![allow(unused_imports)]
 
@@ -256,7 +274,7 @@ mod tests {
 
 		assert_eq!(s2vec("AB"), ['A' as u16, 'B' as u16, 0]);
 
-		let (cs, n) = s2w!("");
+		let (cs, n) = s2wn!("");
 		assert_eq!(n, 0);
 		assert_eq!(cs, []);
 	}

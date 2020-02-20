@@ -5,12 +5,26 @@
 /// # Example:
 ///
 /// ```macros
-/// let (cstr, len) = s2u!("hello"); // ffi::CString
-/// libc::printf("%.*hs", len, cstr.as_ptr());
+/// let cstr = s2u!("hello"); // ffi::CString
+/// libc::printf("%hs", cstr.as_ptr());
 /// ```
 ///
 #[macro_export]
 macro_rules! s2u {
+	($s:expr) => ( $crate::utf::s2un($s.as_ref()).0 )
+}
+
+/// Rust string to UTF-8 conversion. See also `utf::u2s`.
+///
+/// # Example:
+///
+/// ```macros
+/// let (cstr, len) = s2un!("hello"); // ffi::CString
+/// libc::printf("%.*hs", len, cstr.as_ptr());
+/// ```
+///
+#[macro_export]
+macro_rules! s2un {
 	($s:expr) => ( $crate::utf::s2un($s.as_ref()) )
 }
 
@@ -20,12 +34,26 @@ macro_rules! s2u {
 /// # Example:
 ///
 /// ```macros
-/// let (cwstr, len) = s2w!("hello"); // Vec<u16>
-/// libc::printf("%.*ws", len, cwstr.as_ptr());
+/// let cwstr = s2w!("hello"); // Vec<u16>
+/// libc::printf("%ws", cwstr.as_ptr());
 /// ```
 ///
 #[macro_export]
 macro_rules! s2w {
+	($s:expr) => ( $crate::utf::s2vec($s.as_ref()) )
+}
+
+/// Rust string to UTF-16 conversion. See also `utf::w2s`.
+///
+/// # Example:
+///
+/// ```macros
+/// let (cwstr, len) = s2wn!("hello"); // Vec<u16>
+/// libc::printf("%.*ws", len, cwstr.as_ptr());
+/// ```
+///
+#[macro_export]
+macro_rules! s2wn {
 	($s:expr) => ( $crate::utf::s2vecn($s.as_ref()) )
 }
 

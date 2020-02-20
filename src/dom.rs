@@ -160,6 +160,7 @@ use capi::sctypes::*;
 use value::Value;
 
 use capi::scbehavior::{CLICK_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
+use utf::{store_astr, store_wstr, store_bstr};
 
 pub use capi::scdom::{SCDOM_RESULT, HELEMENT, SET_ELEMENT_HTML, ELEMENT_AREAS, ELEMENT_STATE_BITS};
 pub use dom::event::{EventHandler, EventReason};
@@ -256,7 +257,7 @@ impl Element {
 	/// Create new element, it is disconnected initially from the DOM.
 	pub fn create(tag: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
-		let (tag,_) = s2u!(tag);
+		let tag = s2u!(tag);
 		let text = 0 as LPCWSTR;
 		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
 		ok_or!(e, ok)
@@ -265,7 +266,7 @@ impl Element {
 	/// Create new element as child of `parent`.
 	pub fn with_parent(tag: &str, parent: &mut Element) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
-		let (tag,_) = s2u!(tag);
+		let tag = s2u!(tag);
 		let text = 0 as LPCWSTR;
 		(_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
 		let ok = parent.append(&e);
@@ -281,8 +282,8 @@ impl Element {
 	/// Create new element with specified `text`, it is disconnected initially from the DOM.
 	pub fn with_text(tag: &str, text: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
-		let (tag,_) = s2u!(tag);
-		let (text,_) = s2w!(text);
+		let tag = s2u!(tag);
+		let text = s2w!(text);
 		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text.as_ptr(), &mut e.he);
 		ok_or!(e, ok)
 	}
@@ -290,7 +291,7 @@ impl Element {
 	/// Create new element with specified `type`, which is useful for controls and widgets (initially disconnected).
 	pub fn with_type(tag: &str, el_type: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
-		let (tag,_) = s2u!(tag);
+		let tag = s2u!(tag);
 		let text = 0 as LPCWSTR;
 		let ok = (_API.SciterCreateElement)(tag.as_ptr(), text, &mut e.he);
 		if ok == SCDOM_RESULT::OK {
@@ -375,7 +376,7 @@ impl Element {
 
 	/// Set inner text of the element.
 	pub fn set_text(&mut self, text: &str) -> Result<()> {
-		let (s,n) = s2w!(text);
+		let (s,n) = s2wn!(text);
 		let ok = (_API.SciterSetElementText)(self.he, s.as_ptr(), n);
 		ok_or!((), ok)
 	}
@@ -487,7 +488,7 @@ impl Element {
 	/// Evaluate the given script in context of the element.
 	pub fn eval_script(&self, script: &str) -> Result<Value> {
 		let mut rv = Value::new();
-		let (s,n) = s2w!(script);
+		let (s,n) = s2wn!(script);
 		let ok = (_API.SciterEvalElementScript)(self.he, s.as_ptr(), n, rv.as_ptr());
 		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
 	}
@@ -498,7 +499,7 @@ impl Element {
 	/// to construct script arguments from Rust types.
 	pub fn call_function(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
-		let (name,_) = s2u!(name);
+		let name = s2u!(name);
 		let argv = Value::pack_args(args);
 		let ok = (_API.SciterCallScriptingFunction)(self.he, name.as_ptr(), argv.as_ptr(), argv.len() as UINT, rv.as_ptr());
 		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
@@ -510,7 +511,7 @@ impl Element {
 	/// to construct script arguments from Rust types.
 	pub fn call_method(&self, name: &str, args: &[Value]) -> Result<Value> {
 		let mut rv = Value::new();
-		let (name,_) = s2u!(name);
+		let name = s2u!(name);
 		let argv = Value::pack_args(args);
 		let ok = (_API.SciterCallScriptingMethod)(self.he, name.as_ptr(), argv.as_ptr(), argv.len() as UINT, rv.as_ptr());
 		return ok_or!(rv, ok, SCDOM_RESULT::OPERATION_FAILED);
@@ -597,7 +598,7 @@ impl Element {
 	/// Get attribute value by its name.
 	pub fn get_attribute(&self, name: &str) -> Option<String> {
 		let mut s = String::new();
-		let (name,_) = s2u!(name);
+		let name = s2u!(name);
 		let ok = (_API.SciterGetAttributeByNameCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
 		match ok {
 			SCDOM_RESULT::OK => Some(s),
@@ -608,15 +609,15 @@ impl Element {
 
 	/// Add or replace attribute.
 	pub fn set_attribute(&mut self, name: &str, value: &str) -> Result<()> {
-		let (name,_) = s2u!(name);
-		let (value,_) = s2w!(value);
+		let name = s2u!(name);
+		let value = s2w!(value);
 		let ok = (_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value.as_ptr());
 		ok_or!((), ok)
 	}
 
 	/// Remove attribute.
 	pub fn remove_attribute(&mut self, name: &str) -> Result<()> {
-		let (name,_) = s2u!(name);
+		let name = s2u!(name);
 		let value = ::std::ptr::null();
 		let ok = (_API.SciterSetAttributeByName)(self.he, name.as_ptr(), value);
 		ok_or!((), ok)
@@ -643,15 +644,15 @@ impl Element {
 	/// Get [style attribute](https://sciter.com/docs/content/sciter/Style.htm) of the element by its name.
 	pub fn get_style_attribute(&self, name: &str) -> String {
 		let mut s = String::new();
-		let (name,_) = s2u!(name);
+		let name = s2u!(name);
 		(_API.SciterGetStyleAttributeCB)(self.he, name.as_ptr(), store_wstr, &mut s as *mut String as LPVOID);
 		return s;
 	}
 
 	/// Set [style attribute](https://sciter.com/docs/content/sciter/Style.htm).
 	pub fn set_style_attribute(&mut self, name: &str, value: &str) -> Result<()> {
-		let (name,_) = s2u!(name);
-		let (value,_) = s2w!(value);
+		let name = s2u!(name);
+		let value = s2w!(value);
 		let ok = (_API.SciterSetStyleAttribute)(self.he, name.as_ptr(), value.as_ptr());
 		ok_or!((), ok)
 	}
@@ -862,7 +863,7 @@ impl Element {
 	/// Test this element against CSS selector(s).
 	pub fn test(&self, selector: &str) -> bool {
 		let mut p = HELEMENT!();
-		let (s,_) = s2u!(selector);
+		let s = s2u!(selector);
 		(_API.SciterSelectParent)(self.he, s.as_ptr(), 1, &mut p);
 		return !p.is_null();
 	}
@@ -876,7 +877,7 @@ impl Element {
 			let stop = obj.on_element(e);
 			return stop as BOOL;
 		}
-		let (s,_) = s2u!(selector);
+		let s = s2u!(selector);
 		let handler = Box::new(callback);
     let param = Box::into_raw(handler);
 		let ok = (_API.SciterSelectElements)(self.he, s.as_ptr(), inner::<T>, param as LPVOID);
@@ -890,7 +891,7 @@ impl Element {
 	/// Will find first parent element starting from this satisfying given css selector(s).
 	pub fn find_nearest_parent(&self, selector: &str) -> Result<Option<Element>> {
 		let mut p = HELEMENT!();
-		let (s,_) = s2u!(selector);
+		let s = s2u!(selector);
 		let ok = (_API.SciterSelectParent)(self.he, s.as_ptr(), 0, &mut p);
 		if ok != SCDOM_RESULT::OK {
 			return Err(ok);
@@ -1133,30 +1134,6 @@ impl<'a> ::std::iter::IntoIterator for &'a Element {
 	}
 }
 
-
-use ::utf;
-
-/// Convert an incoming UTF-16 to `String`.
-extern "system" fn store_wstr(szstr: LPCWSTR, str_length: UINT, param: LPVOID) {
-	let s = utf::w2sn(szstr, str_length as usize);
-	let out = param as *mut String;
-	unsafe { *out = s };
-}
-
-/// Convert an incoming UTF-8 to `String`.
-extern "system" fn store_astr(szstr: LPCSTR,  str_length: UINT, param: LPVOID) {
-	let s = utf::u2sn(szstr, str_length as usize);
-	let out = param as *mut String;
-	unsafe { *out = s };
-}
-
-/// Convert an incoming html string (UTF-8 in fact) to `String`.
-extern "system" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
-	let s = unsafe { ::std::slice::from_raw_parts(szstr, str_length as usize) };
-	let pout = param as *mut Vec<u8>;
-	let out = unsafe {&mut *pout};
-	out.extend_from_slice(s);
-}
 
 /* Not implemented yet or not used APIs:
 

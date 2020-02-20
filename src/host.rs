@@ -103,7 +103,7 @@ pub trait HostHandler {
 	/// Parameters here must be taken from `SCN_LOAD_DATA` structure. You can store them for later usage,
 	/// but you must answer as [`LOAD_DELAYED`](enum.LOAD_RESULT.html#variant.LOAD_DELAYED) code and provide an `request_id` here.
 	fn data_ready(&self, hwnd: HWINDOW, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
-		let (s,_) = s2w!(uri);
+		let s = s2w!(uri);
 		match request_id {
 			Some(req) => {
 				(_API.SciterDataReadyAsync)(hwnd, s.as_ptr(), data.as_ptr(), data.len() as UINT, req)
@@ -253,7 +253,7 @@ impl Host {
 
 	/// Load an HTML document from file.
 	pub fn load_file(&self, uri: &str) {
-		let (s,_) = s2w!(uri);
+		let s = s2w!(uri);
 		(_API.SciterLoadFile)(self.hwnd, s.as_ptr());
 	}
 
@@ -261,7 +261,7 @@ impl Host {
 	pub fn load_html(&self, html: &[u8], uri: Option<&str>) {
 		match uri {
 			Some(uri) => {
-				let (s,_) = s2w!(uri);
+				let s = s2w!(uri);
 				(_API.SciterLoadHtml)(self.hwnd, html.as_ptr(), html.len() as UINT, s.as_ptr())
 			},
 			None => {
@@ -272,7 +272,7 @@ impl Host {
 
 	/// This function is used as response to `SC_LOAD_DATA` request.
 	pub fn data_ready(&self, uri: &str, data: &[u8]) {
-		let (s,_) = s2w!(uri);
+		let s = s2w!(uri);
 		(_API.SciterDataReady)(self.hwnd, s.as_ptr(), data.as_ptr(), data.len() as UINT);
 	}
 
@@ -283,7 +283,7 @@ impl Host {
 	/// 1. Asynchronious resource loading in respect of `SCN_LOAD_DATA` requests (you must provide `request_id` in this case).
 	/// 2. Refresh of already loaded resource (for example, dynamic image updates).
 	pub fn data_ready_async(&self, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
-		let (s,_) = s2w!(uri);
+		let s = s2w!(uri);
 		let req = request_id.unwrap_or(::std::ptr::null_mut());
 		(_API.SciterDataReadyAsync)(self.hwnd, s.as_ptr(), data.as_ptr(), data.len() as UINT, req);
 	}
@@ -292,7 +292,7 @@ impl Host {
 	///
 	/// This function returns `Result<Value,Value>` with script function result value or with sciter script error.
 	pub fn eval_script(&self, script: &str) -> ::std::result::Result<Value, Value> {
-		let (s,n) = s2w!(script);
+		let (s,n) = s2wn!(script);
 		let mut rv = Value::new();
 		let ok = (_API.SciterEval)(self.hwnd, s.as_ptr(), n, rv.as_ptr());
 		ok_or!(ok, rv, rv)
@@ -306,7 +306,7 @@ impl Host {
 	/// to construct script arguments from Rust types.
 	pub fn call_function(&self, name: &str, args: &[Value]) -> ::std::result::Result<Value, Value> {
 		let mut rv = Value::new();
-		let (s,_) = s2u!(name);
+		let s = s2u!(name);
 		let argv = Value::pack_args(args);
 		let ok = (_API.SciterCall)(self.hwnd, s.as_ptr(), argv.len() as UINT, argv.as_ptr(), rv.as_ptr());
 		ok_or!(ok, rv, rv)
@@ -321,14 +321,14 @@ impl Host {
 	///
 	/// `https://sciter.com/modules/lib/root-extender.tis`.
 	pub fn set_home_url(&self, url: &str) -> Result<()> {
-		let (s,_) = s2w!(url);
+		let s = s2w!(url);
 		let ok = (_API.SciterSetHomeURL)(self.hwnd, s.as_ptr());
 		ok_or!(ok)
 	}
 
 	/// Set media type of this sciter instance.
 	pub fn set_media_type(&self, media_type: &str) -> Result<()> {
-		let (s,_) = s2w!(media_type);
+		let s = s2w!(media_type);
 		let ok = (_API.SciterSetMediaType)(self.hwnd, s.as_ptr());
 		ok_or!(ok)
 	}
@@ -345,7 +345,7 @@ impl Host {
 
 	/// Set or append the master style sheet styles (globally).
 	pub fn set_master_css(&self, css: &str, append: bool) -> Result<()> {
-		let (s,_) = s2u!(css);
+		let s = s2u!(css);
 		let b = s.as_bytes();
 		let n = b.len() as UINT;
 		let ok = if append {
@@ -358,9 +358,9 @@ impl Host {
 
 	/// Set (reset) style sheet of current document.
 	pub fn set_window_css(&self, css: &str, base_url: &str, media_type: &str) -> Result<()> {
-		let (s,_) = s2u!(css);
-		let (url,_) = s2w!(base_url);
-		let (media,_) = s2w!(media_type);
+		let s = s2u!(css);
+		let url = s2w!(base_url);
+		let media = s2w!(media_type);
 		let b = s.as_bytes();
 		let n = b.len() as UINT;
 		let ok = (_API.SciterSetCSS)(self.hwnd, b.as_ptr(), n, url.as_ptr(), media.as_ptr());
@@ -519,7 +519,7 @@ impl Archive {
       0
     };
 
-    let (wname, _) = s2w!(path);
+    let wname = s2w!(path);
     let name = &wname[skip..];
 
     let mut pb = ::std::ptr::null();

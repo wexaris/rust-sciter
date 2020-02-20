@@ -139,7 +139,7 @@ impl From<Text> for Value {
 impl Text {
 	/// Create a text layout object on top of a host element.
 	pub fn create(e: &Element, text: &str) -> Result<Text> {
-		let (t, tn) = s2w!(text);
+		let (t, tn) = s2wn!(text);
 		let mut h = null_mut();
 		let ok = (_GAPI.textCreateForElement)(&mut h, t.as_ptr(), tn, e.as_ptr(), null());
 		ok_or!(Text(h), ok)
@@ -147,8 +147,8 @@ impl Text {
 
 	/// Create a text layout object on top of a host element with the specified `class` attribute.
 	pub fn with_class(e: &Element, text: &str, class: &str) -> Result<Text> {
-		let (t, tn) = s2w!(text);
-		let (c, _cn) = s2w!(class);
+		let (t, tn) = s2wn!(text);
+		let (c, _cn) = s2wn!(class);
 		let mut h = null_mut();
 		let ok = (_GAPI.textCreateForElement)(&mut h, t.as_ptr(), tn, e.as_ptr(), c.as_ptr() );
 		ok_or!(Text(h), ok)
@@ -156,8 +156,8 @@ impl Text {
 
 	/// Create a text layout object on top of a host element with the specified `style` attribute.
 	pub fn with_style(e: &Element, text: &str, styles: &str) -> Result<Text> {
-		let (t, tn) = s2w!(text);
-		let (s, sn) = s2w!(styles);
+		let (t, tn) = s2wn!(text);
+		let (s, sn) = s2wn!(styles);
 		let mut h = null_mut();
 		let ok = (_GAPI.textCreateForElementAndStyle)(&mut h, t.as_ptr(), tn, e.as_ptr(), s.as_ptr(), sn);
 		ok_or!(Text(h), ok)

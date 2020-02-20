@@ -248,7 +248,7 @@ impl Value {
 	/// Parse a json string into value. Returns the number of chars left unparsed in case of error.
 	pub fn parse_as(val: &str, how: VALUE_STRING_CVT_TYPE) -> Result<Value, usize> {
 		let mut me = Value::new();
-		let (s,n) = s2w!(val);
+		let (s,n) = s2wn!(val);
 		let ok: u32 = (_API.ValueFromString)(me.as_ptr(), s.as_ptr(), n, how);
 		if ok == 0 {
 			Ok(me)
@@ -502,7 +502,7 @@ impl Value {
 	pub fn call(&self, this: Option<Value>, args: &[Value], name: Option<&str>) -> Result<Value, VALUE_RESULT> {
 		let mut rv = Value::new();
 		let argv = Value::pack_args(args);
-		let (name,_) = s2w!(name.unwrap_or(""));
+		let name = s2w!(name.unwrap_or(""));
 		let ok = (_API.ValueInvoke)(self.as_cptr(), this.unwrap_or_default().as_ptr(),
 			argv.len() as UINT, argv.as_ptr(), rv.as_ptr(), name.as_ptr());
 		match ok {
@@ -693,7 +693,7 @@ impl Value {
   }
 
 	fn assign_str(&mut self, val: &str, unit: VALUE_UNIT_TYPE_STRING) -> VALUE_RESULT {
-		let (s,n) = s2w!(val);
+		let (s,n) = s2wn!(val);
 		return (_API.ValueStringDataSet)(self.as_ptr(), s.as_ptr(), n, unit as UINT);
 	}
 }

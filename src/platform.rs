@@ -123,7 +123,7 @@ mod windows {
 
 		/// Set native window title.
 		fn set_title(&mut self, title: &str) {
-			let (s,_) = s2w!(title);
+			let s = s2w!(title);
 			unsafe { SetWindowTextW(self.hwnd, s.as_ptr()) };
 		}
 
@@ -278,7 +278,7 @@ mod windows {
 
 		/// Set native window title.
 		fn set_title(&mut self, title: &str) {
-			let (s,_) = s2u!(title);
+			let s = s2u!(title);
 			unsafe { gtk_window_set_title(self.window(), s.as_ptr()) };
 		}
 
