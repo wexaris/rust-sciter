@@ -138,10 +138,10 @@ _Check [rust-sciter/examples](https://github.com/sciter-sdk/rust-sciter/tree/mas
 * [x] [sciter::value](https://github.com/c-smile/sciter-sdk/blob/master/include/value.hpp) Rust wrapper with sciter::script_error and sciter::native_function support
 * [x] [sciter::behavior_factory](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-behavior.h) - global factory for native behaviors
 * [x] [sciter::graphics](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-graphics.hpp) - platform independent graphics native interface (can be used in native behaviors)
-* [ ] [sciter::request](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-request.hpp) - resource request object, used for custom resource downloading and handling
+* [x] [sciter::request](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-request.hpp) - resource request object, used for custom resource downloading and handling
 * [x] [sciter::video](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-video-api.h) - custom video rendering
 * [x] [sciter::archive](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-host-callback.h) - Sciter's compressed archive produced by sdk/bin/packfolder
-* [ ] [sciter::msg](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-msg.h) - Backend-independent input event processing
+* [x] [sciter::msg](https://github.com/c-smile/sciter-sdk/blob/master/include/sciter-x-msg.h) - Backend-independent input event processing
 
 
 ### Platforms:

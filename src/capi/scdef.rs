@@ -24,9 +24,9 @@ pub enum IDXGISurface {}
 /// implement loading of resources in its own way (for example images can be loaded from
 /// database or other resource).
 pub enum LOAD_RESULT {
-	/// Do default loading if data not set.
+	/// Do the default loading if data is not set.
   LOAD_DEFAULT,
-  /// Discard request completely (data will not be loaded at document).
+  /// Discard the request completely (data will not be loaded at the document).
   LOAD_DISCARD,
   /// Data will be delivered later by the host application.
   LOAD_DELAYED,

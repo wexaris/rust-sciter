@@ -83,6 +83,7 @@ mod eventhandler;
 pub mod dom;
 pub mod graphics;
 pub mod host;
+pub mod request;
 pub mod types;
 pub mod utf;
 pub mod value;
