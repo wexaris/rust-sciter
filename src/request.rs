@@ -1,6 +1,7 @@
-/*! Sciter requests.
+/*! Sciter Request API.
 
-Handling all attributes of requests (GET/POST/PUT/DELETE) sent by `Element.request()` and `View.request()` functions and other load requests.
+Handling all attributes of requests (GET/POST/PUT/DELETE) sent by
+`Element.request()` and `View.request()` functions and other load requests.
 
 */
 pub use capi::screquest::{HREQUEST, REQUEST_RESULT};
@@ -38,7 +39,7 @@ type GetValueFn = extern "system" fn (rq: HREQUEST, n: UINT, rcv: LPCWSTR_RECEIV
 
 /// Request object.
 ///
-/// Can be constructed only from a `HREQUEST` handle:
+/// Can be constructed from a `HREQUEST` handle only:
 ///
 /// ```rust,no_run
 /// # use sciter::request::Request;

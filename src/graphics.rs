@@ -1,7 +1,8 @@
 /*! Sciter's platform independent graphics interface.
 
 Used in custom behaviors / event handlers to draw on element's surface in native code.
-Essentially this mimics [`Graphics`](https://sciter.com/docs/content/sciter/Graphics.htm) scripting object as close as possible.
+Essentially this mimics [`Graphics`](https://sciter.com/docs/content/sciter/Graphics.htm)
+scripting object as close as possible.
 
 */
 use capi::scgraphics::{HTEXT, HIMG, HPATH};

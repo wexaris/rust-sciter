@@ -63,17 +63,17 @@ pub type LPRECT = *mut RECT;
 pub type LPCRECT = *const RECT;
 
 impl RECT {
-	/// Calculate height of rect.
+	/// Calculate the height of the rect.
 	pub fn height(&self) -> LONG {
 		self.bottom - self.top
 	}
 
-	/// Calculate width of rect.
+	/// Calculate the width of the rect.
 	pub fn width(&self) -> LONG {
 		self.right - self.left
 	}
 
-	/// Return the size of rect in width and height form.
+	/// Return the size of the rect in width and height form.
 	pub fn size(&self) -> SIZE {
 		SIZE {
 			cx: self.width(),
@@ -81,7 +81,7 @@ impl RECT {
 		}
 	}
 
-	/// Returns the top-left point of rect.
+	/// Returns the top-left point of the rect.
 	pub fn topleft(&self) -> POINT {
 		POINT {
 			x: self.left,

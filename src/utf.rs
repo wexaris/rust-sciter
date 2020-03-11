@@ -140,7 +140,7 @@ fn wcslen(sz: LPCWSTR) -> usize
 	return i as usize;
 }
 
-/// UTF8 to rust string conversion. See also `s2u!`.
+/// UTF8 to Rust string conversion. See also [`s2u!`](../macro.s2u.html).
 pub fn u2s(sz: LPCSTR) -> String
 {
 	if sz.is_null() {
@@ -151,7 +151,7 @@ pub fn u2s(sz: LPCSTR) -> String
 	return cow.into_owned();
 }
 
-/// UTF8 to rust string conversion. See also `s2u!`.
+/// UTF8 to Rust string conversion. See also [`s2u!`](../macro.s2u.html).
 pub fn u2sn(sz: LPCSTR, len: usize) -> String
 {
 	let chars = unsafe { ::std::slice::from_raw_parts(sz as LPCBYTE, len) };
@@ -159,13 +159,13 @@ pub fn u2sn(sz: LPCSTR, len: usize) -> String
 	return s;
 }
 
-/// UTF-16 to rust string conversion. See also `s2w!`.
+/// UTF-16 to Rust string conversion. See also [`s2w!`](../macro.s2w.html).
 pub fn w2s(sz: LPCWSTR) -> String
 {
 	return w2sn(sz, wcslen(sz));
 }
 
-/// UTF-16 to rust string conversion. See also `s2w!`.
+/// UTF-16 to Rust string conversion. See also [`s2w!`](../macro.s2w.html).
 pub fn w2sn(sz: LPCWSTR, len: usize) -> String
 {
 	if sz.is_null() {

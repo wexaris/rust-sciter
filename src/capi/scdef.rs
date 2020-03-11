@@ -21,8 +21,8 @@ pub enum IDXGISurface {}
 /// `HostHandler::on_data_load()` result code.
 ///
 /// This notification gives application a chance to override built-in loader and
-/// implement loading of resources in its own way (for example images can be loaded from
-/// database or other resource).
+/// implement loading of resources in its own way (for example, images can be loaded from
+/// a database or other resource).
 pub enum LOAD_RESULT {
 	/// Do the default loading if data is not set.
   LOAD_DEFAULT,
@@ -47,7 +47,7 @@ pub enum SCRIPT_RUNTIME_FEATURES
 	ALLOW_SYSINFO = 0x8,
 }
 
-/// Explicitly set a sciter graphics layer.
+/// Explicitly set the Sciter graphics layer.
 #[repr(C)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -60,11 +60,11 @@ pub enum GFX_LAYER
 	/// Depends on OS: GDI, Cairo or CoreGraphics.
 	CPU = 1,
 
-	/// A software rasterizer for Direct2D.
+	/// A software rasterizer for Direct2D (Windows only).
 	#[cfg(windows)]
 	WARP = 2,
 
-	/// A hardware Direct2D mode.
+	/// A hardware Direct2D mode (Windows only).
 	#[cfg(windows)]
 	D2D = 3,
 
@@ -77,7 +77,7 @@ pub enum GFX_LAYER
 
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
-/// Various sciter engine options (global or per-window).
+/// Various Sciter engine options (global or per-window).
 pub enum SCITER_RT_OPTIONS
 {
 	/// value:TRUE - enable, value:FALSE - disable, enabled by default.
@@ -197,7 +197,7 @@ pub struct SCN_LOAD_DATA
   /// `HWINDOW` of the window this callback was attached to.
   pub hwnd: HWINDOW,
 
-  /// [in] Zero terminated string, fully qualified uri, for example "http://server/folder/file.ext".
+  /// [in] Zero terminated string, fully qualified uri, for example, "http://server/folder/file.ext".
   pub uri: LPCWSTR,
 
   /// [in,out] pointer to loaded data to return. If data exists in the cache then this field contain pointer to it.
@@ -208,7 +208,7 @@ pub struct SCN_LOAD_DATA
   /// [in] resource type category
   pub dataType: SCITER_RESOURCE_TYPE,
 
-  /// [in] request handle that can be used with sciter request API.
+  /// [in] request handle that can be used with Sciter request API.
   pub request_id: HREQUEST,
 
   /// [in] destination element for request.
@@ -219,14 +219,14 @@ pub struct SCN_LOAD_DATA
 
 #[repr(C)]
 #[derive(Debug)]
-/// This notification indicates that external data (for example image) download process completed.
+/// This notification indicates that external data (for example, image) download process has been completed.
 pub struct SCN_DATA_LOADED
 {
 	/// `SC_DATA_LOADED` here.
   pub code: UINT,
   /// `HWINDOW` of the window this callback was attached to.
   pub hwnd: HWINDOW,
-  /// [in] zero terminated string, fully qualified uri, for example "http://server/folder/file.ext".
+  /// [in] zero terminated string, fully qualified uri, for example, "http://server/folder/file.ext".
   pub uri: LPCWSTR,
   /// [in] pointer to loaded data.
   pub data: LPCBYTE,

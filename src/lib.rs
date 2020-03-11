@@ -78,6 +78,8 @@ folder for more complex usage and module-level sections for the guides about:
 #[macro_use] mod macros;
 
 mod capi;
+
+#[doc(hidden)]
 pub use capi::scdom::{HELEMENT};
 pub use capi::scdef::{GFX_LAYER, SCRIPT_RUNTIME_FEATURES};
 
@@ -392,7 +394,7 @@ lazy_static! {
 /// Set a custom path to the Sciter dynamic library.
 ///
 /// Must be called first before any other functions.
-/// Returns error if library can not be loaded.
+/// Returns error if the specified library can not be loaded.
 ///
 /// # Example
 ///
@@ -421,8 +423,8 @@ pub fn set_library(custom_path: &str) -> ::std::result::Result<(), String> {
 
 /// Sciter engine version number (e.g. `0x03030200`).
 ///
-/// Note: does not return the `build` part because it isn't fit in `0..255` byte range.
-/// Use [`sciter::version()`](fn.version.html) instead which returns complete version string.
+/// Note: does not return the `build` part because it doesn't fit in `0..255` byte range.
+/// Use [`sciter::version()`](fn.version.html) instead which returns the complete version string.
 pub fn version_num() -> u32 {
 	use types::BOOL;
 	let v1 = (_API.SciterVersion)(true as BOOL);
@@ -457,7 +459,7 @@ pub fn is_windowless() -> bool {
 	api_version() >= 0x0001_0001
 }
 
-/// Various global sciter engine options.
+/// Various global Sciter engine options.
 ///
 /// Used by [`sciter::set_options()`](fn.set_options.html).
 ///
@@ -465,11 +467,12 @@ pub fn is_windowless() -> bool {
 #[derive(Copy, Clone)]
 pub enum RuntimeOptions<'a> {
 
-  /// global; value: a full path to Sciter dynamic library (dll/dylib/so), must be called before any other Sciter function.
+  /// global; value: the full path to the Sciter dynamic library (dll/dylib/so),
+  /// must be called before any other Sciter function.
   LibraryPath(&'a str),
   /// global; value: [`GFX_LAYER`](enum.GFX_LAYER.html), must be called before any window creation.
   GfxLayer(GFX_LAYER),
-  /// global; value: `bool`, `true` - the engine will use a "unisex" theme that is common for all platforms.
+  /// global; value: `true` - the engine will use a "unisex" theme that is common for all platforms.
   /// That UX theme is not using OS primitives for rendering input elements.
   /// Use it if you want exactly the same (modulo fonts) look-n-feel on all platforms.
   UxTheming(bool),
@@ -493,7 +496,7 @@ pub enum RuntimeOptions<'a> {
 	MaxHttpDataLength(usize),
 }
 
-/// Set various sciter engine global options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
+/// Set various global Sciter engine options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
 pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 	use RuntimeOptions::*;
 	use capi::scdef::SCITER_RT_OPTIONS::*;

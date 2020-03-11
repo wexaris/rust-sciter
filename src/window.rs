@@ -1,15 +1,16 @@
 /*! High level window wrapper.
 
-To create instance of Sciter you will need either to create new Sciter window or to attach (mix-in) Sciter engine to existing window.
+To create an instance of Sciter you will need either to create a new Sciter window
+or to attach (mix-in) the Sciter engine to an existing window.
 
-Handle of the Sciter engine is defined as `HWINDOW` type which is:
+The handle of the Sciter engine is defined as `HWINDOW` type which is:
 
 * `HWND` handle on Microsoft Windows.
-* `NSView*` – pointer to [`NSView`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSView_Class/) instance that is a contentView of Sciter window on OS X.
-* `GtkWidget*` – pointer to [`GtkWidget`](https://developer.gnome.org/gtk3/stable/GtkWidget.html) instance
+* `NSView*` – a pointer to [`NSView`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSView_Class/) instance that is a contentView of Sciter window on OS X.
+* `GtkWidget*` – a pointer to [`GtkWidget`](https://developer.gnome.org/gtk3/stable/GtkWidget.html) instance
 that is a root widget of Sciter window on Linux/GTK.
 
-## Creation of new window
+## Creation of a new window:
 
 ```no_run
 extern crate sciter;
@@ -21,7 +22,7 @@ fn main() {
 }
 ```
 
-Also you can register the [host](../host/trait.HostHandler.html) and [DOM](../dom/event/index.html) event handlers.
+Also you can register a [host](../host/trait.HostHandler.html) and a [DOM](../dom/event/index.html) event handlers.
 
 .
 */
@@ -41,7 +42,7 @@ pub type Flags = SCITER_CREATE_WINDOW_FLAGS;
 pub use capi::scdef::{SCITER_CREATE_WINDOW_FLAGS};
 
 
-/// Per-window sciter engine options.
+/// Per-window Sciter engine options.
 ///
 /// Used by [`Window::set_options()`](struct.Window.html#method.set_options).
 ///
@@ -115,24 +116,25 @@ impl Window {
 		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
 	}
 
-	/// Obtain reference to `Host` which allows you to control sciter engine and windows.
+	/// Obtain reference to `Host` which allows you to control Sciter engine and windows.
 	pub fn get_host(&self) -> Rc<Host> {
 		Rc::clone(&self.host)
 	}
 
-	/// Set callback for sciter engine events.
+	/// Set callback for Sciter engine events.
 	pub fn sciter_handler<Callback: HostHandler + Sized>(&mut self, handler: Callback) {
 		self.host.setup_callback(handler);
 	}
 
 	/// Attach `dom::EventHandler` to the Sciter window.
 	///
-	/// You can install Window EventHandler only once - it will survive all document reloads.
+	/// You should install Window event handler only once - it will survive all document reloads.
+	/// Also it can be registered on an empty window before the document is loaded.
 	pub fn event_handler<Handler: EventHandler>(&mut self, handler: Handler) {
 		self.host.attach_handler(handler);
 	}
 
-  /// Register an archive produced by `packfolder`.
+  /// Register an archive produced by `packfolder` tool.
   ///
   /// See documentation of the [`Archive`](../host/struct.Archive.html).
   pub fn archive_handler(&mut self, resource: &[u8]) -> Result<(), ()> {
@@ -145,18 +147,18 @@ impl Window {
 	/// In Sciter’s sense, it is a function that is called for different UI events on the DOM element.
 	/// Essentially it is an analog of the [WindowProc](https://en.wikipedia.org/wiki/WindowProc) in Windows.
 	///
-	/// In HTML, there is a `behavior` CSS property that defines name of a native module
-	/// that is responsible for initialization and event handling on the element.
-	/// For example, by defining `div {behavior:button}` you are asking all `<div>` elements in your markup
+	/// In HTML, there is a `behavior` CSS property that defines the name of a native module
+	/// that is responsible for the initialization and event handling on the element.
+	/// For example, by defining `div { behavior:button; }` you are asking all `<div>` elements in your markup
 	/// to behave as buttons: generate [`BUTTON_CLICK`](../dom/event/enum.BEHAVIOR_EVENTS.html#variant.BUTTON_CLICK)
-	/// DOM events when clicks on that element and be focusable.
+	/// DOM events when the user clicks on that element, and be focusable.
 	///
-	/// When the engine discovers element having `behavior: xyz;` defined in its style,
+	/// When the engine discovers an element having `behavior: xyz;` defined in its style,
 	/// it sends the [`SC_ATTACH_BEHAVIOR`](../host/trait.HostHandler.html#method.on_attach_behavior) host notification
-	/// with the name `"xyz"` and element handle to the application.
+	/// with the name `"xyz"` and an element handle to the application.
 	/// You can consume the notification and respond to it yourself,
 	/// or the default handler walks through the list of registered behavior factories
-	/// and creates the instance of the corresponding [`dom::EventHandler`](../dom/event/trait.EventHandler.html).
+	/// and creates an instance of the corresponding [`dom::EventHandler`](../dom/event/trait.EventHandler.html).
 	///
 	/// ## Example:
 	///
@@ -166,6 +168,9 @@ impl Window {
 	/// impl sciter::EventHandler for Button {}
 	///
 	/// let mut frame = sciter::Window::new();
+	///
+	/// // register a factory method that creates a new event handler
+	/// // for each element that has "custom-button" behavior:
 	/// frame.register_behavior("custom-button", || { Box::new(Button) });
 	/// ```
 	///
@@ -226,7 +231,7 @@ impl Window {
 		self.base.get_title()
 	}
 
-	/// Set various sciter engine options, see the [`Options`](enum.Options.html).
+	/// Set various Sciter engine options, see the [`Options`](enum.Options.html).
 	pub fn set_options(&self, options: Options) -> Result<(), ()> {
 		use capi::scdef::SCITER_RT_OPTIONS::*;
 		use self::Options::*;
@@ -266,7 +271,7 @@ impl Window {
 
 
 /// Generic rectangle struct.
-/// NOTE that this is different from RECT type as it specifies width and height.
+/// NOTE that this is different from the [`RECT`](../types/struct.RECT.html) type as it specifies width and height.
 #[derive(Clone, Copy)]
 pub struct Rectangle {
 	pub x: i32,

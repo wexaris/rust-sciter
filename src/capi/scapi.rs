@@ -16,6 +16,7 @@ use capi::scmsg::{SCITER_X_MSG};
 /// Sciter API functions.
 #[repr(C)]
 #[allow(missing_docs)]
+#[doc(hidden)]
 pub struct ISciterAPI
 {
 	pub version: UINT,

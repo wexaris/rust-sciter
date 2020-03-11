@@ -8,7 +8,7 @@ proxies of script functions, objects and arrays.
 
 ## Basic usage
 
-You can create an empty (undefined) Sciter [`Value`](struct.Value.html) with `new()`:
+You can create an empty (undefined) Sciter value with [`Value::new()`](struct.Value.html):
 
 ```
 use sciter::Value;
@@ -18,7 +18,7 @@ assert!(v.is_undefined());
 assert!(!v.is_null());
 ```
 
-Or explicitly create `Value` for specified type:
+Or explicitly create `Value` of the specified type:
 
 ```
 use sciter::Value;
@@ -67,7 +67,7 @@ let v = Value::from(b"123".as_ref());
 assert!(v.is_bytes());
 ```
 
-And from sequence of objects:
+And from a sequence of objects:
 
 ```
 use sciter::Value;
@@ -110,7 +110,7 @@ let v = Value::from(4);
 assert_eq!(v.to_int(), Some(4));
 ```
 
-Note that there is two functions that converts `Value` to JSON and back:
+Note that there are two functions that convert `Value` to JSON and back:
 
 ```
 use sciter::Value;

@@ -76,7 +76,7 @@ pub struct KeyboardEvent {
 #[derive(Debug)]
 pub struct PaintEvent {
 	pub element: HELEMENT,
-	pub foreground: bool,
+	pub is_foreground: bool,
 }
 
 pub struct RenderEvent
@@ -192,7 +192,7 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 			let msg = SCITER_X_MSG_PAINT {
 				header: SCITER_X_MSG_CODE::SXM_PAINT.into(),
 				element: paint.element,
-				isFore: paint.foreground as BOOL,
+				isFore: paint.is_foreground as BOOL,
 				targetType: SCITER_PAINT_TARGET_TYPE::SPT_DEFAULT,
 				param: ptr::null_mut(),
 				callback: None,
@@ -235,13 +235,13 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 
 			let element = paint.layer.unwrap_or(PaintEvent {
 				element: std::ptr::null_mut(),
-				foreground: false,
+				is_foreground: false,
 			});
 
 			let msg = SCITER_X_MSG_PAINT {
 				header: SCITER_X_MSG_CODE::SXM_PAINT.into(),
 				element: element.element,
-				isFore: element.foreground as BOOL,
+				isFore: element.is_foreground as BOOL,
 				targetType: SCITER_PAINT_TARGET_TYPE::SPT_RECEIVER,
 				param: param,
 				callback: Some(inner),

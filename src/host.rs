@@ -13,7 +13,7 @@ pub use capi::scdef::{LOAD_RESULT, OUTPUT_SUBSYTEMS, OUTPUT_SEVERITY};
 pub use capi::scdef::{SCN_LOAD_DATA, SCN_DATA_LOADED, SCN_ATTACH_BEHAVIOR, SCN_INVALIDATE_RECT};
 
 
-/// A specialized `Result` type for sciter host operations.
+/// A specialized `Result` type for Sciter host operations.
 pub type Result<T> = ::std::result::Result<T, ()>;
 
 macro_rules! ok_or {
@@ -47,28 +47,34 @@ macro_rules! ok_or {
 
 ## Resource handling and custom resource loader
 
-HTML loaded into Sciter may contain external resources: CSS (Cascading Style Sheets), images, fonts, cursors and scripts.
-To get any of such resources Sciter will first send `on_data_load(SCN_LOAD_DATA)` notification to your application using
-callback handler registered with `sciter::Window.sciter_handler()` function.
+HTML loaded into Sciter may contain external resources: CSS (Cascading Style Sheets),
+images, fonts, cursors and scripts.
+To get any of such resources Sciter will first send a `on_data_load(SCN_LOAD_DATA)` notification
+to your application using the callback handler registered with `sciter::Window.sciter_handler()` function.
 
-Your application can provide your own data for such resources (for example from resource section, DB or other storage of your choice)
-or delegate resource loading to built-in HTTP client and file loader or discard loading at all.
+Your application can provide your own data for such resources
+(for example, from the resource section, database or other storage of your choice)
+or delegate the resource loading to the built-in HTTP client or file loader, or discard the loading at all.
 
-Note: This handler should be registere before any [`load_html()`](struct.Host.html#method.load_html) call in order to send notifications while loading.
+Note: This handler should be registered before any
+[`load_html()`](struct.Host.html#method.load_html) or
+[`load_file()`](struct.Host.html#method.load_file) calls
+in order to send notifications while loading.
 
 */
 #[allow(unused_variables)]
 pub trait HostHandler {
 
-	/// Notifies that Sciter is about to download a referred resource.
+	/// Notifies that Sciter is about to download the referred resource.
 	///
 	/// You can load or overload data immediately by calling `self.data_ready()` with parameters provided by `SCN_LOAD_DATA`,
 	/// or save them (including `request_id`) for later usage and answer here with `LOAD_RESULT::LOAD_DELAYED` code.
 	///
-	/// Also you can discard request (data will not be loaded at document) or take care about this request completely (via request API).
+	/// Also you can discard the request (data will not be loaded at the document)
+	/// or take care about this request completely by yourself (via the [request API](../request/index.html)).
 	fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> Option<LOAD_RESULT> { return None; }
 
-	/// This notification indicates that external data (for example image) download process completed.
+	/// This notification indicates that external data (for example, image) download process completed.
 	fn on_data_loaded(&mut self, pnm: &SCN_DATA_LOADED) { }
 
 	/// This notification is sent on parsing the document and while processing elements
@@ -290,7 +296,7 @@ impl Host {
 
 	/// Evaluate the given script in context of the current document.
 	///
-	/// This function returns `Result<Value,Value>` with script function result value or with sciter script error.
+	/// This function returns `Result<Value,Value>` with script function result value or with Sciter script error.
 	pub fn eval_script(&self, script: &str) -> ::std::result::Result<Value, Value> {
 		let (s,n) = s2wn!(script);
 		let mut rv = Value::new();
@@ -300,7 +306,7 @@ impl Host {
 
 	/// Call a script function defined in the global namespace.
 	///
-	/// This function returns `Result<Value,Value>` with script function result value or with sciter script error.
+	/// This function returns `Result<Value,Value>` with script function result value or with Sciter script error.
 	///
 	/// You can use the [`make_args!(args...)`](../macro.make_args.html) macro which helps you
 	/// to construct script arguments from Rust types.
@@ -312,7 +318,7 @@ impl Host {
 		ok_or!(ok, rv, rv)
 	}
 
-	/// Set home url for sciter resources.
+	/// Set home url for Sciter resources.
 	///
 	/// If you will set it like `set_home_url("https://sciter.com/modules/")` then
 	///
@@ -326,16 +332,16 @@ impl Host {
 		ok_or!(ok)
 	}
 
-	/// Set media type of this sciter instance.
+	/// Set media type of this Sciter instance.
 	pub fn set_media_type(&self, media_type: &str) -> Result<()> {
 		let s = s2w!(media_type);
 		let ok = (_API.SciterSetMediaType)(self.hwnd, s.as_ptr());
 		ok_or!(ok)
 	}
 
-	/// Set media variables (dictionary) for this sciter instance.
+	/// Set media variables (dictionary) for this Sciter instance.
 	///
-	/// By default sciter window has `"screen:true"` and `"desktop:true"/"handheld:true"` media variables.
+	/// By default Sciter window has `"screen:true"` and `"desktop:true"/"handheld:true"` media variables.
 	///
 	/// Media variables can be changed in runtime. This will cause styles of the document to be reset.
 	pub fn set_media_vars(&self, media: &Value) -> Result<()> {
@@ -472,12 +478,12 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 
 /// Sciter compressed archive.
 ///
-/// An archive is produced by `packfolder` (from SDK) that creates a blob with compressed resources.
+/// An archive is produced by `packfolder` tool (from SDK) that creates a single blob with compressed resources.
 /// It allows to use the same resource pack uniformly across different platforms.
 ///
 /// For example, app resource files (HTML/CSS/scripts) can be stored in an `assets` folder
 /// that can be packed into a single archive by calling `packfolder.exe assets target/assets.rc -binary`.
-/// And later can be accessed via the Archive API:
+/// And later it can be accessed via the Archive API:
 ///
 /// ```rust,ignore
 /// let archived = include_bytes!("target/assets.rc");
@@ -496,7 +502,7 @@ impl Drop for Archive {
 }
 
 impl Archive {
-  /// Open archive blob.
+  /// Open an archive blob.
   pub fn open(archived: &[u8]) -> Result<Self> {
     let p = (_API.SciterOpenArchive)(archived.as_ptr(), archived.len() as u32);
     if !p.is_null() {

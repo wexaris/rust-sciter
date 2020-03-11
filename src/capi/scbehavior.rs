@@ -407,17 +407,17 @@ pub enum BEHAVIOR_EVENTS
 	PASTE_TEXT = 0x8E,
 	PASTE_HTML = 0x8F,
 
-	/// element was collapsed, so far only behavior:tabs is sending these two to the panels
+	/// element was collapsed, so far only `behavior:tabs` is sending these two to the panels
 	ELEMENT_COLLAPSED = 0x90,
 	/// element was expanded,
 	ELEMENT_EXPANDED,
 
 	/// activate (select) child,
-	/// used for example by accesskeys behaviors to send activation request, e.g. tab on `behavior:tabs`.
+	/// used, for example, by `accesskeys` behaviors to send activation request, e.g. tab on `behavior:tabs`.
 	ACTIVATE_CHILD,
 
 	/// ui state changed, observers shall update their visual states.
-	/// is sent for example by `behavior:richtext` when caret position/selection has changed.
+	/// is sent, for example, by `behavior:richtext` when caret position/selection has changed.
 	UI_STATE_CHANGED = 0x95,
 
 
@@ -455,7 +455,7 @@ pub enum BEHAVIOR_EVENTS
 
 	/// document created, script namespace initialized. `target` -> the document
 	DOCUMENT_CREATED  = 0xC0,
-	/// document is about to be closed, to cancel closing do: `evt.data = sciter::value("cancel")`;
+	/// document is about to be closed, to cancel closing do: `evt.data = sciter::Value("cancel")`;
 	DOCUMENT_CLOSE_REQUEST,
 	/// last notification before document removal from the DOM
 	DOCUMENT_CLOSE,
@@ -477,7 +477,7 @@ pub enum BEHAVIOR_EVENTS
 	///   1. Handle and consume this `VIDEO_BIND_RQ` request
 	///   2. You will receive second `VIDEO_BIND_RQ` request/event for the same `<video>` element
 	///      but this time with the `reason` field set to an instance of `sciter::video_destination` interface.
-	///   3. `add_ref()` it and store it for example in worker thread producing video frames.
+	///   3. `add_ref()` it and store it, for example, in a worker thread producing video frames.
 	///   4. call `sciter::video_destination::start_streaming(...)` providing needed parameters
 	///      call `sciter::video_destination::render_frame(...)` as soon as they are available
 	///      call `sciter::video_destination::stop_streaming()` to stop the rendering (a.k.a. end of movie reached)

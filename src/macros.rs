@@ -4,7 +4,7 @@
 ///
 /// # Example:
 ///
-/// ```macros
+/// ```ignore
 /// let cstr = s2u!("hello"); // ffi::CString
 /// libc::printf("%hs", cstr.as_ptr());
 /// ```
@@ -18,7 +18,7 @@ macro_rules! s2u {
 ///
 /// # Example:
 ///
-/// ```macros
+/// ```ignore
 /// let (cstr, len) = s2un!("hello"); // ffi::CString
 /// libc::printf("%.*hs", len, cstr.as_ptr());
 /// ```
@@ -33,7 +33,7 @@ macro_rules! s2un {
 ///
 /// # Example:
 ///
-/// ```macros
+/// ```ignore
 /// let cwstr = s2w!("hello"); // Vec<u16>
 /// libc::printf("%ws", cwstr.as_ptr());
 /// ```
@@ -47,7 +47,7 @@ macro_rules! s2w {
 ///
 /// # Example:
 ///
-/// ```macros
+/// ```ignore
 /// let (cwstr, len) = s2wn!("hello"); // Vec<u16>
 /// libc::printf("%.*ws", len, cwstr.as_ptr());
 /// ```
@@ -72,7 +72,7 @@ macro_rules! u2s {
 }
 
 
-/// Pack arguments to call the sciter script function.
+/// Pack arguments to call the Sciter script function.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! pack_args {
@@ -90,7 +90,7 @@ macro_rules! pack_args {
 	};
 }
 
-/// Pack arguments into a `[Value]` array to call sciter script functions.
+/// Pack arguments into a `[Value]` array to call Sciter script functions.
 ///
 /// Used in [`Element.call_function()`](dom/struct.Element.html#method.call_function),
 /// [`Element.call_method()`](dom/struct.Element.html#method.call_method),
@@ -135,7 +135,7 @@ macro_rules! MAKE_HANDLE {
 
 /// Dispatch script calls to native code. Used in [`dom::EventHandler`](dom/event/trait.EventHandler.html) implementations.
 ///
-/// This macro generates new function which dispatchs incoming script call to native function
+/// This macro generates a new function which dispatches incoming script calls to the corresponding native functions
 /// with arguments unpacking and type checking.
 ///
 /// Note: unstable, will be improved.

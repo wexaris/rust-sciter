@@ -3,14 +3,14 @@
 
 ## Introduction.
 
-Let’s assume you have already integrated Sciter in your application and so you have Sciter window with loaded content.
+Let’s assume you have already integrated Sciter in your application and so you have ф Sciter window with the loaded content.
 
 From Sciter's point of view the loaded document is a tree of DOM elements (elements of Document Object Model).
 Sciter builds this tree while loading/parsing of input HTML.
-As a rule each tag in source HTML gets matching DOM element (there are exceptions, see below).
+As a rule, each tag in source HTML gets matching a DOM element (there are exceptions, see below).
 
-You can change text, attributes, state flags of DOM elements;
-add new or remove existing DOM elemdoents.
+You can change the text, attributes, state flags of DOM elements;
+add new or remove existing DOM elements.
 You can also attach your own DOM event handlers to DOM elements to receive events and notifications.
 
 Therefore your UI in Sciter is a collection of uniform DOM elements
@@ -19,7 +19,7 @@ that can be styled by CSS and manipulated by native or script code.
 
 ## Basic operations
 
-To access the DOM tree we need to get reference of its root element
+To access the DOM tree we need to get a reference of its root element
 (the root element is the element representing the `<html>` tag in HTML source).
 
 ```rust,no_run
@@ -32,9 +32,10 @@ assert_eq!(root.get_tag(), "html");
 *TBD:* Other ways to access DOM tree.
 
 By having a root element reference we are able to access any other element in the tree
-using various access and search functions like `SciterGetNthChild`, `SciterSelectElements`, …
-All of them are wrapped into methods of `dom::Element`.
-Here is how you would get reference to first `<div>` element with class "sidebar" using CSS selectors:
+using various access and search functions like `SciterGetNthChild`, `SciterSelectElements`, etc.
+All of them are wrapped into methods of [`dom::Element`](struct.Element.html).
+
+Here is how you would get a reference to the first `<div>` element with class "sidebar" using CSS selectors:
 
 ```rust,no_run
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
@@ -45,14 +46,14 @@ The same in script:
 
 ```tiscript
 var sidebar = self.select("div.sidebar"); // or
-var sidebar = self.$(div.sidebar); // using a stringizer variant of select()
+var sidebar = self.$(div.sidebar); // using the stringizer variant of select()
 ```
 
 *TBD:* Other select methods.
 
 ## DOM element operations
 
-You can change the **text** or HTML of a DOM element:
+You can change the **text** or **html** of a DOM element:
 
 ```rust,no_run
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
@@ -85,7 +86,7 @@ To **remove** an existing DOM element (to detach it from the DOM) you will do th
 el.detach();
 ```
 
-and when code will leave the scope where the `el` variable is defined, the DOM element will be destroyed.
+and when the code leaves the scope where the `el` variable is defined, the DOM element will be destroyed.
 
 Creation and population of DOM elements looks like this:
 
@@ -93,7 +94,7 @@ Creation and population of DOM elements looks like this:
 # use sciter::dom::Element;
 # let mut el = sciter::dom::Element::from(::std::ptr::null_mut());
 let p = Element::with_text("p", "Hello").unwrap(); // create <p> element
-el.append(&p); // append it to existing element, or use insert() ...
+el.append(&p); // append it to the existing element, or use insert() ...
 ```
 
 And in script:
@@ -116,21 +117,23 @@ And in script:
 el.state.visited = true;
 ```
 
-(after such call the element will match `:visited` CSS selector)
+(after such call the element will match the `:visited` CSS selector)
 
 
 ## Getting and setting values of DOM elements.
 
-By default a value of a DOM element is its text but some DOM elements may have
+By default the value of a DOM element is its text but some DOM elements may have
 so called behaviors attached to them (see below).
-`<input>`’s elements, for example, are plain DOM elements but each input type has its own behavior assigned to the element.
+`<input>` elements, for example, are plain DOM elements
+but each input type has its own behavior assigned to the element.
 The behavior, among other things, is responsible for providing and setting the value of the element.
 
-For example, value of an `input type=checkbox>` is boolean – _true_ or _false_,
-and value of a `<form>` element is a collection (name/value map) of all named inputs on the form.
+For example, the value of an `<input type=checkbox>` is boolean – _true_ or _false_,
+and the value of a `<form>` element is a collection (name/value map) of all named inputs on the form.
 
-In native code values are represented by `sciter::Value` objects.
-`sciter::Value` is a structure that can hold different types of values: numbers, strings, arrays, objects, etc
+In native code values are represented by [`sciter::Value`](../value/index.html) objects.
+[`sciter::Value`](../value/index.html) is a structure that can hold different types of values:
+numbers, strings, arrays, objects, etc
 (see [documentation](https://sciter.com/docs/content/script/language/Types.htm)).
 
 Here is how to set a numeric value of a DOM element in native code:
@@ -139,8 +142,8 @@ Here is how to set a numeric value of a DOM element in native code:
 # use sciter::Value;
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
 if let Some(mut num) = root.find_first("input[type=number]").unwrap() {
-	num.set_value( Value::from(12) );  // sciter::Value with T_INT type (i32 in Rust)
-	num.set_value(12);  // equivalent but with implicit conversion
+  num.set_value( Value::from(12) );  // sciter::Value with T_INT type (i32 in Rust)
+  num.set_value(12);  // equivalent but with implicit conversion
 }
 ```
 
@@ -148,7 +151,7 @@ In script the same will look like:
 
 ```tiscript
 if (var num = self.select("input[type=number]")) {
-	num.value = 12;
+  num.value = 12;
 }
 ```
 
@@ -245,16 +248,18 @@ unsafe impl Send for Element {}
 /// It is safe to share `sciter::Element` between threads - underlaying API is thread-safe.
 unsafe impl Sync for Element {}
 
+impl From<HELEMENT> for Element {
+	/// Construct an Element object from an `HELEMENT` handle.
+	fn from(he: HELEMENT) -> Self {
+		Element { he: Element::use_or(he) }
+	}
+}
+
 impl Element {
 
 	//\name Creation
 
-	/// Construct Element object from `HELEMENT` handle.
-	pub fn from(he: HELEMENT) -> Element {
-		Element { he: Element::use_or(he) }
-	}
-
-	/// Create new element, it is disconnected initially from the DOM.
+	/// Create a new element, it is disconnected initially from the DOM.
 	pub fn create(tag: &str) -> Result<Element> {
 		let mut e = Element { he: HELEMENT!() };
 		let tag = s2u!(tag);
@@ -336,6 +341,7 @@ impl Element {
 		ok_or!(Element::from(p), ok)
 	}
 
+	#[doc(hidden)]
 	fn use_or(he: HELEMENT) -> HELEMENT {
 		let ok = (_API.Sciter_UseElement)(he);
 		if ok == SCDOM_RESULT::OK {
@@ -1194,43 +1200,49 @@ pub mod event {
 
 # Behaviors and event handling.
 
-Primary goal of User Interface (UI) as a subsystem is to present some information to the user
+The primary goal of the User Interface (UI) as a subsystem is to present some information to the user
 and generate some events according to user’s actions.
 Your application handles UI events and acts accordingly executing its functions.
 
-To be able to handle events in native code you will need to attach instance of `sciter::EventHandler`
-to existing DOM element or to the window itself. In the `EventHandler` you will receive all events
-dispatched to the element and its children as before children (in `PHASE_MASK::SINKING` phase)
-as after them (`PHASE_MASK::BUBBLING` event phase), see [Events Propagation](https://sciter.com/developers/for-native-gui-programmers/#events-propagation).
+To be able to handle events in native code you will need to attach an instance of
+[`sciter::EventHandler`](trait.EventHandler.html)
+to an existing DOM element or to the window itself.
+In `EventHandler`'s implementation you will receive all events
+dispatched to the element and its children as before children (in [`PHASE_MASK::SINKING`](enum.PHASE_MASK.html) phase)
+as after them ([`PHASE_MASK::BUBBLING`](enum.PHASE_MASK.html) event phase),
+see [Events Propagation](https://sciter.com/developers/for-native-gui-programmers/#events-propagation).
 
 `EventHandler` attached to the window will receive all DOM events no matter which element they are targeted to.
 
-`EventHandler` contains various methods – receivers of events of various types.
-You can override any of these methods in order to receive events you are interested in your implementation of `sciter::EventHandler` class.
+`EventHandler` contains [various methods](trait.EventHandler.html#provided-methods) –
+receivers of events of various types.
+You can override any of these methods in order to receive events you are interested in
+in your implementation of `sciter::EventHandler`.
 
 
-To attach native event handler to DOM element or to the window you can do one of these:
+To attach a native event handler to a DOM element or to the window you can do one of these:
 
-* "Manually", to Sciter window: `sciter::Window.event_handler(your_event_handler)`
-* "Manually", to arbitrary DOM element: `sciter::dom::Element.attach_handler(your_event_handler)`
-* To group of DOM elements by declaration in CSS: `selector { behavior:your-behavior-name }`
+* "Manually", to a Sciter window: `sciter::Window.event_handler(your_event_handler)`
+* "Manually", to an arbitrary DOM element: `sciter::dom::Element.attach_handler(your_event_handler)`
+* To a group of DOM elements by declaration in CSS: `selector { behavior:your-behavior-name }`
 
 You also can assign events handlers defined in script code:
 
-* "Manually", individual events: if you have reference `el` of some element then to handle mouse events you can do this for example:
+* "Manually", individual events: if you have a reference `el` of some element then
+to handle mouse events you can do this, for example:
 
 ```tiscript
 el.onMouse = function(evt) { ... }
 ```
 
-* "Manually", by assigning behavior class to the [Element](https://sciter.com/docs/content/sciter/Element.htm):
+* "Manually", by assigning a behavior class to the [Element](https://sciter.com/docs/content/sciter/Element.htm):
 
 ```tiscript
 class MyEventsHandler: Element { ... }  // your behavior class which inherits sciter's Element class
 el.prototype = MyEventsHandler; // "sub-class" the element.
 ```
 
-* By declaration in CSS to all elements satisfying some CSS selector:
+* By declaration in CSS - to all elements satisfying some CSS selector:
 
 ```css
 selector { prototype: MyEventsHandler; }
@@ -1267,7 +1279,7 @@ let root = Element::from_window(hwnd).unwrap();
 let result: Value = root.eval_script("... script ...").unwrap();
 ```
 
-* To call global function defined in script using its full name (may include name of namespaces where it resides):
+* To call a global function defined in script using its full name (may include the name of namespaces where it resides):
 
 ```ignore
 # #[macro_use] extern crate sciter;
@@ -1275,30 +1287,30 @@ let result: Value = root.eval_script("... script ...").unwrap();
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
 let result: Value = root.call_function("namespace.name", &make_args!(1, "2", 3.0)).unwrap();
 ```
-parameters – `&[Value]` slice.
+The parameters are passed as a `&[Value]` slice.
 
-* To call method (function) defined in script for particular DOM element:
+* To call a method (function) defined in script for particular DOM element:
 
 ```ignore
 # #[macro_use] extern crate sciter;
 # use sciter::Value;
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
 if let Some(el) = root.find_first("input").unwrap() {
-	let result: Value = el.call_method("canUndo", &make_args!()).unwrap();
+  let result: Value = el.call_method("canUndo", &make_args!()).unwrap();
 }
 ```
 
 
 ## Calling native code from script
 
-If needed your application may expose some [native] functions to be called by script code.
+If needed, your application may expose some [native] functions to be called by script code.
 Usually this is made by implementing your own `EventHandler` and overriding its `on_script_call` method.
-If you will do this then you can invoke this callback from script as:
+If you do this, then you can invoke this callback from script as:
 
-* "global" native functions: `var r = view.funcName( p0, p1, ... );` – calling `on_script_call` of `EventHandler` instance
-**attached to the window**.
-* As element’s methods: `var r = el.funcName( p0, p1, ... );` – calling `on_script_call` of `EventHandler` instance
-(native behavior) attached to the **element**.
+* "global" native functions: `var r = view.funcName( p0, p1, ... );` – calling
+`on_script_call` of an `EventHandler` instance attached to the **window**.
+* As element’s methods: `var r = el.funcName( p0, p1, ... );` – calling
+`on_script_call` of an `EventHandler` instance (native behavior) attached to the **element**.
 
 This way you can establish interaction between scipt and native code inside your application.
 
@@ -1360,11 +1372,13 @@ This way you can establish interaction between scipt and native code inside your
 	///
 	/// In notifications:
 	///
-	/// * `root` means the DOM element to which we attached (`<html>` for `Window` event handler).
-	/// * `target` contains reference to the notification target DOM element.
-	/// * `source` element e.g. in `SELECTION_CHANGED` it is new selected `<option>`, in `MENU_ITEM_CLICK` it is menu item (`<li>`) element.
+	/// * `root` means the DOM element to which we are attached (`<html>` for `Window` event handlers).
+	/// * `target` contains a reference to the notification target DOM element.
+	/// * `source` element e.g. in `SELECTION_CHANGED` it is the new selected `<option>`,
+	/// in `MENU_ITEM_CLICK` it is a menu item (`<li>`) element.
 	///
-	/// For example, if we attached to `<body>` element, we will receive `document_complete` with `target` set to `<html>`.
+	/// For example, if we are attached to the `<body>` element,
+	/// we will receive `document_complete` with `target` set to `<html>`.
 	///
 	#[allow(unused_variables)]
 	pub trait EventHandler {
