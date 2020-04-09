@@ -172,19 +172,29 @@ pub enum SCITER_NOTIFICATION {
 }
 
 #[repr(C)]
-#[derive(Debug, PartialOrd, PartialEq)]
-/// Sciter resource type identifiers.
-pub enum SCITER_RESOURCE_TYPE
-{
-  RT_DATA_HTML = 0,
-  RT_DATA_IMAGE = 1,
-  RT_DATA_STYLE = 2,
-  RT_DATA_CURSOR = 3,
-  RT_DATA_SCRIPT = 4,
-  RT_DATA_RAW = 5,
-  RT_DATA_FONT,
-  RT_DATA_SOUND,    // wav bytes
+#[derive(Debug, PartialEq)]
+/// The type of a loaded resource.
+pub enum RESOURCE_TYPE {
+	/// HTML document.
+	HTML = 0,
+	/// Image.
+	IMAGE = 1,
+	/// CSS.
+	STYLE = 2,
+	/// Mouse cursor image.
+	CURSOR = 3,
+	/// TIScript document.
+	SCRIPT = 4,
+	/// Any data.
+	RAW = 5,
+	/// Font.
+	FONT,
+	/// Sound (wav bytes).
+	SOUND,
 }
+
+/// The type of a loaded resource.
+pub type SCITER_RESOURCE_TYPE = RESOURCE_TYPE;
 
 
 #[repr(C)]
@@ -206,7 +216,7 @@ pub struct SCN_LOAD_DATA
   pub outDataSize: UINT,
 
   /// [in] resource type category
-  pub dataType: SCITER_RESOURCE_TYPE,
+  pub dataType: RESOURCE_TYPE,
 
   /// [in] request handle that can be used with Sciter request API.
   pub request_id: HREQUEST,
@@ -233,7 +243,7 @@ pub struct SCN_DATA_LOADED
   /// [in] loaded data size (in bytes).
   pub dataSize: UINT,
   /// [in] resource type category
-  pub dataType: UINT,
+  pub dataType: RESOURCE_TYPE,
   /// Download status code:
   ///
   /// * status = 0 and `dataSize == 0` - unknown error.
@@ -336,11 +346,5 @@ pub type LPCSTR_RECEIVER  = extern "system" fn (szstr: LPCSTR,  str_length: UINT
 pub type LPCBYTE_RECEIVER = extern "system" fn (szstr: LPCBYTE, str_length: UINT, param: LPVOID);
 
 pub type ELEMENT_BITMAP_RECEIVER = extern "system" fn (rgba: LPCBYTE, x: INT, y: INT, width: UINT, height: UINT, param: LPVOID);
-
-#[repr(C)]
-pub struct REQUEST_PARAM {
-  name: LPCWSTR,
-  value: LPCWSTR,
-}
 
 pub type KeyValueCallback = extern "system" fn (param: LPVOID, pkey: *const VALUE, pval: *const VALUE) -> BOOL;

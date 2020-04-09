@@ -9,9 +9,8 @@ use capi::scvalue::*;
 use capi::sctiscript::{HVM, tiscript_value, tiscript_native_interface};
 use capi::scbehavior::*;
 use capi::scgraphics::SciterGraphicsAPI;
-use capi::screquest::{SciterRequestAPI, HREQUEST};
+use capi::screquest::{SciterRequestAPI, HREQUEST, REQUEST_PARAM};
 use capi::scmsg::{SCITER_X_MSG};
-
 
 /// Sciter API functions.
 #[repr(C)]
@@ -144,7 +143,7 @@ pub struct ISciterAPI
 	pub SciterPostEvent: extern "system" fn (he: HELEMENT, appEventCode: UINT, heSource: HELEMENT, reason: UINT_PTR) -> SCDOM_RESULT,
 	pub SciterCallBehaviorMethod: extern "system" fn (he: HELEMENT, params: * const METHOD_PARAMS) -> SCDOM_RESULT,
 	pub SciterRequestElementData: extern "system" fn (he: HELEMENT, url: LPCWSTR, dataType: UINT, initiator: HELEMENT) -> SCDOM_RESULT,
-	pub SciterHttpRequest: extern "system" fn (he: HELEMENT, url: LPCWSTR, dataType: UINT, requestType: UINT, requestParams: * const REQUEST_PARAM, nParams: UINT),
+	pub SciterHttpRequest: extern "system" fn (he: HELEMENT, url: LPCWSTR, dataType: UINT, requestType: UINT, requestParams: * const REQUEST_PARAM, nParams: UINT) -> SCDOM_RESULT,
 	pub SciterGetScrollInfo: extern "system" fn (he: HELEMENT, scrollPos: LPPOINT, viewRect: LPRECT, contentSize: LPSIZE) -> SCDOM_RESULT,
 	pub SciterSetScrollPos: extern "system" fn (he: HELEMENT, scrollPos: POINT, smooth: BOOL) -> SCDOM_RESULT,
 	pub SciterGetElementIntrinsicWidths: extern "system" fn (he: HELEMENT, pMinWidth: * mut INT, pMaxWidth: * mut INT) -> SCDOM_RESULT,

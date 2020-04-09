@@ -72,16 +72,45 @@ impl sciter::EventHandler for DocumentHandler {
 
 		if let Some(mut h1) = body.first_child() {
 			println!("changing h1 attributes");
-			h1.set_style_attribute("color", "lightblue");
+			h1.set_style_attribute("color", "green");
 			h1.set_style_attribute("outline", "1px solid orange");
 			h1.set_attribute("title", "yellow!");
 		}
 
-		let mut all = body.find_all("div > p").unwrap().expect("must be at least one div > p");
-		assert!(!all.is_empty());
-		assert_eq!(all.len(), 1);
+		{
+			let all: Vec<Element> = body.find_all("div > p").unwrap().expect("must be at least one 'div > p'");
+			assert!(!all.is_empty());
+			assert_eq!(all.len(), 1);
+			all.len();
+		}
 
-		all.clear();
+		if let Ok(Some(mut body)) = root.find_first("html > body") {
+			let mut div = Element::with_parent("div", &mut body).unwrap();
+			div.set_attribute("id", "requests");
+			div.set_style_attribute("outline", "1px solid orange");
+			div.set_style_attribute("margin", "10dip 0");
+			div.set_style_attribute("padding", "4dip");
+
+			let e = Element::with_text("label", "Requests:").unwrap();
+			div.append(&e).unwrap();
+
+			let d = Element::with_text("div", "data").unwrap();
+			div.append(&d).unwrap();
+
+			let c = Element::with_text("div", "footer").unwrap();
+			div.append(&c).unwrap();
+
+			d.request_html("https://sciter.com/test/text.txt", None).unwrap();
+
+			// d.send_get_request("https://sciter.com/test/text.txt", None).expect("can't send an http request");
+			// d.send_get_request("http://httpbin.org/html", None).expect("can't send an http request");
+			// d.send_get_request("http://httpbin.org/get?one=1&two=2", None).expect("can't send an http request");
+
+			// let params = [("one", "1"), ("two", "2")];
+			// let method = sciter::request::REQUEST_TYPE::AsyncGet;
+			// let data_type = sciter::request::RESOURCE_TYPE::HTML;
+			// d.send_request("http://httpbin.org/html", Some(&params), Some(method), Some(data_type)).expect("can't send an http request");
+		}
 
 		if let Ok(Some(mut body)) = root.find_first("html > body") {
 
@@ -227,7 +256,8 @@ impl sciter::EventHandler for ProgressHandler {
 
 fn main() {
   let mut frame = sciter::WindowBuilder::main_window()
-  	.with_size((750, 950))
+		.with_size((750, 950))
+		.debug()
 		.create();
 
 	println!("attaching an event handler for the whole window");

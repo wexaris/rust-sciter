@@ -1,11 +1,13 @@
 /*! Sciter Request API.
 
 Handling all attributes of requests (GET/POST/PUT/DELETE) sent by
-`Element.request()` and `View.request()` functions and other load requests.
+[`Element.request()`](https://sciter.com/docs/content/sciter/Element.htm) and
+[`View.request()`](https://sciter.com/docs/content/sciter/View.htm)
+functions and other load requests.
 
 */
 pub use capi::screquest::{HREQUEST, REQUEST_RESULT};
-pub use capi::screquest::{REQUEST_METHOD, REQUEST_STATE, RESOURCE_TYPE};
+pub use capi::screquest::{REQUEST_METHOD, REQUEST_STATE, REQUEST_TYPE, RESOURCE_TYPE};
 
 use capi::sctypes::{LPVOID, UINT};
 use capi::scdef::{LPCWSTR_RECEIVER};

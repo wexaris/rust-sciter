@@ -162,6 +162,8 @@ use ::{_API};
 use capi::sctypes::*;
 use value::Value;
 
+use capi::screquest::{REQUEST_PARAM, REQUEST_TYPE};
+use capi::scdef::RESOURCE_TYPE;
 use capi::scbehavior::{CLICK_REASON, BEHAVIOR_EVENTS, BEHAVIOR_EVENT_PARAMS};
 use utf::{store_astr, store_wstr, store_bstr};
 
@@ -445,10 +447,65 @@ impl Element {
 		ok_or!(rc, ok)
 	}
 
-	// TODO: request_data, request_html
-	// TODO: send_request
+	/// Request data download for this element.
+	pub fn request_data(&self, url: &str, data_type: RESOURCE_TYPE, initiator: Option<HELEMENT>) -> Result<()> {
+		let url = s2w!(url);
+		let ok = (_API.SciterRequestElementData)(self.he, url.as_ptr(), data_type as u32, initiator.unwrap_or(HELEMENT!()));
+		ok_or!((), ok)
+	}
 
-	/// Sends sinking/bubbling event to the child/parent chain of element.
+	/// Request HTML data download for this element.
+	pub fn request_html(&self, url: &str, initiator: Option<HELEMENT>) -> Result<()> {
+		self.request_data(url, RESOURCE_TYPE::HTML, initiator)
+	}
+
+	/// Send an asynchronous HTTP GET request for the element.
+	///
+	/// The contents of this element is replaced with the HTTP response (in text or html form).
+	pub fn send_get_request(&self, url: &str) -> Result<()> {
+		let url = s2w!(url);
+		let no_params = ::std::ptr::null();
+		let ok = (_API.SciterHttpRequest)(self.he, url.as_ptr(), RESOURCE_TYPE::HTML as u32, REQUEST_TYPE::AsyncGet as u32, no_params, 0);
+		ok_or!((), ok)
+	}
+
+	/// Send an HTTP GET or POST request for the element.
+	///
+	/// GET params (if any) are appended to the url to form the request.<br/>
+	/// HTTP POST params are serialized as `Content-Type: application/x-www-form-urlencoded;charset=utf-8;`.
+	pub fn send_request(&self, url: &str, params: Option<&[(&str, &str)]>, method: Option<REQUEST_TYPE>, data_type: Option<RESOURCE_TYPE>) -> Result<()> {
+
+		let url = s2w!(url);
+		let method = method.unwrap_or(REQUEST_TYPE::AsyncGet) as u32;
+		let data_type = data_type.unwrap_or(RESOURCE_TYPE::HTML) as u32;
+
+		type WSTR = Vec<u16>;
+
+		let mut wide_params: Vec<(WSTR, WSTR)> = Vec::new();
+		let mut call_params: Vec<REQUEST_PARAM> = Vec::new();
+
+		if let Some(params) = params {
+			let count = params.len();
+
+			wide_params.reserve_exact(count);
+			call_params.reserve_exact(count);
+
+			for i in 0..count {
+				let (k, v) = params[i];
+				let (kw, vw) = (s2w!(k), s2w!(v));
+				call_params.push (REQUEST_PARAM {
+					name: kw.as_ptr(),
+					value: vw.as_ptr(),
+				});
+				wide_params.push((kw, vw));
+			}
+		}
+
+		let ok = (_API.SciterHttpRequest)(self.he, url.as_ptr(), data_type, method, call_params.as_ptr(), call_params.len() as u32);
+		ok_or!((), ok)
+	}
+
+	/// Sends sinking/bubbling event to the child/parent chain of the element.
 	pub fn send_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>) -> Result<bool> {
 		let mut handled = false as BOOL;
 		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
@@ -457,7 +514,7 @@ impl Element {
 		ok_or!(handled != 0, ok)
 	}
 
-	/// Post asynchronously a sinking/bubbling event to the child/parent chain of element.
+	/// Post asynchronously a sinking/bubbling event to the child/parent chain of the element.
 	pub fn post_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>) -> Result<()> {
 		let r = reason.unwrap_or(CLICK_REASON::SYNTHESIZED);
 		let s = source.unwrap_or(self.he);
@@ -465,7 +522,7 @@ impl Element {
 		ok_or!((), ok)
 	}
 
-	/// Send or posts event to the child/parent chain of element.
+	/// Send or posts event to the child/parent chain of the element.
 	pub fn fire_event(&self, code: BEHAVIOR_EVENTS, reason: Option<CLICK_REASON>, source: Option<HELEMENT>, post: bool, data: Option<Value>) -> Result<bool> {
 		let mut handled = false as BOOL;
 		let mut params = BEHAVIOR_EVENT_PARAMS {
@@ -483,7 +540,7 @@ impl Element {
 		ok_or!(handled != 0, ok)
 	}
 
-	/// Send or posts event with specified params to the child/parent chain of element.
+	/// Send or posts event with specified params to the child/parent chain of the element.
 	pub fn fire_event_params(evt: &BEHAVIOR_EVENT_PARAMS, post: bool) -> Result<bool> {
 		let mut handled = false as BOOL;
 		let ok = (_API.SciterFireEvent)(evt, post as BOOL, &mut handled);

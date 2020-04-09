@@ -1,9 +1,15 @@
-//! Handling all attributes of requests (GET/POST/PUT/DELETE) sent by `Element.request()` and `View.request()` functions and other load requests.
+/*! Handling all attributes of requests (GET/POST/PUT/DELETE) sent by
+[`Element.request()`](https://sciter.com/docs/content/sciter/Element.htm) and
+[`View.request()`](https://sciter.com/docs/content/sciter/View.htm)
+functions and other load requests.
+
+ */
 
 #![allow(non_camel_case_types, non_snake_case)]
 
 use capi::sctypes::{UINT, LPVOID, LPCBYTE, LPCSTR, LPCWSTR};
 use capi::scdef::{LPCSTR_RECEIVER, LPCWSTR_RECEIVER, LPCBYTE_RECEIVER};
+pub use capi::scdef::RESOURCE_TYPE;
 
 MAKE_HANDLE!(#[doc = "Request native handle."] HREQUEST, _HREQUEST);
 
@@ -45,25 +51,18 @@ pub enum REQUEST_METHOD {
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
-/// The type of a resource.
-pub enum RESOURCE_TYPE {
-	/// HTML document.
-	HTML = 0,
-	/// Image.
-	IMAGE = 1,
-	/// CSS.
-	STYLE = 2,
-	/// Mouse cursor image.
-	CURSOR = 3,
-	/// TIScript document.
-	SCRIPT = 4,
-	/// Any data.
-	RAW = 5,
-	/// Font.
-	FONT,
-	/// Sound (wav bytes).
-	SOUND,
+/// HTTP methods for the [`Element::send_request`](../dom/struct.Element.html#method.send_request).
+pub enum REQUEST_TYPE {
+	/// Asynchronous GET.
+	AsyncGet,
+	/// Asynchronous POST.
+	AsyncPost,
+	/// Synchronous GET.
+	Get,
+	/// Synchronous POST.
+	Post,
 }
+
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
@@ -75,6 +74,13 @@ pub enum REQUEST_STATE {
 	SUCCESS = 1,
 	/// Completed with failure.
 	FAILURE = 2,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct REQUEST_PARAM {
+	pub name: LPCWSTR,
+	pub value: LPCWSTR,
 }
 
 
