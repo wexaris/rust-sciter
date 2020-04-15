@@ -6,6 +6,7 @@
 [![Documentation](https://docs.rs/sciter-rs/badge.svg)](https://docs.rs/sciter-rs)
 [![License](https://img.shields.io/crates/l/sciter-rs.svg)](https://crates.io/crates/sciter-rs)
 [![Join the forums at https://sciter.com/forums](https://img.shields.io/badge/forum-sciter.com-orange.svg)](https://sciter.com/forums)
+[![Minimum supported Rust version](https://img.shields.io/badge/rustc-1.38+-green.svg)](https://github.com/sciter-sdk/rust-sciter/commits/master/.travis.yml)
 
 Check [this page](https://sciter.com/developers/sciter-sdk-bindings/) for other language bindings (Delphi / D / Go / .NET / Python / Rust).
 
