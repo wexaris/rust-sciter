@@ -58,8 +58,8 @@ You can change the **text** or **html** of a DOM element:
 ```rust,no_run
 # let root = sciter::dom::Element::from(::std::ptr::null_mut());
 if let Some(mut el) = root.find_first("#cancel").unwrap() {
-	el.set_text("Abort!");
-	el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
+  el.set_text("Abort!");
+  el.set_html(br##"<img src="http://lorempixel.com/32/32/cats/" alt="some cat"/>"##, None);
 }
 ```
 
@@ -490,8 +490,7 @@ impl Element {
 			wide_params.reserve_exact(count);
 			call_params.reserve_exact(count);
 
-			for i in 0..count {
-				let (k, v) = params[i];
+			for (k,v) in params {
 				let (kw, vw) = (s2w!(k), s2w!(v));
 				call_params.push (REQUEST_PARAM {
 					name: kw.as_ptr(),
@@ -533,8 +532,8 @@ impl Element {
 			data: Default::default(),
 			name: 0 as LPCWSTR,
 		};
-		if data.is_some() {
-			data.unwrap().pack_to(&mut params.data);
+		if let Some(data) = data {
+			data.pack_to(&mut params.data);
 		}
 		let ok = (_API.SciterFireEvent)(&params, post as BOOL, &mut handled);
 		ok_or!(handled != 0, ok)

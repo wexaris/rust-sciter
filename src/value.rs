@@ -720,10 +720,10 @@ impl ::std::fmt::Debug for Value {
 		} else if self.is_string() && self.data.u != 0 {
 			// VALUE_UNIT_TYPE_STRING
 			let units = [("file", 0xfffe), ("symbol", 0xffff), ("string", 0), ("error", 1), ("secure", 2)];
-			let item = units.iter().find(|&&x| x.1 == self.data.u);
+
 			tname.push_str(":");
-			if item.is_some() {
-				tname.push_str(item.unwrap().0);
+			if let Some(name) = units.iter().find(|&&x| x.1 == self.data.u) {
+				tname.push_str(name.0);
 			} else {
 				tname.push_str(&self.data.u.to_string());
 			}

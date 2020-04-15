@@ -122,25 +122,25 @@ pub enum SCITER_CREATE_WINDOW_FLAGS {
 	/// child window only, if this flag is set all other flags ignored.
   SW_CHILD      = 1,
   /// toplevel window, has titlebar.
-  SW_TITLEBAR   = (1 << 1),
+  SW_TITLEBAR   = 1 << 1,
   /// has resizeable frame.
-  SW_RESIZEABLE = (1 << 2),
+  SW_RESIZEABLE = 1 << 2,
   /// is tool window.
-  SW_TOOL       = (1 << 3),
+  SW_TOOL       = 1 << 3,
   /// has minimize / maximize buttons.
-  SW_CONTROLS   = (1 << 4),
+  SW_CONTROLS   = 1 << 4,
   /// glassy window - "Acrylic" on Windows and "Vibrant" on macOS.
-  SW_GLASSY     = (1 << 5),
+  SW_GLASSY     = 1 << 5,
   /// transparent window (e.g. `WS_EX_LAYERED` on Windows, macOS is supported too).
-  SW_ALPHA      = (1 << 6),
+  SW_ALPHA      = 1 << 6,
   /// main window of the app, will terminate the app on close.
-  SW_MAIN       = (1 << 7),
+  SW_MAIN       = 1 << 7,
   /// the window is created as topmost window.
-  SW_POPUP      = (1 << 8),
+  SW_POPUP      = 1 << 8,
   /// make this window inspector ready.
-  SW_ENABLE_DEBUG = (1 << 9),
+  SW_ENABLE_DEBUG = 1 << 9,
   /// it has its own script VM.
-  SW_OWNS_VM      = (1 << 10),
+  SW_OWNS_VM      = 1 << 10,
 }
 
 impl Default for SCITER_CREATE_WINDOW_FLAGS {

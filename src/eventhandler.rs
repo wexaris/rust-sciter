@@ -34,9 +34,8 @@ pub extern "system" fn _event_handler_window_proc<T: EventHandler>(tag: LPVOID, 
 	let boxed = tag as *mut WindowHandler<T>;
 	let tuple: &mut WindowHandler<T> = unsafe { &mut *boxed };
 
-	let root = ::dom::Element::from_window(tuple.hwnd);
-	let hroot: HELEMENT = if root.is_ok() {
-		root.unwrap().as_ptr()
+	let hroot: HELEMENT = if let Ok(root) = ::dom::Element::from_window(tuple.hwnd) {
+		root.as_ptr()
 	} else {
 		::std::ptr::null_mut()
 	};

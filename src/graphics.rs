@@ -310,7 +310,7 @@ impl Image {
   /// image.paint(|gfx, size| {
   ///   gfx.rectangle((5.0, 5.0), (size.0 - 5.0, size.1 - 5.0))?;
   ///   Ok(())
-  ///	}).unwrap();
+  /// }).unwrap();
   /// ```
   pub fn paint<PaintFn>(&mut self, painter: PaintFn) -> Result<()>
   where

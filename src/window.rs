@@ -16,9 +16,9 @@ that is a root widget of Sciter window on Linux/GTK.
 extern crate sciter;
 
 fn main() {
-	let mut frame = sciter::Window::new();
-	frame.load_file("minimal.htm");
-	frame.run_app();
+  let mut frame = sciter::Window::new();
+  frame.load_file("minimal.htm");
+  frame.run_app();
 }
 ```
 

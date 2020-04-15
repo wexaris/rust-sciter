@@ -65,6 +65,7 @@ folder for more complex usage and module-level sections for the guides about:
 
 #![allow(clippy::needless_return, clippy::let_and_return)] // past habits
 #![allow(clippy::redundant_field_names)] // since Rust 1.17 and less readable
+#![allow(clippy::unreadable_literal)] // C++ SDK constants
 // #![allow(clippy::cast_ptr_alignment)] // 0.0.195 only
 
 
@@ -381,14 +382,14 @@ pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 
 
 lazy_static! {
-	static ref _API: &'static ISciterAPI = { SciterAPI() };
+	static ref _API: &'static ISciterAPI = SciterAPI();
 	static ref _GAPI: &'static SciterGraphicsAPI = {
-		if version_num() < 0x04010A00 {
+		if version_num() < 0x0401_0A00 {
 			panic!("Graphics API is incompatible since 4.1.10 (your version is {})", version());
 		}
 		unsafe { &*(SciterAPI().GetSciterGraphicsAPI)() }
 	};
-	static ref _RAPI: &'static SciterRequestAPI = { unsafe { &*(SciterAPI().GetSciterRequestAPI)() } };
+	static ref _RAPI: &'static SciterRequestAPI = unsafe { &*(SciterAPI().GetSciterRequestAPI)() };
 }
 
 /// Set a custom path to the Sciter dynamic library.
