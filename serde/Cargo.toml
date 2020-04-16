@@ -1,6 +1,6 @@
 [package]
 name = "sciter-serde"
-version = "0.3.1"
+version = "0.3.2"
 description = "Serde support for Sciter engine."
 keywords = ["serde", "gui", "gtk", "opengl", "skia"]
 categories = ["gui", "web-programming", "rendering::graphics-api", "api-bindings"]

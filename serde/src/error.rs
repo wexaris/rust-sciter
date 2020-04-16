@@ -8,7 +8,7 @@ use serde::{ser, de};
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type for serialization.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Error {
 	Message(String),
 	Unimplemented,
@@ -32,13 +32,20 @@ impl std::error::Error for Error {
 	fn description(&self) -> &str {
 		match *self {
 			Error::Message(ref msg) => msg,
-			_ => "dunno",
+			Error::ExpectedType(ref msg) => msg,
+			Error::Unimplemented => "unimplemented",
+			Error::UnsupportedType => "unsupported",
 		}
 	}
 }
 
 impl Display for Error {
-	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-		formatter.write_str(std::error::Error::description(self))
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			Error::Message(ref msg) => write!(f, "error: {}", msg),
+			Error::ExpectedType(ref msg) => write!(f, "expected: {}", msg),
+			Error::UnsupportedType => write!(f, "unsupported type"),
+			Error::Unimplemented => write!(f, "unimplemented"),
+		}
 	}
 }

@@ -134,6 +134,9 @@ fn main() {
 ```
 
 */
+#![allow(clippy::redundant_field_names)]
+#![allow(clippy::tabs_in_doc_comments)]
+
 #[macro_use]
 extern crate serde;
 extern crate sciter;
