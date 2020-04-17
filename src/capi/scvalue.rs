@@ -30,6 +30,15 @@ pub enum VALUE_RESULT
   INCOMPATIBLE_TYPE = 2,
 }
 
+impl std::error::Error for VALUE_RESULT {}
+
+impl std::fmt::Display for VALUE_RESULT {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:?}", self)
+	}
+}
+
+
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
 pub enum VALUE_STRING_CVT_TYPE {

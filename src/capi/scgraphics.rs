@@ -36,6 +36,15 @@ pub enum GRAPHIN_RESULT {
   NOTSUPPORTED = 3,
 }
 
+impl std::error::Error for GRAPHIN_RESULT {}
+
+impl std::fmt::Display for GRAPHIN_RESULT {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:?}", self)
+	}
+}
+
+
 /// Path drawing mode.
 #[repr(C)]
 #[derive(Debug, PartialEq)]

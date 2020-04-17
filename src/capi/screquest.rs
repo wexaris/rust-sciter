@@ -29,6 +29,15 @@ pub enum REQUEST_RESULT {
   NOTSUPPORTED = 3,
 }
 
+impl std::error::Error for REQUEST_RESULT {}
+
+impl std::fmt::Display for REQUEST_RESULT {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:?}", self)
+	}
+}
+
+
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 /// Request methods.

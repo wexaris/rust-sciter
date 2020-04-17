@@ -27,6 +27,14 @@ pub enum SCDOM_RESULT {
 	OK_NOT_HANDLED = -1,
 }
 
+impl std::error::Error for SCDOM_RESULT {}
+
+impl std::fmt::Display for SCDOM_RESULT {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:?}", self)
+	}
+}
+
 #[repr(C)]
 #[derive(Debug, PartialOrd, PartialEq)]
 /// `dom::Element.set_html()` options.
