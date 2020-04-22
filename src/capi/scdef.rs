@@ -47,7 +47,7 @@ pub enum SCRIPT_RUNTIME_FEATURES
 	ALLOW_SYSINFO = 0x8,
 }
 
-/// Explicitly set the Sciter graphics layer.
+/// Sciter graphics rendering backend.
 #[repr(C)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]

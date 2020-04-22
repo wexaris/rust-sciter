@@ -1,4 +1,12 @@
-//! Messages for Windowless Sciter.
+/*! Windowless Sciter.
+
+Windowless here means that Sciter does not use any `HWND`, `NSView*` or whatever OS uses for window designation.
+You just need to provide something of size `void*` that will be associated with the instance of the engine.
+
+Check out [this article](https://sciter.com/sciter-lite-is-published/) on sciter.com that explains
+the difference between the desktop and the windowless Sciter engine versions.
+
+*/
 
 use ::{_API};
 use capi::scdef::{GFX_LAYER};
@@ -6,6 +14,7 @@ use capi::scdom::HELEMENT;
 use capi::sctypes::{HWINDOW, POINT, UINT, BOOL, RECT, LPCBYTE, LPVOID, INT};
 use capi::scmsg::*;
 
+pub use capi::scmsg::key_codes;
 pub use capi::scbehavior::{MOUSE_BUTTONS, MOUSE_EVENTS, KEYBOARD_STATES, KEY_EVENTS};
 
 
@@ -14,7 +23,9 @@ pub use capi::scbehavior::{MOUSE_BUTTONS, MOUSE_EVENTS, KEYBOARD_STATES, KEY_EVE
 pub enum Message {
 	/// Creates an instance of Sciter assotiated with the given handle.
 	Create {
+		/// Graphics backend for rendering.
 		backend: GFX_LAYER,
+		/// Background transparency option.
 		transparent: bool,
 	},
 
@@ -23,22 +34,27 @@ pub enum Message {
 
 	/// Window size changes.
 	Size {
+		/// Width of the rendering surface.
 		width: u32,
+		/// Height of the rendering surface.
 		height: u32,
 	},
 
 	/// Screen resolution changes.
 	Resolution {
+		/// Pixels per inch.
 		ppi: u32,
 	},
 
 	/// Window focus event.
 	Focus {
+		/// Whether the window has got or lost the input focus.
 		enter: bool,
 	},
 
 	/// Time changes in order to process animations, timers and other timed things.
 	Heartbit {
+		/// Absolute steady clock value, e.g. `GetTickCount()` or `glfwGetTime()`.
 		milliseconds: u32,
 	},
 
@@ -46,9 +62,9 @@ pub enum Message {
 	Redraw,
 
 	/// Redraw the specific layer.
-	Paint(PaintEvent),
+	Paint(PaintLayer),
 
-	/// Render to bitmap.
+	/// Render to a bitmap.
 	RenderTo(RenderEvent),
 
 	/// Mouse input.
@@ -58,30 +74,56 @@ pub enum Message {
 	Keyboard(KeyboardEvent),
 }
 
+/// Events describing the mouse input.
 #[derive(Debug)]
 pub struct MouseEvent {
+	/// A specific mouse event, like "mouse down" or "mouse move".
 	pub event: MOUSE_EVENTS,
+	/// Which mouse button is pressed.
 	pub button: MOUSE_BUTTONS,
+	/// Which keyboard modifier (e.g. Ctrl or Alt) is pressed.
 	pub modifiers: KEYBOARD_STATES,
+	/// Mouse cursor position.
 	pub pos: POINT,
 }
 
+/// Events describing the keyboard input.
 #[derive(Debug)]
 pub struct KeyboardEvent {
+	/// A specific key event, like "key down" or "key up".
 	pub event: KEY_EVENTS,
+	/// A key code:
+	///
+	/// * a keyboard [scan-code](key_codes/index.html)
+	/// for [`KEY_DOWN`](enum.KEY_EVENTS.html#variant.KEY_DOWN)
+	/// and [`KEY_UP`](enum.KEY_EVENTS.html#variant.KEY_UP) events;
+	/// * a Unicode code point for [`KEY_CHAR`](enum.KEY_EVENTS.html#variant.KEY_CHAR).
 	pub code: UINT,
+	/// Which keyboard modifier (e.g. Ctrl or Alt) is pressed.
 	pub modifiers: KEYBOARD_STATES,
 }
 
+/// A specific UI layer to redraw.
 #[derive(Debug)]
-pub struct PaintEvent {
+pub struct PaintLayer {
+	/// A DOM element (layer) to render.
 	pub element: HELEMENT,
+
+	/// Whether the `element` is the topmost layer or a background one.
 	pub is_foreground: bool,
 }
 
+/// Events for rendering UI to a bitmap.
 pub struct RenderEvent
 {
-	pub layer: Option<PaintEvent>,
+	/// Which layer to render (or the whole document if `None`).
+	pub layer: Option<PaintLayer>,
+
+	/// The callback that receives a rendered bitmap.
+	///
+	/// The first argument contains a rectangle with the coordinates (position and size) of the rendered bitmap.
+	///
+	/// The second ardument is the rendered bitmap in the `BGRA` form. The size of the bitmap equals to `width * height * 4`.
 	pub callback: Box<dyn Fn(&RECT, &[u8])>,
 }
 
@@ -208,6 +250,8 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 
 			extern "system" fn inner(rgba: LPCBYTE, x: INT, y: INT, width: UINT, height: UINT, param: LPVOID)
 			{
+				assert!(!param.is_null());
+				assert!(!rgba.is_null());
 				if param.is_null() || rgba.is_null() { return; }
 
 				let bitmap_area = RECT {
@@ -225,15 +269,12 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 				(wrapper.callback)(&bitmap_area, bitmap_data);
 			}
 
-			// let param = paint.callback.as_ref() as *const _ as LPVOID;
-			// let param = Box::into_raw(paint.callback);
-			// let param = param as *const _ as LPVOID;
 			let wrapper = Callback {
 				callback: paint.callback,
 			};
 			let param = &wrapper as *const _ as LPVOID;
 
-			let element = paint.layer.unwrap_or(PaintEvent {
+			let element = paint.layer.unwrap_or(PaintLayer {
 				element: std::ptr::null_mut(),
 				is_foreground: false,
 			});

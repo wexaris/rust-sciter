@@ -1,4 +1,4 @@
-/*! High level window wrapper.
+/*! High-level native window wrapper.
 
 To create an instance of Sciter you will need either to create a new Sciter window
 or to attach (mix-in) the Sciter engine to an existing window.
