@@ -109,7 +109,7 @@ impl sciter::EventHandler for VideoGen {
           use sciter::video::*;
 
           // `VideoBind` comes with a video_destination interface
-          let mut site = AssetPtr::adopt(ptr as *mut video_destination);
+          let mut site = AssetPtr::from(ptr as *mut video_destination);
 
           // query a fragmented video destination interface
           if let Ok(fragmented) = AssetPtr::<fragmented_video_destination>::try_from(&mut site) {

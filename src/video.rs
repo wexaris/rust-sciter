@@ -1,4 +1,10 @@
-//! Sciter custom video rendering primitives.
+/*! Sciter video rendering.
+
+Host application can render custom video streams using `<video>` infrastructure.
+
+*/
+
+
 use capi::sctypes::{UINT, LPCBYTE};
 
 /// A type alias for Sciter functions that return `bool`.
@@ -9,10 +15,13 @@ pub type Result<T> = ::std::result::Result<T, ()>;
 #[repr(C)]
 pub enum COLOR_SPACE {
 	Unknown,
+
 	Yv12,
-	Iyuv, // a.k.a. I420
+	/// I420
+	Iyuv,
 	Nv12,
 	Yuy2,
+
 	Rgb24,
 	Rgb555,
 	Rgb565,
@@ -109,14 +118,17 @@ pub struct iasset {
 }
 
 impl iasset {
+	/// Increments the reference count for an interface on an object.
 	fn add_ref(&mut self) -> i32 {
 		cppcall!(self.add_ref())
 	}
 
+	/// Decrements the reference count for an interface on an object.
 	fn release(&mut self) -> i32 {
 		cppcall!(self.release())
 	}
 
+	/// Retrieves pointers to the supported interfaces on an object.
 	pub fn get_interface(&mut self, name: *const u8, out: *mut *mut iasset) -> bool {
 		cppcall!(self.get_interface(name, out))
 	}
@@ -157,56 +169,73 @@ struct video_source_vtbl {
 	// -->
 }
 
-/// Video source interface, used by engine to query video state.
+/// Video source interface to query video state.
 #[repr(C)]
 pub struct video_source {
 	vtbl: *const video_source_vtbl,
 }
 
 impl video_source {
+	/// Starts playback from the current position.
 	pub fn play(&mut self) -> Result<()> {
 		cppresult!(self.play())
 	}
+
+	/// Pauses playback.
 	pub fn pause(&mut self) -> Result<()> {
 		cppresult!(self.pause())
 	}
+
+	/// Stops playback.
 	pub fn stop(&mut self) -> Result<()> {
 		cppresult!(self.stop())
 	}
 
+	/// Whether playback has reached the end of the video.
 	pub fn is_ended(&self) -> Result<bool> {
 		let mut r = false;
 		cppresult!(const self.get_is_ended(&mut r as *mut _)).map(|_| r)
 	}
 
+	/// Reports the current playback position.
 	pub fn get_position(&self) -> Result<f64> {
 		let mut r = 0f64;
 		cppresult!(const self.get_position(&mut r as *mut _)).map(|_| r)
 	}
 
+	/// Sets the current playback position.
 	pub fn set_position(&mut self, seconds: f64) -> Result<()> {
 		cppresult!(self.set_position(seconds))
 	}
 
+	/// Reports the duration of the video in seconds.
+	///
+	/// If duration is not available, returns `0`.
 	pub fn get_duration(&self) -> Result<f64> {
 		let mut r = 0f64;
 		cppresult!(const self.get_duration(&mut r as *mut _)).map(|_| r)
 	}
 
+	/// Reports the current volume level of an audio track of the movie.
+	///
+	/// `1.0` corresponds to `0db`, `0.0` (mute) to `-100db`.
 	pub fn get_volume(&self) -> Result<f64> {
 		let mut r = 0f64;
 		cppresult!(const self.get_volume(&mut r as *mut _)).map(|_| r)
 	}
 
+	/// Sets the current volume level between `0.0` (mute) and `1.0` (`0db`).
 	pub fn set_volume(&mut self, volume: f64) -> Result<()> {
 		cppresult!(self.set_volume(volume))
 	}
 
+	/// Reports the current stereo balance.
 	pub fn get_balance(&self) -> Result<f64> {
 		let mut r = 0f64;
 		cppresult!(const self.get_balance(&mut r as *mut _)).map(|_| r)
 	}
 
+	/// Sets a new value of the stereo balance.
 	pub fn set_balance(&mut self, balance: f64) -> Result<()> {
 		cppresult!(self.set_balance(balance))
 	}
@@ -256,6 +285,10 @@ impl video_destination {
 	}
 
 	/// Start streaming/rendering.
+	///
+	/// * `frame_size` - the width and the height of the video frame.
+	/// * `color_space` - the color space format of the video frame.
+	/// * `src` - an optional custom [`video_source`](struct.video_source.html) interface implementation, provided by the application.
 	pub fn start_streaming(&mut self, frame_size: (i32, i32), color_space: COLOR_SPACE, src: Option<&video_source>) -> Result<()> {
 		let src_ptr = if let Some(ptr) = src { ptr as *const _ } else { ::std::ptr::null() };
 		cppresult!(self.start_streaming(frame_size.0, frame_size.1, color_space, src_ptr))
@@ -321,6 +354,10 @@ impl fragmented_video_destination {
 	}
 
 	/// Start streaming/rendering.
+	///
+	/// * `frame_size` - the width and the height of the video frame.
+	/// * `color_space` - the color space format of the video frame.
+	/// * `src` - an optional custom [`video_source`](struct.video_source.html) interface implementation, provided by the application.
 	pub fn start_streaming(&mut self, frame_size: (i32, i32), color_space: COLOR_SPACE, src: Option<&video_source>) -> Result<()> {
 		let src_ptr = if let Some(ptr) = src { ptr as *const _ } else { ::std::ptr::null() };
 		cppresult!(self.start_streaming(frame_size.0, frame_size.1, color_space, src_ptr))
@@ -337,6 +374,9 @@ impl fragmented_video_destination {
 	}
 
 	/// Render the specified part of the current frame.
+	///
+	/// * `update_point` - X and Y coordinates of the update portion.
+	/// * `update_size` - width and height of the update portion.
 	pub fn render_frame_part(&mut self, data: &[u8], update_point: (i32, i32), update_size: (i32, i32)) -> Result<()> {
 		cppresult!(self.render_frame_part(data.as_ptr(), data.len() as UINT, update_point.0, update_point.1, update_size.0, update_size.1))
 	}
@@ -388,7 +428,7 @@ impl<T> Drop for AssetPtr<T> {
 }
 
 impl<T> AssetPtr<T> {
-	/// Attach to an existing pointer without reference increment.
+	/// Attach to an existing `iasset` pointer without reference increment.
 	fn attach(lp: *mut T) -> Self {
 		assert!(!lp.is_null());
 		Self {
@@ -396,7 +436,7 @@ impl<T> AssetPtr<T> {
 		}
 	}
 
-	/// Attach to a pointer and increment its reference count.
+	/// Attach to an `iasset` pointer and increment its reference count.
 	pub fn adopt(lp: *mut T) -> Self {
 		let mut me = Self::attach(lp);
 		me.get().add_ref();
@@ -409,6 +449,16 @@ impl<T> AssetPtr<T> {
 		unsafe { &mut *ptr }
 	}
 }
+
+
+/// Attach to an `iasset` pointer.
+impl<T> From<*mut T> for AssetPtr<T> {
+	/// Attach to a pointer and increment its reference count.
+	fn from(lp: *mut T) -> Self {
+		AssetPtr::adopt(lp)
+	}
+}
+
 
 /// Attempt to construct `Self` via a conversion.
 impl<T: NamedInterface> AssetPtr<T> {
