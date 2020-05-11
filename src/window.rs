@@ -86,17 +86,19 @@ pub struct Window
 #[allow(clippy::new_without_default)]
 impl Window {
 
-	#[cfg(not(feature = "windowless"))]
 	/// Create a new main window.
+	// #[cfg(not(feature = "windowless"))]
+	#[cfg_attr(feature = "windowless", deprecated = "Sciter.Lite doesn't have OS windows in windowless mode.")]
 	pub fn new() -> Window {
 		Builder::main_window().create()
 	}
 
 	/// Create a new window with the specified position, flags and an optional parent window.
+	#[cfg_attr(feature = "windowless", deprecated = "Sciter.Lite doesn't have OS windows in windowless mode.")]
 	pub fn create(rect: RECT, flags: SCITER_CREATE_WINDOW_FLAGS, parent: Option<HWINDOW>) -> Window {
 		if cfg!(feature = "windowless")
 		{
-			panic!("Sciter doesn't have windows in windowless mode!");
+			panic!("Sciter.Lite doesn't have OS windows in windowless mode!");
 		}
 
 		let mut base = OsWindow::new();
@@ -431,8 +433,8 @@ impl Builder {
 		self
 	}
 
-	#[cfg(not(feature = "windowless"))]
 	/// Consume the builder and call [`Window::create()`](struct.Window.html#method.create) with built parameters.
+	#[cfg_attr(feature = "windowless", deprecated = "Sciter.Lite doesn't have OS windows in windowless mode.")]
 	pub fn create(self) -> Window {
 		Window::create(self.rect, self.flags, self.parent)
 	}
