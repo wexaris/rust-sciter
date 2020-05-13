@@ -6,9 +6,9 @@ fn main() {
   // can be called as `examples/first ~/lib/libsciter.so`
   if cfg!(feature = "dynamic") {
     if let Some(arg) = std::env::args().nth(1) {
-	println!("using {:?}", arg);
-      if let Err(_) = sciter::set_options(sciter::RuntimeOptions::LibraryPath(&arg)) {
-        panic!("Invalid library path specified.");
+      println!("using {:?}", arg);
+      if let Err(e) = sciter::set_library(&arg) {
+        panic!("Invalid library path specified: {}", e);
       }
     }
   }
@@ -28,7 +28,5 @@ fn main() {
   let v2 = (scapi.SciterVersion)(false as BOOL);
   let num = [v1 >> 16, v1 & 0xFFFF, v2 >> 16, v2 & 0xFFFF];
   let version = num.iter().map(|&x| x.to_string()).collect::<Vec<String>>().join(".");
-	println!("sciter version: {} {:?}", version, num);
-
-
+  println!("sciter version: {} {:?}", version, num);
 }

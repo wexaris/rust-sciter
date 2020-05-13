@@ -268,12 +268,6 @@ mod ext {
         return dll;
       }
 
-      if cfg!(target_os = "macos") && dir.is_some() {
-        // "(bundle folder)/Contents/Frameworks/"
-        let mut path = dir.unwrap().to_owned();
-        path.push("../Frameworks/sciter-osx-64.dylib");
-        return try_load(&path);
-      }
       None
     }
 
@@ -281,7 +275,17 @@ mod ext {
     fn in_current_dir() -> Option<LPVOID> {
       if let Ok(dir) = ::std::env::current_exe() {
         if let Some(dir) = dir.parent() {
-          return try_load_from(Some(dir));
+          let dll = try_load_from(Some(dir));
+          if dll.is_some() {
+            return dll;
+          }
+
+          if cfg!(target_os = "macos") {
+            // "(bundle folder)/Contents/Frameworks/"
+            let mut path = dir.to_owned();
+            path.push("../Frameworks/sciter-osx-64.dylib");
+            return try_load(&path);
+          }
         }
       }
       None
@@ -294,15 +298,15 @@ mod ext {
 
     // Try to find in $PATH.
     fn in_paths() -> Option<LPVOID> {
-    	use std::env;
-    	if let Some(paths) = env::var_os("PATH") {
-    		for path in env::split_paths(&paths) {
-    			if let Some(dll) = try_load_from(Some(&path)) {
-    				return Some(dll);
-    			}
-    		}
-    	}
-    	None
+      use std::env;
+      if let Some(paths) = env::var_os("PATH") {
+        for path in env::split_paths(&paths) {
+          if let Some(dll) = try_load_from(Some(&path)) {
+            return Some(dll);
+          }
+        }
+      }
+      None
     }
 
     // try specified path first (and only if present)
@@ -310,7 +314,7 @@ mod ext {
     let dll = if let Some(path) = unsafe { CUSTOM_DLL_PATH.as_ref() } {
       try_load(Path::new(path))
     } else {
-      in_current_dir().or(in_paths()).or(in_global())
+      in_current_dir().or_else(in_paths).or_else(in_global)
     };
 
     if let Some(dll) = dll {
@@ -329,7 +333,7 @@ mod ext {
       return Ok(get_api());
     }
 
-    let sdkbin = if cfg!(target_os = "macos") { "bin.osx" } else { "bin.gtk" };
+    let sdkbin = if cfg!(target_os = "macos") { "bin.osx" } else { "bin.lnx" };
     let msg = format!("Please verify that Sciter SDK is installed and its binaries (from {}) are available in PATH.", sdkbin);
     Err(format!("error: '{}' was not found neither in PATH nor near the current executable.\n  {}", DLL_NAMES[0], msg))
   }
