@@ -448,8 +448,13 @@ pub fn version() -> String {
 
 /// Sciter API version.
 ///
-/// Returns `0x0000_0001` for regular builds and
-/// `0x0001_0001` for windowless builds.
+/// Returns:
+///
+///	* `0x0000_0001` for regular builds, `0x0001_0001` for windowless builds.
+/// * `0x0000_0002` since 4.4.2.14 (a breaking change in assets with [SOM builds](https://sciter.com/native-code-exposure-to-script/))
+/// * `0x0000_0003` since 4.4.2.16
+/// * `0x0000_0004` since 4.4.2.17 (a breaking change in SOM passport)
+///
 /// Since 4.4.0.3.
 pub fn api_version() -> u32 {
 	_API.version

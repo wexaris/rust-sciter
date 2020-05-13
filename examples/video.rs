@@ -151,9 +151,19 @@ fn main() {
   if cfg!(all(target_os = "windows", target_arch = "x86")) {
     println!("\nerror: Sciter video will not work on Windows x86.");
     println!("error: Consider using a nightly Rust version to enable `abi_thiscall`,");
-    println!("error: see the https://github.com/rust-lang/rust/issues/42202.");
+    println!("error: see https://github.com/rust-lang/rust/issues/42202\n");
     std::process::exit(126);
-  }
+	}
+
+	if sciter::version_num() >= 0x04_04_02_0E {
+		// since 4.4.2.14
+		println!("\nerror: `sciter::video` is incompatible with SOM interfaces yet.");
+		println!("error: Sciter API was changed in '4.4.2.14'");
+		println!("error: Sciter version is '{}' now", sciter::version());
+		println!("error: see https://sciter.com/native-code-exposure-to-script/");
+		println!("error: and https://sciter.com/developers/for-native-gui-programmers/sciter-object-model/\n");
+		std::process::exit(126);
+	}
 
   let mut frame = sciter::WindowBuilder::main_window()
   	.with_size((750, 750))
