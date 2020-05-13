@@ -1,7 +1,7 @@
 # Based on the "trust" template v0.1.2
 # https://github.com/japaric/trust/tree/v0.1.2
 
-dist: trusty
+dist: xenial
 sudo: false
 language: rust
 compiler: gcc
@@ -53,12 +53,12 @@ before_install:
 
 install:
   - source ~/.cargo/env || true
-  - export SDK_PATH=https://raw.githubusercontent.com/c-smile/sciter-sdk/master
+  - export SDK_URL=https://raw.githubusercontent.com/c-smile/sciter-sdk/master
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export SDK_DLL="$TRAVIS_BUILD_DIR/sciter-osx-64.dylib"; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export SDK_DLL="$TRAVIS_BUILD_DIR/libsciter-gtk.so"; fi
 
-  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then curl -so "$TRAVIS_BUILD_DIR/sciter-osx-64.dylib" $SDK_PATH/bin.osx/sciter-osx-64.dylib; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then curl -so "$TRAVIS_BUILD_DIR/libsciter-gtk.so" $SDK_PATH/bin.lnx/x64/libsciter-gtk.so; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then curl -so "$SDK_DLL" $SDK_URL/bin.osx/sciter-osx-64.dylib; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then curl -so "$SDK_DLL" $SDK_URL/bin.lnx/x64/libsciter-gtk.so; fi
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$TRAVIS_BUILD_DIR"; fi
@@ -73,6 +73,7 @@ before_script:
 
   - #ls /usr/lib/x86_64-linux-gnu/libstdc++*
   - #strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBC
+  - #file $SDK_DLL
   - gcc --version
   - rustc --version
 
