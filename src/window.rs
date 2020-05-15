@@ -95,7 +95,7 @@ impl Window {
 
 	/// Create a new window with the specified position, flags and an optional parent window.
 	#[cfg_attr(feature = "windowless", deprecated = "Sciter.Lite doesn't have OS windows in windowless mode.")]
-	pub fn create(rect: RECT, flags: SCITER_CREATE_WINDOW_FLAGS, parent: Option<HWINDOW>) -> Window {
+	pub fn create(rect: RECT, flags: Flags, parent: Option<HWINDOW>) -> Window {
 		if cfg!(feature = "windowless")
 		{
 			panic!("Sciter.Lite doesn't have OS windows in windowless mode!");
@@ -118,17 +118,17 @@ impl Window {
 		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
 	}
 
-	/// Obtain reference to `Host` which allows you to control Sciter engine and windows.
+	/// Obtain a reference to `Host` which allows you to control Sciter engine.
 	pub fn get_host(&self) -> Rc<Host> {
-		Rc::clone(&self.host)
+		self.host.clone()
 	}
 
-	/// Set callback for Sciter engine events.
+	/// Set [callback](../host/trait.HostHandler.html) for Sciter engine events.
 	pub fn sciter_handler<Callback: HostHandler + Sized>(&mut self, handler: Callback) {
 		self.host.setup_callback(handler);
 	}
 
-	/// Attach `dom::EventHandler` to the Sciter window.
+	/// Attach [`dom::EventHandler`](../dom/event/trait.EventHandler.html) to the Sciter window.
 	///
 	/// You should install Window event handler only once - it will survive all document reloads.
 	/// Also it can be registered on an empty window before the document is loaded.
@@ -190,7 +190,7 @@ impl Window {
 
 	/// Load an HTML document from file.
 	///
-	/// The specified `uri` should be either an absolute file path,
+	/// The specified `uri` should be either an absolute file path
 	/// or a full URL to the HTML to load.
 	///
 	/// Supported URL schemes are: `http://`, `file://`, `this://app/` (when used with [`archive_handler`](#archive_handler)).

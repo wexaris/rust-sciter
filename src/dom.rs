@@ -3,15 +3,15 @@
 
 ## Introduction.
 
-Let’s assume you have already integrated Sciter in your application and so you have ф Sciter window with the loaded content.
+Let’s assume you have already integrated Sciter in your application and so you have a Sciter window with the loaded content.
 
 From Sciter's point of view the loaded document is a tree of DOM elements (elements of Document Object Model).
 Sciter builds this tree while loading/parsing of input HTML.
-As a rule, each tag in source HTML gets matching a DOM element (there are exceptions, see below).
+As a rule, each tag in the source HTML is matching with a DOM element (there are exceptions, see below).
 
 You can change the text, attributes, state flags of DOM elements;
 add new or remove existing DOM elements.
-You can also attach your own DOM event handlers to DOM elements to receive events and notifications.
+You can also attach your own DOM event handlers to DOM elements in order to receive events and notifications.
 
 Therefore your UI in Sciter is a collection of uniform DOM elements
 that can be styled by CSS and manipulated by native or script code.

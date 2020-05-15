@@ -106,7 +106,7 @@ pub trait HostHandler {
 
 	/// This function is used as response to [`on_data_load`](#method.on_data_load) request.
 	///
-	/// Parameters here must be taken from `SCN_LOAD_DATA` structure. You can store them for later usage,
+	/// Parameters here must be taken from [`SCN_LOAD_DATA`](struct.SCN_LOAD_DATA.html) structure. You can store them for later usage,
 	/// but you must answer as [`LOAD_DELAYED`](enum.LOAD_RESULT.html#variant.LOAD_DELAYED) code and provide an `request_id` here.
 	fn data_ready(&self, hwnd: HWINDOW, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
 		let s = s2w!(uri);
@@ -170,13 +170,13 @@ impl Host {
 	///
 	/// Usually Sciter window created by a [`sciter::Window::create()`](../window/struct.Window.html#method.create),
 	/// but you can attach Sciter to an existing native window.
-	/// In this case you need to mix-in window events processing with `SciterProcND`.
+	/// In this case you need to mix-in window events processing with `SciterProcND` (Windows only).
 	/// Sciter engine will be initialized either on `WM_CREATE` or `WM_INITDIALOG` response
-	/// or by calling `SciterCreateOnDirectXWindow`.
+	/// or by calling `SciterCreateOnDirectXWindow` (again, Windows only).
 	pub fn attach(hwnd: HWINDOW) -> Host {
 		// Host with default debug handler installed
 		let host = Host {
-      hwnd: hwnd,
+      hwnd,
       behaviors: Default::default(),
       handler: Default::default(),
       archive: Default::default(),
@@ -185,10 +185,10 @@ impl Host {
 		return host;
 	}
 
-	/// Attach Sciter host to existing window with the given Host handler.
+	/// Attach Sciter host to an existing window with the given Host handler.
 	pub fn attach_with<Handler: HostHandler>(hwnd: HWINDOW, handler: Handler) -> Host {
 	  let host = Host {
-      hwnd: hwnd,
+      hwnd,
       behaviors: Default::default(),
       handler: Default::default(),
       archive: Default::default(),
@@ -197,7 +197,13 @@ impl Host {
 	  return host;
 	}
 
-	/// Attach `dom::EventHandler` to the Sciter window.
+	/// Attach [`dom::EventHandler`](../dom/event/trait.EventHandler.html) to the Sciter window.
+	pub fn event_handler<Handler: EventHandler>(&self, handler: Handler) {
+		self.attach_handler(handler)
+	}
+
+	/// Attach [`dom::EventHandler`](../dom/event/trait.EventHandler.html) to the Sciter window.
+	#[doc(hidden)]
 	pub fn attach_handler<Handler: EventHandler>(&self, handler: Handler) {
 		let hwnd = self.get_hwnd();
 		let boxed = Box::new( WindowHandler { hwnd, handler } );
@@ -225,6 +231,8 @@ impl Host {
 	}
 
 	/// Register a native event handler for the specified behavior name.
+	///
+	/// See the [`Window::register_behavior`](../window/struct.Window.html#method.register_behavior) for an example.
 	pub fn register_behavior<Factory>(&self, name: &str, factory: Factory)
 	where
 		Factory: Fn() -> Box<dyn EventHandler> + 'static
@@ -276,18 +284,19 @@ impl Host {
 		};
 	}
 
-	/// This function is used as response to `SC_LOAD_DATA` request.
+	/// This function is used as response to [`HostHandler::on_data_load`](trait.HostHandler.html#method.on_data_load) request.
 	pub fn data_ready(&self, uri: &str, data: &[u8]) {
 		let s = s2w!(uri);
 		(_API.SciterDataReady)(self.hwnd, s.as_ptr(), data.as_ptr(), data.len() as UINT);
 	}
 
-	/// Use this function outside of `SCN_LOAD_DATA` request.
+	/// Use this function outside of [`HostHandler::on_data_load`](trait.HostHandler.html#method.on_data_load) request.
 	///
-	/// It can be used for the two purposes:
+	/// It can be used for two purposes:
 	///
-	/// 1. Asynchronious resource loading in respect of `SCN_LOAD_DATA` requests (you must provide `request_id` in this case).
-	/// 2. Refresh of already loaded resource (for example, dynamic image updates).
+	/// 1. Asynchronious resource loading in respect of [`on_data_load`](trait.HostHandler.html#method.on_data_load)
+	/// requests (you must use `request_id` in this case).
+	/// 2. Refresh of an already loaded resource (for example, dynamic image updates).
 	pub fn data_ready_async(&self, uri: &str, data: &[u8], request_id: Option<HREQUEST>) {
 		let s = s2w!(uri);
 		let req = request_id.unwrap_or(::std::ptr::null_mut());
@@ -308,7 +317,7 @@ impl Host {
 	///
 	/// This function returns `Result<Value,Value>` with script function result value or with Sciter script error.
 	///
-	/// You can use the [`make_args!(args...)`](../macro.make_args.html) macro which helps you
+	/// You can use the [`&make_args!(args...)`](../macro.make_args.html) macro which helps you
 	/// to construct script arguments from Rust types.
 	pub fn call_function(&self, name: &str, args: &[Value]) -> ::std::result::Result<Value, Value> {
 		let mut rv = Value::new();
@@ -320,7 +329,7 @@ impl Host {
 
 	/// Set home url for Sciter resources.
 	///
-	/// If you will set it like `set_home_url("https://sciter.com/modules/")` then
+	/// If you set it like `set_home_url("https://sciter.com/modules/")` then
 	///
 	///  `<script src="sciter:lib/root-extender.tis">` will load
 	///  root-extender.tis from
@@ -333,6 +342,13 @@ impl Host {
 	}
 
 	/// Set media type of this Sciter instance.
+	///
+	/// For example, media type can be "handheld", "projection", "screen", "screen-hires", etc.
+	/// By default, Sciter window has the `"screen"` media type.
+	///
+	/// Media type name is used while loading and parsing style sheets in the engine,
+	/// so you should call this function **before** loading document in it.
+	///
 	pub fn set_media_type(&self, media_type: &str) -> Result<()> {
 		let s = s2w!(media_type);
 		let ok = (_API.SciterSetMediaType)(self.hwnd, s.as_ptr());
@@ -344,12 +360,24 @@ impl Host {
 	/// By default Sciter window has `"screen:true"` and `"desktop:true"/"handheld:true"` media variables.
 	///
 	/// Media variables can be changed in runtime. This will cause styles of the document to be reset.
+	///
+	/// ## Example
+	///
+	/// ```rust,no_run
+	/// # use sciter::vmap;
+	/// # let mut host = sciter::Host::attach(0 as sciter::types::HWINDOW);
+	/// host.set_media_vars( &vmap! {
+	///   "screen" => true,
+	///   "handheld" => true,
+	/// }).unwrap();
+	/// ```
 	pub fn set_media_vars(&self, media: &Value) -> Result<()> {
 		let ok = (_API.SciterSetMediaVars)(self.hwnd, media.as_cptr());
 		ok_or!(ok)
 	}
 
-	/// Set or append the master style sheet styles (globally).
+	/// Set or append the [master](https://sciter.com/css-extensions-in-h-smile-engine-part-i-style-sets/)
+	/// style sheet styles (**globally**, for all windows).
 	pub fn set_master_css(&self, css: &str, append: bool) -> Result<()> {
 		let s = s2u!(css);
 		let b = s.as_bytes();
@@ -362,7 +390,9 @@ impl Host {
 		ok_or!(ok)
 	}
 
-	/// Set (reset) style sheet of current document.
+	/// Set (reset) style sheet of the **current** document.
+	///
+	/// Will reset styles for all elements according to given CSS.
 	pub fn set_window_css(&self, css: &str, base_url: &str, media_type: &str) -> Result<()> {
 		let s = s2u!(css);
 		let url = s2w!(base_url);
