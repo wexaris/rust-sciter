@@ -266,22 +266,23 @@ impl Host {
 	}
 
 	/// Load an HTML document from file.
-	pub fn load_file(&self, uri: &str) {
+	pub fn load_file(&self, uri: &str) -> bool {
+		// TODO: it should be `Result<()>` instead `bool`
 		let s = s2w!(uri);
-		(_API.SciterLoadFile)(self.hwnd, s.as_ptr());
+		(_API.SciterLoadFile)(self.hwnd, s.as_ptr()) != 0
 	}
 
 	/// Load an HTML document from memory.
-	pub fn load_html(&self, html: &[u8], uri: Option<&str>) {
+	pub fn load_html(&self, html: &[u8], uri: Option<&str>) -> bool {
 		match uri {
 			Some(uri) => {
 				let s = s2w!(uri);
-				(_API.SciterLoadHtml)(self.hwnd, html.as_ptr(), html.len() as UINT, s.as_ptr())
+				(_API.SciterLoadHtml)(self.hwnd, html.as_ptr(), html.len() as UINT, s.as_ptr()) != 0
 			},
 			None => {
-				(_API.SciterLoadHtml)(self.hwnd, html.as_ptr(), html.len() as UINT, 0 as LPCWSTR)
+				(_API.SciterLoadHtml)(self.hwnd, html.as_ptr(), html.len() as UINT, 0 as LPCWSTR) != 0
 			}
-		};
+		}
 	}
 
 	/// This function is used as response to [`HostHandler::on_data_load`](trait.HostHandler.html#method.on_data_load) request.
@@ -513,7 +514,7 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 ///
 /// For example, app resource files (HTML/CSS/scripts) can be stored in an `assets` folder
 /// that can be packed into a single archive by calling `packfolder.exe assets target/assets.rc -binary`.
-/// And later it can be accessed via the Archive API:
+/// And later it can be accessed via the Archive API explicitly:
 ///
 /// ```rust,ignore
 /// let archived = include_bytes!("target/assets.rc");
@@ -521,6 +522,17 @@ extern "system" fn _on_debug_notification<T: HostHandler>(param: LPVOID, subsyst
 ///
 /// // access `assets/index.htm`
 /// let html_data = assets.get("index.htm").unwrap();
+/// ```
+///
+/// or implicitly via the `this://app/` URL after registering the archive via
+/// [`Window::archive_handler`](../window/struct.Window.html#method.archive_handler):
+///
+/// ```rust,ignore
+///
+/// let archived = include_bytes!("target/assets.rc");
+/// let mut frame = sciter::Window::new();
+/// frame.archive_handler(archived).expect("Unable to load archive");
+/// frame.load("this://app/index.htm");
 /// ```
 pub struct Archive(HSARCHIVE);
 

@@ -137,8 +137,11 @@ impl Window {
 	}
 
   /// Register an archive produced by `packfolder` tool.
-  ///
-  /// See documentation of the [`Archive`](../host/struct.Archive.html).
+	///
+	/// The resources can be accessed via the `this://app/` URL.
+	///
+	/// See documentation of the [`Archive`](../host/struct.Archive.html).
+	///
   pub fn archive_handler(&mut self, resource: &[u8]) -> Result<(), ()> {
     self.host.register_archive(resource)
   }
@@ -194,12 +197,12 @@ impl Window {
 	/// or a full URL to the HTML to load.
 	///
 	/// Supported URL schemes are: `http://`, `file://`, `this://app/` (when used with [`archive_handler`](#archive_handler)).
-	pub fn load_file(&mut self, uri: &str) {
+	pub fn load_file(&mut self, uri: &str) -> bool {
 		self.host.load_file(uri)
 	}
 
 	/// Load an HTML document from memory.
-	pub fn load_html(&mut self, html: &[u8], uri: Option<&str>) {
+	pub fn load_html(&mut self, html: &[u8], uri: Option<&str>) -> bool {
 		self.host.load_html(html, uri)
 	}
 
