@@ -614,7 +614,13 @@ impl Graphics {
   fn pop_state(&mut self) -> Result<&mut Self> {
     let ok = (_GAPI.gStateRestore)(self.0);
     ok_or!(self, ok)
-  }
+	}
+
+	/// Flush all pending graphic operations.
+	pub fn flush(&mut self) -> Result<&mut Self> {
+		let ok = (_GAPI.gFlush)(self.0);
+		ok_or!(self, ok)
+	}
 }
 
 /// Primitives drawing operations.

@@ -344,6 +344,9 @@ pub struct SciterGraphicsAPI {
   pub vUnWrapPath: extern "system" fn(fromValue: *const VALUE, phpath: &mut HPATH) -> GRAPHIN_RESULT,
 
   pub vUnWrapText: extern "system" fn(fromValue: *const VALUE, phtext: &mut HTEXT) -> GRAPHIN_RESULT,
+
+	// since 4.4.3.20
+  pub gFlush: extern "system" fn(hgfx: HGFX) -> GRAPHIN_RESULT,
 }
 
 pub type ImageWriteFunction = extern "system" fn(prm: LPVOID, data: LPCBYTE, data_length: UINT);
