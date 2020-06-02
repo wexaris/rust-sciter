@@ -384,6 +384,20 @@ pub fn SciterAPI<'a>() -> &'a ISciterAPI {
 	return ap;
 }
 
+/// Getting ISciterAPI reference, can be used for manual API calling.
+///
+/// Bypasses ABI compatability checks.
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub fn SciterAPI_unchecked<'a>() -> &'a ISciterAPI {
+	let ap = unsafe {
+		let p = ext::SciterAPI();
+		&*p
+	};
+
+	return ap;
+}
+
 
 lazy_static! {
 	static ref _API: &'static ISciterAPI = SciterAPI();
