@@ -440,6 +440,18 @@ impl Element {
 		return hwnd;
 	}
 
+	/// Attach a native window to the element as a child.
+	pub fn attach_hwnd(&mut self, child: HWINDOW) -> Result<()> {
+		let ok = (_API.SciterAttachHwndToElement)(self.he, child);
+		ok_or!((), ok)
+	}
+
+	/// Detach a child native window (if any) from the element.
+	pub fn detach_hwnd(&mut self) -> Result<()> {
+		let ok = (_API.SciterAttachHwndToElement)(self.he, 0 as HWINDOW);
+		ok_or!((), ok)
+	}
+
 	/// Get bounding rectangle of the element. See the [`ELEMENT_AREAS`](enum.ELEMENT_AREAS.html) enum for `kind` flags.
 	pub fn get_location(&self, kind: u32) -> Result<RECT> {
 		let mut rc = RECT::default();
@@ -1198,8 +1210,6 @@ impl<'a> ::std::iter::IntoIterator for &'a Element {
 
 
 /* Not implemented yet or not used APIs:
-
-SciterAttachHwndToElement
 
 SciterCallBehaviorMethod
 SciterCombineURL
