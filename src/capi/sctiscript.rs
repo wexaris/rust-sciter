@@ -5,6 +5,7 @@
 use capi::sctypes::{LPVOID, UINT64};
 
 MAKE_HANDLE!(#[doc = "TIScript VM native handle."] HVM, _HVM);
+
 pub type tiscript_value = UINT64;
 
 #[repr(C)]

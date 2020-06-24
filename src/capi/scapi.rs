@@ -161,8 +161,13 @@ pub struct ISciterAPI
 	pub SciterGetValue: extern "system" fn (he: HELEMENT, pval: * mut VALUE) -> SCDOM_RESULT,
 	pub SciterSetValue: extern "system" fn (he: HELEMENT, pval: * const VALUE) -> SCDOM_RESULT,
 	pub SciterGetExpando: extern "system" fn (he: HELEMENT, pval: * mut VALUE, forceCreation: BOOL) -> SCDOM_RESULT,
+
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub SciterGetObject: extern "system" fn (he: HELEMENT, pval: * mut tiscript_value, forceCreation: BOOL) -> SCDOM_RESULT,
+
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub SciterGetElementNamespace: extern "system" fn (he: HELEMENT, pval: * mut tiscript_value) -> SCDOM_RESULT,
+
 	pub SciterGetHighlightedElement: extern "system" fn (hwnd: HWINDOW, phe: * mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterSetHighlightedElement: extern "system" fn (hwnd: HWINDOW, he: HELEMENT) -> SCDOM_RESULT,
 	//|
@@ -219,12 +224,18 @@ pub struct ISciterAPI
 	pub ValueIsNativeFunctor: extern "system" fn (pval: * const VALUE) -> BOOL,
 
 	// tiscript VM API
+
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub TIScriptAPI: extern "system" fn () -> * mut tiscript_native_interface,
 
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub SciterGetVM: extern "system" fn (hwnd: HWINDOW) -> HVM,
 
 	// since 3.1.0.12
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub Sciter_v2V: extern "system" fn (vm: HVM, script_value: tiscript_value, value: * mut VALUE, isolate: BOOL) -> BOOL,
+
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	pub Sciter_V2v: extern "system" fn (vm: HVM, valuev: * const VALUE, script_value: * mut tiscript_value) -> BOOL,
 
 	// since 3.1.0.18

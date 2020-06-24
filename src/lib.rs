@@ -472,6 +472,8 @@ pub fn version() -> String {
 /// * `0x0000_0002` since 4.4.2.14 (a breaking change in assets with [SOM builds](https://sciter.com/native-code-exposure-to-script/))
 /// * `0x0000_0003` since 4.4.2.16
 /// * `0x0000_0004` since 4.4.2.17 (a breaking change in SOM passport)
+/// * `0x0000_0005` since 4.4.3.20 (a breaking change in `INITIALIZATION_PARAMS`, SOM in event handlers fix)
+/// * `0x0000_0006` since 4.4.3.24 (TIScript native API is gone, use SOM instead)
 ///
 /// Since 4.4.0.3.
 pub fn api_version() -> u32 {

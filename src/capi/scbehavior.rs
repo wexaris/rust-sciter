@@ -165,7 +165,9 @@ pub enum EVENT_GROUPS
 	HANDLE_METHOD_CALL           = 0x0200,
 	/// Behavior specific methods.
 	HANDLE_SCRIPTING_METHOD_CALL = 0x0400,
+
 	/// Behavior specific methods using direct `tiscript::value`'s.
+	#[deprecated(since="Sciter 4.4.3.24", note="TIScript native API is gone, use SOM instead.")]
 	HANDLE_TISCRIPT_METHOD_CALL  = 0x0800,
 
 	/// System drag-n-drop.

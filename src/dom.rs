@@ -873,7 +873,8 @@ impl Element {
 	/// Create new element as copy of existing element.
 	///
 	/// The new element is a full (deep) copy of the element and is initially disconnected from the DOM.
-	/// Note that `Element.clone()` does not clone DOM element, just increments its reference count.
+	/// Note that [`Element.clone()`](struct.Element.html#impl-Clone) does not clone the DOM element,
+	/// just increments its reference count.
 	pub fn clone_element(&self) -> Element {
 		let mut e = Element { he: HELEMENT!() };
 		(_API.SciterCloneElement)(self.he, &mut e.he);
