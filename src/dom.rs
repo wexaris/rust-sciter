@@ -257,6 +257,32 @@ impl From<HELEMENT> for Element {
 	}
 }
 
+/// Store the DOM element as a `Value`.
+///
+/// Since 4.4.3.26, perhaps.
+impl std::convert::TryFrom<Element> for Value {
+	type Error = SCDOM_RESULT;
+	fn try_from(e: Element) -> Result<Value> {
+		let mut v = Value::new();
+		let ok = (_API.SciterGetExpando)(e.as_ptr(), v.as_ptr(), true as BOOL);
+		ok_or!(v, ok)
+	}
+}
+
+/// Get an `Element` object contained in the `Value`.
+impl crate::value::FromValue for Element {
+	fn from_value(v: &Value) -> Option<Element> {
+		let mut pv: LPCBYTE = std::ptr::null();
+		let mut cb: UINT = 0;
+		let ok = (_API.ValueBinaryData)(v.as_cptr(), &mut pv, &mut cb);
+		if ok == crate::value::VALUE_RESULT::OK {
+			Some(Element::from(pv as HELEMENT))
+		} else {
+			None
+		}
+	}
+}
+
 impl Element {
 
 	//\name Creation
