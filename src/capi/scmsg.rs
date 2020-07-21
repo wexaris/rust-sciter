@@ -127,14 +127,17 @@ pub struct SCITER_X_MSG_HEARTBIT
 #[repr(C)]
 #[derive(Copy, Clone)]
 #[derive(Debug, PartialOrd, PartialEq)]
-/// `SCITER_X_MSG_PAINT` target identifier.
+/// `SCITER_X_MSG_PAINT` rendering targets.
 pub enum SCITER_PAINT_TARGET_TYPE
 {
-	/// default rendering target - OpenGL window surface
+	/// Default target - OpenGL window surface.
 	SPT_DEFAULT   = 0,
 
-	/// target::receiver
+	/// Bitmap target.
 	SPT_RECEIVER  = 1,
+
+	/// `IDXGISurface` target (since 4.4.3.27).
+	SPT_SURFACE = 2,
 }
 
 /// Message to paint view to the provided target (HDC or callback).
@@ -148,7 +151,7 @@ pub struct SCITER_X_MSG_PAINT
 
 	// union {
 	// HDC or LPVOID
-	pub param: LPVOID,
+	pub context: LPVOID,
 	pub callback: Option<ELEMENT_BITMAP_RECEIVER>,
 	// }
 }

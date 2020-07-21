@@ -119,7 +119,7 @@ impl FromValue for Text {
     let mut h = null_mut();
     let ok = (_GAPI.vUnWrapText)(v.as_cptr(), &mut h);
     if ok == GRAPHIN_RESULT::OK {
-	(_GAPI.textAddRef)(h);
+      (_GAPI.textAddRef)(h);
       Some(Text(h))
     } else {
       None

@@ -67,6 +67,10 @@ pub enum Message {
 	/// Render to a bitmap.
 	RenderTo(RenderEvent),
 
+	#[cfg(any(windows, doc))]
+	/// Render to a DXGI surface (Windows only, since 4.4.3.27).
+	RenderToDxgiSurface(DxgiRenderEvent),
+
 	/// Mouse input.
 	Mouse(MouseEvent),
 
@@ -135,6 +139,19 @@ impl std::fmt::Debug for RenderEvent {
 			.field("callback", &"Box<dyn Fn>")
 			.finish()
 	}
+}
+
+#[cfg(any(windows, doc))]
+#[derive(Debug)]
+/// Events for rendering UI to a DXGI surface.
+///
+/// Since 4.4.3.27.
+pub struct DxgiRenderEvent {
+	/// Which layer to render (or the whole document if `None`).
+	pub layer: Option<PaintLayer>,
+
+	/// [`IDXGISurface`](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nn-dxgi-idxgisurface) pointer.
+	pub surface: LPVOID,
 }
 
 
@@ -223,20 +240,37 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 				element: ptr::null_mut(),
 				isFore: true as BOOL,
 				targetType: SCITER_PAINT_TARGET_TYPE::SPT_DEFAULT,
-				param: ptr::null_mut(),
+				context: ptr::null_mut(),
 				callback: None,
 			};
 			(_API.SciterProcX)(wnd, &msg.header as *const _)
 		},
 
 		Message::Paint(paint) => {
-			use std::ptr;
 			let msg = SCITER_X_MSG_PAINT {
 				header: SCITER_X_MSG_CODE::SXM_PAINT.into(),
 				element: paint.element,
 				isFore: paint.is_foreground as BOOL,
 				targetType: SCITER_PAINT_TARGET_TYPE::SPT_DEFAULT,
-				param: ptr::null_mut(),
+				context: std::ptr::null_mut(),
+				callback: None,
+			};
+			(_API.SciterProcX)(wnd, &msg.header as *const _)
+		},
+
+		#[cfg(windows)]
+		Message::RenderToDxgiSurface(paint) => {
+			let layer = paint.layer.unwrap_or(PaintLayer {
+				element: std::ptr::null_mut(),
+				is_foreground: false,
+			});
+
+			let msg = SCITER_X_MSG_PAINT {
+				header: SCITER_X_MSG_CODE::SXM_PAINT.into(),
+				element: layer.element,
+				isFore: layer.is_foreground as BOOL,
+				targetType: SCITER_PAINT_TARGET_TYPE::SPT_SURFACE,
+				context: paint.surface,
 				callback: None,
 			};
 			(_API.SciterProcX)(wnd, &msg.header as *const _)
@@ -274,17 +308,17 @@ pub fn handle_message(wnd: HWINDOW, event: Message) -> bool
 			};
 			let param = &wrapper as *const _ as LPVOID;
 
-			let element = paint.layer.unwrap_or(PaintLayer {
+			let layer = paint.layer.unwrap_or(PaintLayer {
 				element: std::ptr::null_mut(),
 				is_foreground: false,
 			});
 
 			let msg = SCITER_X_MSG_PAINT {
 				header: SCITER_X_MSG_CODE::SXM_PAINT.into(),
-				element: element.element,
-				isFore: element.is_foreground as BOOL,
+				element: layer.element,
+				isFore: layer.is_foreground as BOOL,
 				targetType: SCITER_PAINT_TARGET_TYPE::SPT_RECEIVER,
-				param: param,
+				context: param,
 				callback: Some(inner),
 			};
 			(_API.SciterProcX)(wnd, &msg.header as *const _)
