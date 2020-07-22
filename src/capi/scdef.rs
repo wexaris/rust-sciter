@@ -370,7 +370,9 @@ pub type KeyValueCallback = extern "system" fn (param: LPVOID, pkey: *const VALU
 /// fn SciterLibraryInit(api: &'static sciter::ISciterAPI, exported: &mut VALUE) -> BOOL
 /// {
 ///   sciter::set_host_api(api);
-///   todo!("export some extension functions");
+///
+///   unimplemented!("export some extension functions");
+///
 ///   true as BOOL
 /// }
 /// ```
