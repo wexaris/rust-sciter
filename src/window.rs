@@ -72,6 +72,11 @@ pub enum Options {
 
 	/// Window is main, will destroy all other dependent windows on close, since 4.3.0.12
 	MainWindow(bool),
+
+  /// global or per-window; value: `true` - `1px` in CSS is treated as `1dip`, otherwise `1px` is a physical pixel (by default).
+  ///
+  /// since [4.4.5.0](https://rawgit.com/c-smile/sciter-sdk/aafb625bb0bc317d79c0a14d02b5730f6a02b48a/logfile.htm).
+	LogicalPixel(bool),
 }
 
 
@@ -246,8 +251,9 @@ impl Window {
 			TransparentWindow(enable) => (SCITER_TRANSPARENT_WINDOW, enable as usize),
 			AlphaWindow(enable) => (SCITER_ALPHA_WINDOW, enable as usize),
 			MainWindow(enable) => (SCITER_SET_MAIN_WINDOW, enable as usize),
-      DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
+			DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
 			ScriptFeatures(mask) => (SCITER_SET_SCRIPT_RUNTIME_FEATURES, mask as usize),
+			LogicalPixel(enable) => (SCITER_SET_PX_AS_DIP, enable as usize),
 		};
 		let ok = (_API.SciterSetOption)(self.get_hwnd(), option, value);
 		if ok != 0 {

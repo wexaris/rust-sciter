@@ -115,6 +115,8 @@ pub enum SCITER_RT_OPTIONS
 	SCITER_SET_MAIN_WINDOW = 14,
 	/// global; value - max request length in megabytes (1024*1024 bytes).
 	SCITER_SET_MAX_HTTP_DATA_LENGTH = 15,
+	/// global or per-window; value 1 - 1px in CSS is treated as 1dip, value 0 - default behavior - 1px is a physical pixel.
+	SCITER_SET_PX_AS_DIP = 16,
 }
 
 /// Window flags

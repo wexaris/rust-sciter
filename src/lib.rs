@@ -556,6 +556,10 @@ pub enum RuntimeOptions<'a> {
 	InitScript(&'a str),
 	/// global; value - max request length in megabytes (1024*1024 bytes), since 4.3.0.15.
 	MaxHttpDataLength(usize),
+	/// global or per-window; value: `true` - `1px` in CSS is treated as `1dip`, otherwise `1px` is a physical pixel (by default).
+	///
+	/// since [4.4.5.0](https://rawgit.com/c-smile/sciter-sdk/aafb625bb0bc317d79c0a14d02b5730f6a02b48a/logfile.htm).
+	LogicalPixel(bool),
 }
 
 /// Set various global Sciter engine options, see the [`RuntimeOptions`](enum.RuntimeOptions.html).
@@ -572,6 +576,8 @@ pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 		DebugMode(enable) => (SCITER_SET_DEBUG_MODE, enable as usize),
 		UxTheming(enable) => (SCITER_SET_UX_THEMING, enable as usize),
 		MaxHttpDataLength(value) => (SCITER_SET_MAX_HTTP_DATA_LENGTH, value),
+		LogicalPixel(enable) => (SCITER_SET_PX_AS_DIP, enable as usize),
+
     LibraryPath(path) => {
       return set_library(path).map_err(|_|());
     }
