@@ -509,6 +509,7 @@ pub fn version() -> String {
 /// * `0x0000_0004` since 4.4.2.17 (a breaking change in SOM passport)
 /// * `0x0000_0005` since 4.4.3.20 (a breaking change in `INITIALIZATION_PARAMS`, SOM in event handlers fix)
 /// * `0x0000_0006` since 4.4.3.24 (TIScript native API is gone, use SOM instead)
+/// * `0x0000_0007` since 4.4.5.4  (DOM-Value conversion functions were added, no breaking change)
 ///
 /// Since 4.4.0.3.
 pub fn api_version() -> u32 {

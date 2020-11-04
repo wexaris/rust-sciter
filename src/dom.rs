@@ -257,6 +257,8 @@ impl From<HELEMENT> for Element {
 	}
 }
 
+const DOM_UNWRAP_API_VERSION: u32 = 0x0000_0007;
+
 /// Store the DOM element as a `Value`.
 ///
 /// Since 4.4.3.26, perhaps.
@@ -264,7 +266,11 @@ impl std::convert::TryFrom<Element> for Value {
 	type Error = SCDOM_RESULT;
 	fn try_from(e: Element) -> Result<Value> {
 		let mut v = Value::new();
-		let ok = (_API.SciterGetExpando)(e.as_ptr(), v.as_ptr(), true as BOOL);
+		let ok = if crate::api_version() >= DOM_UNWRAP_API_VERSION {
+			(_API.SciterElementWrap)(v.as_mut_ptr(), e.as_ptr())
+		} else {
+			(_API.SciterGetExpando)(e.as_ptr(), v.as_ptr(), true as BOOL)
+		};
 		ok_or!(v, ok)
 	}
 }
@@ -272,13 +278,23 @@ impl std::convert::TryFrom<Element> for Value {
 /// Get an `Element` object contained in the `Value`.
 impl crate::value::FromValue for Element {
 	fn from_value(v: &Value) -> Option<Element> {
-		let mut pv: LPCBYTE = std::ptr::null();
-		let mut cb: UINT = 0;
-		let ok = (_API.ValueBinaryData)(v.as_cptr(), &mut pv, &mut cb);
-		if ok == crate::value::VALUE_RESULT::OK {
-			Some(Element::from(pv as HELEMENT))
+		if crate::api_version() >= DOM_UNWRAP_API_VERSION {
+			let mut h = std::ptr::null_mut();
+			let ok = (_API.SciterElementUnwrap)(v.as_cptr(), &mut h);
+			if ok == SCDOM_RESULT::OK {
+				Some(Element::from(h))
+			} else {
+				None
+			}
 		} else {
-			None
+			let mut pv: LPCBYTE = std::ptr::null();
+			let mut cb: UINT = 0;
+			let ok = (_API.ValueBinaryData)(v.as_cptr(), &mut pv, &mut cb);
+			if ok == crate::value::VALUE_RESULT::OK {
+				Some(Element::from(pv as HELEMENT))
+			} else {
+				None
+			}
 		}
 	}
 }

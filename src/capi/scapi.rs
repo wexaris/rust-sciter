@@ -276,4 +276,10 @@ pub struct ISciterAPI
 
 	// since 4.4.2.16
 	pub SciterSetGlobalAsset: extern "system" fn(pass: *mut som_asset_t) -> BOOL,
+	// since 4.4.5.4
+	pub SciterElementUnwrap: extern "system" fn(pval: *const VALUE, ppElement: *mut HELEMENT) -> SCDOM_RESULT,
+	pub SciterElementWrap: extern "system" fn(pval: *mut VALUE, pElement: HELEMENT) -> SCDOM_RESULT,
+	pub SciterNodeUnwrap: extern "system" fn(pval: *const VALUE, ppElement: *mut HNODE) -> SCDOM_RESULT,
+	pub SciterNodeWrap: extern "system" fn(pval: *mut VALUE, pElement: HNODE) -> SCDOM_RESULT,
+
 }

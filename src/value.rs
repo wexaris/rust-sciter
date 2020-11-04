@@ -279,6 +279,11 @@ impl Value {
 		return None;
 	}
 
+	/// Returns a raw pointer to the underlaying data.
+	pub fn as_mut_ptr(&mut self) -> *mut VALUE {
+		&mut self.data as *mut VALUE
+	}
+
 	#[doc(hidden)]
 	pub fn as_ptr(&mut self) -> *mut VALUE {
 		&mut self.data as *mut VALUE
