@@ -295,6 +295,9 @@ pub enum MOUSE_EVENTS
 	/// drag src notification before drag start. To cancel - return true from handler.
 	DRAG_REQUEST = 0xC,
 
+	/// mouse triple click.
+	MOUSE_TCLICK = 0xF,
+
 	/// mouse click event
 	MOUSE_CLICK = 0xFF,
 
@@ -359,10 +362,12 @@ pub enum BEHAVIOR_EVENTS
 	EDIT_VALUE_CHANGING,
 	/// after text change
 	EDIT_VALUE_CHANGED,
-	/// selection in `<select>` changed
+	/// selection in `<select>` is changed
 	SELECT_SELECTION_CHANGED,
-	/// node in select expanded/collapsed, heTarget is the node
-	SELECT_STATE_CHANGED,
+	// node in select expanded/collapsed, heTarget is the node - OBSOLETE since 4.4.4.9
+	// SELECT_STATE_CHANGED,
+	/// value of `<select>` is changed
+	SELECT_VALUE_CHANGED,
 
 	/// request to show popup just received,
 	///     here DOM of popup element can be modifed.
