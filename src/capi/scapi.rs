@@ -11,7 +11,7 @@ use capi::scbehavior::*;
 use capi::scgraphics::SciterGraphicsAPI;
 use capi::screquest::{SciterRequestAPI, HREQUEST, REQUEST_PARAM};
 use capi::scmsg::{SCITER_X_MSG};
-use capi::scom::som_asset_t;
+use capi::scom::{som_asset_t, som_atom_t};
 
 
 /// Sciter API functions.
@@ -271,11 +271,21 @@ pub struct ISciterAPI
 	pub SciterProcX: extern "system" fn(hwnd: HWINDOW, msg: * const SCITER_X_MSG) -> BOOL,
 
 	// since 4.4.2.14
-	pub SciterAtomValue: extern "system" fn(name: LPCSTR) -> UINT64,
-	pub SciterAtomNameCB: extern "system" fn(atomv: UINT64, rcv: LPCSTR_RECEIVER, rcv_param: LPVOID) -> BOOL,
+	pub SciterAtomValue: extern "system" fn(name: LPCSTR) -> som_atom_t,
+	pub SciterAtomNameCB: extern "system" fn(atomv: som_atom_t, rcv: LPCSTR_RECEIVER, rcv_param: LPVOID) -> BOOL,
 
 	// since 4.4.2.16
 	pub SciterSetGlobalAsset: extern "system" fn(pass: *mut som_asset_t) -> BOOL,
+
+	// since 4.4.4.7
+	pub SciterGetElementAsset: extern "system" fn(el: HELEMENT, atomv: som_atom_t, pass: *mut *mut som_asset_t) -> SCDOM_RESULT,
+
+	// since 4.4.4.6 (yet disabled)
+	/// Set global value by path.
+	pub SciterSetVariable: extern "system" fn(hwndOrNull: HWINDOW, path: LPCWSTR, value: *const VALUE) -> UINT,
+	/// Get global value by path.
+	pub SciterGetVariable: extern "system" fn(hwndOrNull: HWINDOW, path: LPCWSTR, value: *mut VALUE) -> UINT,
+
 	// since 4.4.5.4
 	pub SciterElementUnwrap: extern "system" fn(pval: *const VALUE, ppElement: *mut HELEMENT) -> SCDOM_RESULT,
 	pub SciterElementWrap: extern "system" fn(pval: *mut VALUE, pElement: HELEMENT) -> SCDOM_RESULT,

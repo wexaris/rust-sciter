@@ -589,3 +589,30 @@ pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 		Err(())
 	}
 }
+
+/// Set a global variable by its path.
+///
+/// See the per-window [`Window::set_variable`](window/struct.Window.html#method.set_variable).
+pub fn set_variable(path: &str, value: Value) -> std::result::Result<(), ()> {
+	let ws = s2w!(path);
+	let ok = (_API.SciterSetVariable)(std::ptr::null_mut(), ws.as_ptr(), value.as_cptr());
+	if ok != 0 {
+		Ok(())
+	} else {
+		Err(())
+	}
+}
+
+/// Get a global variable by its path.
+///
+/// See the per-window [`Window::get_variable`](window/struct.Window.html#method.get_variable).
+pub fn get_variable(path: &str) -> std::result::Result<Value, ()> {
+	let ws = s2w!(path);
+	let mut value = Value::new();
+	let ok = (_API.SciterGetVariable)(std::ptr::null_mut(), ws.as_ptr(), value.as_mut_ptr());
+	if ok != 0 {
+		Ok(value)
+	} else {
+		Err(())
+	}
+}

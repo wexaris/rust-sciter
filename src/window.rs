@@ -329,6 +329,34 @@ impl Window {
 		}
 	}
 
+
+	/// Set a window variable by its path.
+	///
+	/// See the global [`sciter::set_variable`](../fn.set_variable.html).
+	pub fn set_variable(&self, path: &str, value: crate::Value) -> std::result::Result<(), ()> {
+		let ws = s2w!(path);
+		let ok = (_API.SciterSetVariable)(self.get_hwnd(), ws.as_ptr(), value.as_cptr());
+		if ok != 0 {
+			Ok(())
+		} else {
+			Err(())
+		}
+	}
+
+	/// Get a window variable by its path.
+	///
+	/// See the global [`sciter::get_variable`](../fn.get_variable.html).
+	pub fn get_variable(&self, path: &str) -> std::result::Result<crate::Value, ()> {
+		let ws = s2w!(path);
+		let mut value = crate::Value::new();
+		let ok = (_API.SciterGetVariable)(self.get_hwnd(), ws.as_ptr(), value.as_mut_ptr());
+		if ok != 0 {
+			Ok(value)
+		} else {
+			Err(())
+		}
+	}
+
 	/// Show window and run the main app message loop until the main window is closed.
 	pub fn run_app(self) {
 		self.base.expand(false);
