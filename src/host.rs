@@ -166,11 +166,12 @@ pub struct Host {
 
 impl Host {
 
-	/// Attach Sciter host to existing window.
+	/// Attach Sciter host to an existing window.
 	///
-	/// Usually Sciter window created by a [`sciter::Window::create()`](../window/struct.Window.html#method.create),
+	/// Usually Sciter window is created by [`sciter::Window::create()`](../window/struct.Window.html#method.create),
 	/// but you can attach Sciter to an existing native window.
-	/// In this case you need to mix-in window events processing with `SciterProcND` (Windows only).
+	/// In this case you need [to mix-in](https://sciter.com/developers/embedding-principles/)
+	/// window events processing with `SciterProcND` (Windows only).
 	/// Sciter engine will be initialized either on `WM_CREATE` or `WM_INITDIALOG` response
 	/// or by calling `SciterCreateOnDirectXWindow` (again, Windows only).
 	pub fn attach(hwnd: HWINDOW) -> Host {
@@ -185,7 +186,7 @@ impl Host {
 		return host;
 	}
 
-	/// Attach Sciter host to an existing window with the given Host handler.
+	/// Attach Sciter host to an existing window with the given `Host` handler.
 	pub fn attach_with<Handler: HostHandler>(hwnd: HWINDOW, handler: Handler) -> Host {
 	  let host = Host {
       hwnd,

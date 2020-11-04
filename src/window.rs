@@ -115,27 +115,88 @@ impl Window {
 	}
 
 	/// Attach Sciter to an existing native window.
+	///
+	/// Most likely, there is no need for [`run_app`](#method.run_app) or [`run_loop`](#method.run_loop) after that.
+	/// However, to get UI working, you have to route window events
+	/// to Sciter - see the [blog article](https://sciter.com/developers/embedding-principles/).
 	pub fn attach(hwnd: HWINDOW) -> Window {
-		// suppress warnings about unused method
+		// suppress warnings about unused method when compiled as "windowless"
 		let _ = &OsWindow::new;
 
 		assert!(!hwnd.is_null());
 		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
 	}
 
-	/// Obtain a reference to `Host` which allows you to control Sciter engine.
+	/// Attach Sciter to an existing native window and intercept its messages.
+	///
+	/// This will automatically intercept specific messages needed by Sciter
+	/// and pass them via [`SciterProcND`](https://sciter.com/developers/embedding-principles/).
+	#[cfg(all(windows, not(feature = "windowless")))]
+	pub fn attach_intercepted(hwnd: HWINDOW) -> Window {
+		assert!(!hwnd.is_null());
+
+		#[link(name="user32")]
+		extern "system"
+		{
+			fn SetWindowLongW(hwnd: HWINDOW, index: i32, new_data: WndProc) -> WndProc;
+			fn SetWindowLongPtrW(hwnd: HWINDOW, index: i32, new_data: WndProc) -> WndProc;
+			fn CallWindowProcW(prev: WndProc, hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT;
+		}
+
+		let set_window_proc = if cfg!(target_pointer_width = "64") { SetWindowLongPtrW } else { SetWindowLongW };
+
+		type WndProc = extern "system" fn (hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT;
+		type PrevProcs = std::collections::HashMap<HWINDOW, WndProc>;
+
+		thread_local! {
+			static PREV_PROC: std::cell::RefCell<PrevProcs> = Default::default();
+		}
+
+		// https://sciter.com/developers/embedding-principles/
+		extern "system" fn wnd_proc(hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT {
+			// first, pass the message to Sciter.
+			let mut handled = false as BOOL;
+			let lr = (_API.SciterProcND)(hwnd, msg, wp, lp, &mut handled);
+
+			// if it was handled by Sciter, we're done here.
+			if handled != 0 {
+				return lr;
+			}
+
+			// if not, call the original window proc.
+			let mut lr: LRESULT = 0;
+			PREV_PROC.with(|procs| {
+				let prev_proc = *procs.borrow().get(&hwnd).expect("An unregistered WindowProc is called somehow.");
+				lr = unsafe { CallWindowProcW(prev_proc, hwnd, msg, wp, lp) }
+			});
+
+			// and return its result
+			lr
+		}
+
+		// Subclass the window in order to receive its messages.
+		const GWLP_WNDPROC: i32 = -4;
+		let prev_proc = unsafe { set_window_proc(hwnd, GWLP_WNDPROC, wnd_proc) };
+		PREV_PROC.with(|procs| {
+			procs.borrow_mut().insert(hwnd, prev_proc);
+		});
+
+		Window { base: OsWindow::from(hwnd), host: Rc::new(Host::attach(hwnd)) }
+	}
+
+	/// Obtain a reference to [`Host`](../host/struct.Host.html) which offers some advanced control over the Sciter engine instance.
 	pub fn get_host(&self) -> Rc<Host> {
 		self.host.clone()
 	}
 
-	/// Set [callback](../host/trait.HostHandler.html) for Sciter engine events.
+	/// Set a [callback](../host/trait.HostHandler.html) for Sciter engine events.
 	pub fn sciter_handler<Callback: HostHandler + Sized>(&mut self, handler: Callback) {
 		self.host.setup_callback(handler);
 	}
 
 	/// Attach [`dom::EventHandler`](../dom/event/trait.EventHandler.html) to the Sciter window.
 	///
-	/// You should install Window event handler only once - it will survive all document reloads.
+	/// You should install a window event handler only once - it will survive all document reloads.
 	/// Also it can be registered on an empty window before the document is loaded.
 	pub fn event_handler<Handler: EventHandler>(&mut self, handler: Handler) {
 		self.host.attach_handler(handler);
@@ -201,42 +262,47 @@ impl Window {
 	/// The specified `uri` should be either an absolute file path
 	/// or a full URL to the HTML to load.
 	///
-	/// Supported URL schemes are: `http://`, `file://`, `this://app/` (when used with [`archive_handler`](#archive_handler)).
+	/// Supported URL schemes are: `http://`, `file://`; `this://app/` (when used with [`archive_handler`](#method.archive_handler)).
+	///
+	/// ZIP archives [are also supported](https://sciter.com/zip-resource-packaging-in-sciter/).
 	pub fn load_file(&mut self, uri: &str) -> bool {
 		self.host.load_file(uri)
 	}
 
 	/// Load an HTML document from memory.
+	///
+	/// For example, HTML can be loaded from a file in compile time
+	/// via [`include_bytes!`](https://doc.rust-lang.org/nightly/std/macro.include_bytes.html).
 	pub fn load_html(&mut self, html: &[u8], uri: Option<&str>) -> bool {
 		self.host.load_html(html, uri)
 	}
 
-	/// Get native window handle.
+	/// Get a native window handle.
 	pub fn get_hwnd(&self) -> HWINDOW {
 		self.base.get_hwnd()
 	}
 
-	/// Minimize or hide window.
+	/// Minimize or hide the window.
 	pub fn collapse(&self, hide: bool) {
 		self.base.collapse(hide)
 	}
 
-	/// Show or maximize window.
+	/// Show or maximize the window.
 	pub fn expand(&self, maximize: bool) {
 		self.base.expand(maximize)
 	}
 
-	/// Close window.
+	/// Close the window.
 	pub fn dismiss(&self) {
 		self.base.dismiss()
 	}
 
-	/// Set title of native window.
+	/// Set a new window title.
 	pub fn set_title(&mut self, title: &str) {
 		self.base.set_title(title)
 	}
 
-	/// Get native window title.
+	/// Get the native window title.
 	pub fn get_title(&self) -> String {
 		self.base.get_title()
 	}
@@ -263,18 +329,18 @@ impl Window {
 		}
 	}
 
-	/// Show window and run the main app message loop until window been closed.
+	/// Show window and run the main app message loop until the main window is closed.
 	pub fn run_app(self) {
 		self.base.expand(false);
 		self.base.run_app();
 	}
 
-	/// Run the main app message loop with already configured window.
-	pub fn run_loop(&self) {
+	/// Run the main app message loop with the already shown window.
+	pub fn run_loop(self) {
 		self.base.run_app();
 	}
 
-	/// Post app quit message.
+	/// Post a quit message for the app.
 	pub fn quit_app(&self) {
 		self.base.quit_app()
 	}

@@ -159,7 +159,7 @@ mod windows {
 }
 
 #[cfg(target_os="linux")]
-mod windows {
+mod linux {
 
 	use ::{_API};
 	use capi::sctypes::*;
@@ -302,7 +302,7 @@ mod windows {
 }
 
 #[cfg(target_os="macos")]
-mod windows {
+mod macos {
 
 	extern crate objc_foundation;
 
@@ -477,4 +477,12 @@ mod windows {
 
 }
 
+
+#[cfg(windows)]
 pub type OsWindow = windows::OsWindow;
+
+#[cfg(target_os="linux")]
+pub type OsWindow = linux::OsWindow;
+
+#[cfg(target_os="macos")]
+pub type OsWindow = macos::OsWindow;

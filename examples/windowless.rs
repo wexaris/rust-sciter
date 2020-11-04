@@ -45,7 +45,7 @@ fn main() {
 
 	#[cfg(windows)]
 	{
-		// Windows-specific: we need to redraw window in responce to the corresponding notification.
+		// Windows-specific: we need to redraw window in response to a corresponding notification.
 		// winit 0.20 has an explicit `Window::request_redraw` method,
 		// here we use `winapi::InvalidateRect` for this.
 		struct WindowlessHandler {
