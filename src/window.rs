@@ -135,15 +135,27 @@ impl Window {
 	pub fn attach_intercepted(hwnd: HWINDOW) -> Window {
 		assert!(!hwnd.is_null());
 
+		#[cfg(target_pointer_width = "64")]
 		#[link(name="user32")]
 		extern "system"
 		{
-			fn SetWindowLongW(hwnd: HWINDOW, index: i32, new_data: WndProc) -> WndProc;
 			fn SetWindowLongPtrW(hwnd: HWINDOW, index: i32, new_data: WndProc) -> WndProc;
 			fn CallWindowProcW(prev: WndProc, hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT;
 		}
 
-		let set_window_proc = if cfg!(target_pointer_width = "64") { SetWindowLongPtrW } else { SetWindowLongW };
+		#[cfg(target_pointer_width = "32")]
+		#[link(name="user32")]
+		extern "system"
+		{
+			fn SetWindowLongW(hwnd: HWINDOW, index: i32, new_data: WndProc) -> WndProc;
+			fn CallWindowProcW(prev: WndProc, hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT;
+		}
+
+		#[cfg(target_pointer_width = "64")]
+		let set_window_proc = SetWindowLongPtrW;
+
+		#[cfg(target_pointer_width = "32")]
+		let set_window_proc = SetWindowLongW;
 
 		type WndProc = extern "system" fn (hwnd: HWINDOW, msg: UINT, wp: WPARAM, lp: LPARAM) -> LRESULT;
 		type PrevProcs = std::collections::HashMap<HWINDOW, WndProc>;
