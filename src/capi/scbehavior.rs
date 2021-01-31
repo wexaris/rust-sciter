@@ -218,7 +218,7 @@ pub enum PHASE_MASK
 	BUBBLING 				= 0,
 	/// Sinking phase – direction: from containers to target child element.
 	SINKING  				= 0x0_8000,
-	/// Bubbling event consumed by some child.
+	/// Bubbling event consumed by some element.
 	BUBBLING_HANDLED= 0x1_0000,
 	/// Sinking event consumed by some child.
 	SINKING_HANDLED = 0x1_8000,

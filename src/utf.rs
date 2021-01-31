@@ -12,7 +12,7 @@ use std::ffi::{CStr, CString};
 use capi::sctypes::{LPCSTR, LPCWSTR, LPCBYTE};
 
 
-/// UTF-8 to UTF-16* converter.
+/// UTF-8 to UTF-16 converter.
 #[allow(unused_parens)]
 fn towcs(utf: &[u8], outbuf: &mut Vec<u16>) -> bool
 {
@@ -154,6 +154,9 @@ pub fn u2s(sz: LPCSTR) -> String
 /// UTF8 to Rust string conversion. See also [`s2u!`](../macro.s2u.html).
 pub fn u2sn(sz: LPCSTR, len: usize) -> String
 {
+	if sz.is_null() || len == 0 {
+		return String::new();
+	}
 	let chars = unsafe { ::std::slice::from_raw_parts(sz as LPCBYTE, len) };
 	let s = String::from_utf8_lossy(chars).into_owned();
 	return s;
@@ -168,7 +171,7 @@ pub fn w2s(sz: LPCWSTR) -> String
 /// UTF-16 to Rust string conversion. See also [`s2w!`](../macro.s2w.html).
 pub fn w2sn(sz: LPCWSTR, len: usize) -> String
 {
-	if sz.is_null() {
+	if sz.is_null() || len == 0 {
 		return String::new();
 	}
 	let chars = unsafe { ::std::slice::from_raw_parts(sz, len) };
@@ -191,7 +194,7 @@ pub fn s2vec(s: &str) -> Vec<u16> {
 /// Rust string to UTF-16 conversion.
 pub fn s2vecn(s: &str) -> (Vec<u16>, u32) {
 	let cs = CString::new(s).unwrap();
-	let mut out = Vec::with_capacity(s.len() * 2);
+	let mut out = Vec::with_capacity(s.len() * 2 + 1);
 	towcs(cs.to_bytes(), &mut out);
 	let n = out.len() as u32;
 	if n > 0 {
@@ -218,6 +221,9 @@ pub(crate) extern "system" fn store_astr(szstr: LPCSTR,  str_length: UINT, param
 
 /// Convert an incoming html string (UTF-8 in fact) to `String`.
 pub(crate) extern "system" fn store_bstr(szstr: LPCBYTE, str_length: UINT, param: LPVOID) {
+	if szstr.is_null() || str_length == 0 {
+		return;
+	}
 	let s = unsafe { ::std::slice::from_raw_parts(szstr, str_length as usize) };
 	let pout = param as *mut Vec<u8>;
 	let out = unsafe {&mut *pout};
@@ -251,7 +257,8 @@ mod tests {
 		assert_eq!(u2s(nullptr), String::new());
 
 		let s = "hi, there";
-		assert_eq!(u2s(CString::new(s).unwrap().as_ptr()), s);
+		let cs = CString::new(s).unwrap();
+		assert_eq!(u2s(cs.as_ptr()), s);
 	}
 
 	#[test]
