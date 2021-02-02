@@ -350,39 +350,67 @@ impl Element {
 			Err(ok)
 		}
 	}
-	/// Get root DOM element of the Sciter document.
+
+	/// Check the given element for `NULL` and returns [`SCDOM_RESULT::OK_NOT_HANDLED`] in that case.
+	///
+	/// Some functions, like `SciterGetRootElement` or `SciterGetHighlightedElement`
+	/// return `OK` if no element found, but `HELEMENT` is `NULL`.
+	///
+	/// We might want to switch to an `Result<Option<Element>> for `Element::from_*` functions,
+	/// but for now let's return an error for such cases.
+	///
+	/// https://github.com/sciter-sdk/rust-sciter/issues/27
+	fn forbid_null(e: Element) -> Result<Element> {
+		if e.he.is_null() {
+			Err(SCDOM_RESULT::OK_NOT_HANDLED)
+		} else {
+			Ok(e)
+		}
+	}
+
+	/// Get the root DOM element of the Sciter document.
+	///
+	/// If there is no document loaded, this function will return [an error](enum.SCDOM_RESULT.html#variant.OK_NOT_HANDLED).
 	pub fn from_window(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetRootElement)(hwnd, &mut p);
-		ok_or!(Element::from(p), ok)
+		ok_or!(Element::from(p), ok).and_then(Element::forbid_null)
 	}
 
 	/// Get focus DOM element of the Sciter document.
+	///
+	/// If there is no such element, this function will return [an error](enum.SCDOM_RESULT.html#variant.OK_NOT_HANDLED).
 	pub fn from_focus(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetFocusElement)(hwnd, &mut p);
-		ok_or!(Element::from(p), ok)
+		ok_or!(Element::from(p), ok).and_then(Element::forbid_null)
 	}
 
 	/// Get highlighted element.
+	///
+	/// If there is no such element, this function will return [an error](enum.SCDOM_RESULT.html#variant.OK_NOT_HANDLED).
 	pub fn from_highlighted(hwnd: HWINDOW) -> Result<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetHighlightedElement)(hwnd, &mut p);
-		ok_or!(Element::from(p), ok)
+		ok_or!(Element::from(p), ok).and_then(Element::forbid_null)
 	}
 
 	/// Find DOM element of the Sciter document by coordinates.
+	///
+	/// If there is no such element, this function will return [an error](enum.SCDOM_RESULT.html#variant.OK_NOT_HANDLED).
 	pub fn from_point(hwnd: HWINDOW, pt: POINT) -> Result<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterFindElement)(hwnd, pt, &mut p);
-		ok_or!(Element::from(p), ok)
+		ok_or!(Element::from(p), ok).and_then(Element::forbid_null)
 	}
 
 	/// Get element handle by its UID.
+	///
+	/// If there is no such element, this function will return [an error](enum.SCDOM_RESULT.html#variant.OK_NOT_HANDLED).
 	pub fn from_uid(hwnd: HWINDOW, uid: u32) -> Result<Element> {
 		let mut p = HELEMENT!();
 		let ok = (_API.SciterGetElementByUID)(hwnd, uid, &mut p);
-		ok_or!(Element::from(p), ok)
+		ok_or!(Element::from(p), ok).and_then(Element::forbid_null)
 	}
 
 	#[doc(hidden)]

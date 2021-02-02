@@ -5,7 +5,7 @@ use capi::scdef::SCITER_RT_OPTIONS;
 use capi::sctypes::*;
 use capi::screquest::HREQUEST;
 use capi::schandler::NativeHandler;
-use dom::event::EventHandler;
+use dom::{self, event::EventHandler};
 use eventhandler::*;
 use value::{Value};
 
@@ -212,7 +212,7 @@ impl Host {
 		// eprintln!("{}: {:?}", std::any::type_name::<Handler>(), ptr);
 
 		let func = _event_handler_window_proc::<Handler>;
-		let flags = ::dom::event::default_events();
+		let flags = dom::event::default_events();
 		(_API.SciterWindowAttachEventHandler)(hwnd, func, ptr as LPVOID, flags as UINT);
 	}
 
@@ -264,8 +264,8 @@ impl Host {
 	}
 
 	/// Get window root DOM element.
-	pub fn get_root(&self) -> Option<::dom::Element> {
-		::dom::Element::from_window(self.hwnd).ok()
+	pub fn get_root(&self) -> Option<dom::Element> {
+		dom::Element::from_window(self.hwnd).ok()
 	}
 
 	/// Load an HTML document from file.
