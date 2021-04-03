@@ -82,7 +82,7 @@ build_script:
   - cargo build --release --all %FEATURES%
 
   - cmd: echo Building examples
-  - cargo build --example first --verbose
+  - cargo build --example first
   - cargo build --example windowless --features windowless
   - cargo build --release --examples %FEATURES%
 

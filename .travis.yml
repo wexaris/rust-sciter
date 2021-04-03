@@ -62,7 +62,6 @@ install:
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$TRAVIS_BUILD_DIR"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cp "$TRAVIS_BUILD_DIR/libsciter.dylib" "$TRAVIS_BUILD_DIR/liblibsciter.dylib"; fi
 
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$TRAVIS_BUILD_DIR"; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export RUSTFLAGS='-C link-arg=-Wl,--unresolved-symbols=ignore-in-shared-libs'; fi
@@ -80,7 +79,6 @@ before_script:
 script:
   - cargo update
 
-  - cargo build --example first --verbose
   - cargo run --example first
   - cargo run --example first --features "dynamic"
   - cargo run --example first --features "dynamic" -- "$SDK_DLL"
