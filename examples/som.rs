@@ -163,7 +163,7 @@ impl sciter::EventHandler for Handler {
 	}
 
 	fn get_asset(&mut self) -> Option<&sciter::om::som_asset_t> {
-		Some(self.asset.as_ref())
+		Some(self.asset.as_asset())
 	}
 }
 

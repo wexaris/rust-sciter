@@ -485,7 +485,7 @@ impl Value {
 	/// Value as string for `T_STRING` type.
 	pub fn as_string(&self) -> Option<String> {
 		let mut s = 0 as LPCWSTR;
-		let mut n = 0 as UINT;
+		let mut n = 0_u32;
 		match (_API.ValueStringData)(self.as_cptr(), &mut s, &mut n) {
 			VALUE_RESULT::OK => Some(::utf::w2sn(s, n as usize)),
 			_ => None
@@ -501,7 +501,7 @@ impl Value {
 	/// Value as a byte slice for `T_BYTES` type.
 	pub fn as_bytes(&self) -> Option<&[u8]> {
 		let mut s = 0 as LPCBYTE;
-		let mut n = 0 as UINT;
+		let mut n = 0_u32;
 		match (_API.ValueBinaryData)(self.as_cptr(), &mut s, &mut n) {
 			VALUE_RESULT::OK => Some(unsafe { ::std::slice::from_raw_parts(s, n as usize) }),
 			_ => None
@@ -763,7 +763,7 @@ impl ::std::fmt::Debug for Value {
 				("url", 3), ("selector", 4),
 				];
 
-			tname.push_str(":");
+			tname.push(':');
 			if let Some(name) = units.iter().find(|&&x| x.1 == self.data.u) {
 				tname.push_str(name.0);
 			} else {
@@ -774,7 +774,7 @@ impl ::std::fmt::Debug for Value {
 			// VALUE_UNIT_TYPE_OBJECT
 			let units = ["array", "object", "class", "native", "function", "error"];
 			let u = self.data.u as usize;
-			tname.push_str(":");
+			tname.push(':');
 			if u < units.len() {
 				tname.push_str(units[u]);
 			} else {
@@ -825,11 +825,8 @@ impl Clone for Value {
 /// Compare two values.
 impl ::std::cmp::PartialEq for Value {
 	fn eq(&self, other: &Self) -> bool {
-		match (_API.ValueCompare)(self.as_cptr(), other.as_cptr()) {
-			VALUE_RESULT::OK_TRUE => true,
-			// VALUE_RESULT::OK => false,
-			_ => false
-		}
+		let eq = (_API.ValueCompare)(self.as_cptr(), other.as_cptr());
+		matches!(eq, VALUE_RESULT::OK_TRUE)
 	}
 }
 

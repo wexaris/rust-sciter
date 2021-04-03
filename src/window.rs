@@ -447,9 +447,10 @@ impl Builder {
 
 	/// Start with some flags.
 	pub fn with_flags(flags: Flags) -> Self {
-		let mut me = Builder::default();
-		me.flags = flags;
-		me
+		Self {
+			flags,
+			..Default::default()
+		}
 	}
 
 	/// Main window style (appears in taskbar).

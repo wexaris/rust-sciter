@@ -357,7 +357,7 @@ impl Image {
 
   /// Clear image by filling it with the black color.
   pub fn clear(&mut self) -> Result<()> {
-    let ok = (_GAPI.imageClear)(self.0, 0 as Color);
+    let ok = (_GAPI.imageClear)(self.0, Graphics::NO_COLOR);
     ok_or!((), ok)
   }
 
@@ -703,6 +703,8 @@ impl Graphics {
 
 /// Drawing attributes.
 impl Graphics {
+	const NO_COLOR: Color = 0;
+
   /// Set the color for solid fills for subsequent drawings.
   pub fn fill_color(&mut self, color: Color) -> Result<&mut Self> {
     let ok = (_GAPI.gFillColor)(self.0, color);
@@ -719,7 +721,7 @@ impl Graphics {
 
   /// Disables fills for subsequent drawing operations.
   pub fn no_fill(&mut self) -> Result<&mut Self> {
-    self.fill_color(0 as Color)
+    self.fill_color(Self::NO_COLOR)
   }
 
   /// Set the line color for subsequent drawings.

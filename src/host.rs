@@ -449,7 +449,7 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 		SCITER_NOTIFICATION::SC_DATA_LOADED => {
 			let scnm = pnm as *mut SCN_DATA_LOADED;
 			me.on_data_loaded(unsafe { &mut *scnm } );
-			0 as UINT
+			0
 		},
 
 		SCITER_NOTIFICATION::SC_ATTACH_BEHAVIOR => {
@@ -478,18 +478,18 @@ extern "system" fn _on_handle_notification<T: HostHandler>(pnm: *mut ::capi::scd
 
 		SCITER_NOTIFICATION::SC_ENGINE_DESTROYED => {
 			me.on_engine_destroyed();
-			0 as UINT
+			0
 		},
 
 		SCITER_NOTIFICATION::SC_GRAPHICS_CRITICAL_FAILURE => {
 			me.on_graphics_critical_failure();
-			0 as UINT
+			0
 		},
 
 		SCITER_NOTIFICATION::SC_INVALIDATE_RECT => {
 			let scnm = pnm as *const SCN_INVALIDATE_RECT;
 			me.on_invalidate(unsafe { &*scnm });
-			0 as UINT
+			0
 		}
 
 		_ => 0,

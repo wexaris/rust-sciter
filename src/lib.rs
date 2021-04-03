@@ -66,7 +66,9 @@ folder for more complex usage and module-level sections for the guides about:
 #![allow(clippy::needless_return, clippy::let_and_return)] // past habits
 #![allow(clippy::redundant_field_names)] // since Rust 1.17 and less readable
 #![allow(clippy::unreadable_literal)] // C++ SDK constants
+#![allow(clippy::upper_case_acronyms)]// C++ SDK constants
 #![allow(clippy::deprecated_semver)]  // `#[deprecated(since="Sciter 4.4.3.24")]` is not a semver format.
+#![allow(clippy::result_unit_err)]		// Sciter returns BOOL, but `Result<(), ()>` is more strict even without error description.
 // #![allow(clippy::cast_ptr_alignment)] // 0.0.195 only
 
 

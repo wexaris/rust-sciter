@@ -126,10 +126,7 @@ impl<T> IAssetRef<T> {
 	}
 
 	/// Get a reference to the underlaying pointer.
-	#[doc(hidden)]
-	pub fn as_ref(&self) -> &som_asset_t {
-		// TODO: do we need this?
-		// clippy complains about `std::convert::AsRef`
+	pub fn as_asset(&self) -> &som_asset_t {
 		unsafe { & *self.asset }
 	}
 

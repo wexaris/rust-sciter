@@ -1090,7 +1090,7 @@ impl Element {
 	/// Stop Timer for the element.
 	pub fn stop_timer(&self, timer_id: u64) -> Result<()> {
 		if !self.he.is_null() {
-			let ok = (_API.SciterSetTimer)(self.he, 0 as UINT, timer_id as ::capi::sctypes::UINT_PTR);
+			let ok = (_API.SciterSetTimer)(self.he, 0, timer_id as ::capi::sctypes::UINT_PTR);
 			ok_or!((), ok)
 		} else {
 			Ok(())
