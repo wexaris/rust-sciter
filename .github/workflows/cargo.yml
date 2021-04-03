@@ -113,3 +113,9 @@ jobs:
         cargo test -p sciter-serde
       env:
         SCITER_DEPS: ${{ runner.workspace }}
+
+    - name: Clippy
+      shell: bash
+      run: |
+        test -f $HOME/.cargo/env && source $HOME/.cargo/env
+        cargo clippy
