@@ -106,8 +106,13 @@ jobs:
       env:
         SCITER_DEPS: ${{ runner.workspace }}
 
+  # check with clippy
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
     - name: Clippy
-      shell: bash
-      run: |
-        test -f $HOME/.cargo/env && source $HOME/.cargo/env
-        cargo clippy
+      run: cargo clippy
