@@ -1,5 +1,6 @@
 # Rust bindings for Sciter
 
+[![Build-n-Test](https://github.com/sciter-sdk/rust-sciter/actions/workflows/cargo.yml/badge.svg?branch=master)](https://github.com/sciter-sdk/rust-sciter/actions/workflows/cargo.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/cbrisyh792mmmd08/branch/master?svg=true)](https://ci.appveyor.com/project/pravic/rust-sciter)
 [![Build Status](https://img.shields.io/travis/sciter-sdk/rust-sciter/master.svg)](https://travis-ci.org/sciter-sdk/rust-sciter)
 [![Minimum supported Rust version](https://img.shields.io/badge/rustc-1.38+-green.svg)](https://github.com/sciter-sdk/rust-sciter/commits/master/.travis.yml)
