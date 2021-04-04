@@ -33,9 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macOS doesn't have Rust installed
-        # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners#macos-1015
-        # we will try to install it manually below.
+        # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
@@ -86,27 +84,21 @@ jobs:
 
     - name: macOS deps
       if: runner.os == 'macOS'
-      # OSX: download sciter library && install rustup
+      # OSX: download sciter library
       run: |
         curl -so "$SCITER_DEPS/libsciter.dylib" "https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin.osx/libsciter.dylib"
-        curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
-        test -f $HOME/.cargo/env && source $HOME/.cargo/env
-        echo cargo is at `which cargo`
-        echo rustc is at `which rustc`
       env:
         SCITER_DEPS: ${{ runner.workspace }}
 
     - name: Build
       shell: bash
       run: |
-        test -f $HOME/.cargo/env && source $HOME/.cargo/env
         cargo build --all
         cargo build --examples
 
     - name: Tests
       shell: bash
       run: |
-        test -f $HOME/.cargo/env && source $HOME/.cargo/env
         export PATH="$PATH:$SCITER_DEPS"
         cargo run --example first
         cargo test -p sciter-rs
