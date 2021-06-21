@@ -1480,12 +1480,12 @@ This way you can establish interaction between scipt and native code inside your
 	use capi::scgraphics::HGFX;
 	use value::Value;
 
-	/// Default subscription events
+	/// Default subscription events.
 	///
-	/// Default is `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL` which covers behavior events
-	/// (like `document_complete` or `button_click`) and script calls to native window.
+	/// Default are `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL | HANDLE_METHOD_CALL` which cover behavior events
+	/// (like `document_complete` or `button_click`) and TIScript/JavaScript calls to native window.
 	pub fn default_events() -> EVENT_GROUPS {
-		return EVENT_GROUPS::HANDLE_BEHAVIOR_EVENT | EVENT_GROUPS::HANDLE_SCRIPTING_METHOD_CALL;
+		return EVENT_GROUPS::HANDLE_BEHAVIOR_EVENT | EVENT_GROUPS::HANDLE_SCRIPTING_METHOD_CALL | EVENT_GROUPS::HANDLE_METHOD_CALL;
 	}
 
 	/// UI action causing change.
@@ -1541,7 +1541,7 @@ This way you can establish interaction between scipt and native code inside your
 
 		/// Return a list of event groups this event handler is subscribed to.
 		///
-		/// Default is `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL`.
+		/// Default are `HANDLE_BEHAVIOR_EVENT | HANDLE_SCRIPTING_METHOD_CALL | HANDLE_METHOD_CALL`.
 		/// See also [`default_events()`](fn.default_events.html).
 		fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
 			return Some(default_events());
