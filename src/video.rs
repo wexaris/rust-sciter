@@ -142,7 +142,7 @@ impl iasset {
 /// Video source interface, used by engine to query video state.
 #[repr(C)]
 struct video_source_vtbl {
-	// <-- iasset:
+	// region: iasset
 	/// Increments the reference count for an interface on an object.
 	pub add_ref: extern "C" fn(this: *mut video_source) -> i32,
 
@@ -154,9 +154,9 @@ struct video_source_vtbl {
 
 	/// Retrieves a pointer to the passport declaration of an object.
 	pub get_passport: extern "C" fn(thing: *mut iasset) -> *const som_passport_t,
-	// -->
+	// endregion
 
-	// <-- video_source
+	// region: video_source
 	pub play: extern "C" fn(this: *mut video_source) -> bool,
 	pub pause: extern "C" fn(this: *mut video_source) -> bool,
 	pub stop: extern "C" fn(this: *mut video_source) -> bool,
@@ -173,7 +173,7 @@ struct video_source_vtbl {
 
 	pub get_balance: extern "C" fn(this: *const video_source, balance: *mut f64) -> bool,
 	pub set_balance: extern "C" fn(this: *mut video_source, balance: f64) -> bool,
-	// -->
+	// endregion
 }
 
 /// Video source interface to query video state.
@@ -252,7 +252,7 @@ impl video_source {
 /// Video destination interface, represents video rendering site.
 #[repr(C)]
 struct video_destination_vtbl {
-	// <-- iasset:
+	// region: iasset:
 	/// Increments the reference count for an interface on an object.
 	pub add_ref: extern "C" fn(this: *mut video_destination) -> i32,
 
@@ -264,9 +264,9 @@ struct video_destination_vtbl {
 
 	/// Retrieves a pointer to the passport declaration of an object.
 	pub get_passport: extern "C" fn(thing: *mut iasset) -> *const som_passport_t,
-	// -->
+	// endregion
 
-	// <-- video_destination
+	// region: video_destination
 	/// Whether this instance of `video_renderer` is attached to a DOM element and is capable of playing.
 	pub is_alive: extern "C" fn(this: *const video_destination) -> bool,
 
@@ -278,7 +278,7 @@ struct video_destination_vtbl {
 
 	/// Render the next frame.
 	pub render_frame: extern "C" fn(this: *mut video_destination, data: LPCBYTE, size: UINT) -> bool,
-	// -->
+	// endregion
 }
 
 /// Video destination interface, represents video rendering site.
@@ -319,7 +319,7 @@ impl video_destination {
 /// Fragmented destination interface, used for partial updates.
 #[repr(C)]
 struct fragmented_video_destination_vtbl {
-	// <-- iasset:
+	// region: iasset:
 	/// Increments the reference count for an interface on an object.
 	pub add_ref: extern "C" fn(this: *mut fragmented_video_destination) -> i32,
 
@@ -331,9 +331,9 @@ struct fragmented_video_destination_vtbl {
 
 	/// Retrieves a pointer to the passport declaration of an object.
 	pub get_passport: extern "C" fn(thing: *mut iasset) -> *const som_passport_t,
-	// -->
+	// endregion
 
-	// <-- video_destination
+	// region: video_destination
 	/// Whether this instance of `video_renderer` is attached to a DOM element and is capable of playing.
 	pub is_alive: extern "C" fn(this: *const fragmented_video_destination) -> bool,
 
@@ -345,12 +345,13 @@ struct fragmented_video_destination_vtbl {
 
 	/// Render the next frame.
 	pub render_frame: extern "C" fn(this: *mut fragmented_video_destination, data: LPCBYTE, size: UINT) -> bool,
-	// -->
 
-	// <-- fragmented_video_destination
+	// endregion
+
+	// region: fragmented_video_destination
 	/// Render the specified part of the current frame.
 	pub render_frame_part: extern "C" fn(this: *mut fragmented_video_destination, data: LPCBYTE, size: UINT, x: i32, y: i32, width: i32, height: i32) -> bool,
-	// -->
+	// endregion
 }
 
 /// Fragmented destination interface, used for partial updates.
