@@ -278,6 +278,9 @@ struct video_destination_vtbl {
 
 	/// Render the next frame.
 	pub render_frame: extern "C" fn(this: *mut video_destination, data: LPCBYTE, size: UINT) -> bool,
+
+	/// Render the next frame with the given stride.
+	pub render_frame_with_stride: extern "C" fn(this: *mut video_destination, data: LPCBYTE, size: UINT, stride: UINT) -> bool,
 	// endregion
 }
 
@@ -313,6 +316,11 @@ impl video_destination {
 	pub fn render_frame(&mut self, data: &[u8]) -> Result<()> {
 		cppresult!(self.render_frame(data.as_ptr(), data.len() as UINT))
 	}
+
+	/// Render the next frame with the given stride.
+	pub fn render_frame_with_stride(&mut self, data: &[u8], stride: u32) -> Result<()> {
+		cppresult!(self.render_frame_with_stride(data.as_ptr(), data.len() as UINT, stride))
+	}
 }
 
 
@@ -346,6 +354,8 @@ struct fragmented_video_destination_vtbl {
 	/// Render the next frame.
 	pub render_frame: extern "C" fn(this: *mut fragmented_video_destination, data: LPCBYTE, size: UINT) -> bool,
 
+	/// Render the next frame with the given stride.
+	pub render_frame_with_stride: extern "C" fn(this: *mut fragmented_video_destination, data: LPCBYTE, size: UINT, stride: UINT) -> bool,
 	// endregion
 
 	// region: fragmented_video_destination
@@ -385,6 +395,11 @@ impl fragmented_video_destination {
 	/// Render the next frame.
 	pub fn render_frame(&mut self, data: &[u8]) -> Result<()> {
 		cppresult!(self.render_frame(data.as_ptr(), data.len() as UINT))
+	}
+
+	/// Render the next frame with the given stride.
+	pub fn render_frame_with_stride(&mut self, data: &[u8], stride: u32) -> Result<()> {
+		cppresult!(self.render_frame_with_stride(data.as_ptr(), data.len() as UINT, stride))
 	}
 
 	/// Render the specified part of the current frame.
