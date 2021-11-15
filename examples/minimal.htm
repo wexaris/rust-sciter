@@ -72,6 +72,51 @@
       }
 
     </script>
+    <script type="module">
+      import * as env from "@env";
+      import * as sciter from "@sciter";
+
+      Window.this.caption = document.$("head > title").value;
+
+      document.$("#kind").innerText = ".JS";
+      document.$("#machine").innerText = env.machineName();
+      document.$("#version").innerText = sciter.VERSION;
+      document.$("#revision").innerText = sciter.REVISION;
+
+      function append(item) {
+        document.$("#files").append(<li>{ item }</li>);
+      }
+
+      var counter = 0;
+      document.$("button#append").on("click", function() {
+        append(++counter);
+      });
+
+      document.$("button#open").on("click", function() {
+
+        var fn = Window.this.selectFile({
+          mode: "open",
+          filter: "HTML Files (*.htm,*.html)|*.HTM;*.HTML|All Files (*.*)|*.*",
+          extension: "html"
+        });
+
+        console.log("selected file: " + fn);
+        if (fn) {
+          append(fn);
+        }
+      });
+
+      // Some tricks with hyperlinks:
+      document.on("click", "a[href]", function(evt, el) {
+        env.launch(el.attributes["href"]);
+        return true;
+      });
+
+      for (const a of document.$$("a")) {
+        a.attributes["title"] = a.attributes["href"];
+      }
+
+    </script>
   </head>
 <body>
 
