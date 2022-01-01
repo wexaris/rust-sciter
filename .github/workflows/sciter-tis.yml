@@ -27,33 +27,7 @@ on:
 # So, now we're ended up with this ugly script.
 
 jobs:
-  fetch:
-    name: Fetch dependencies
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
-        os: [macos-latest, ubuntu-latest, windows-latest]
-
-    steps:
-      - name: Environment
-        shell: bash
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-          SCITER_DEPS: ${{ runner.workspace }}
-        run: |
-          echo HOME is "$HOME"
-          echo workspace is "$SCITER_DEPS"
-          echo temp is "$TEMP"
-          echo runner is "$RUNNER_CONTEXT"
-          echo cargo is at `which cargo`
-          echo rustc is at `which rustc`
-          command -v cargo && rustc -vV
-          echo done
-
   build:
-    needs: [fetch]
     name: Build and test
 
     runs-on: ${{ matrix.os }}
