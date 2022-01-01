@@ -1,4 +1,4 @@
-name: Build-n-Test
+name: JavaScript
 
 on:
   push:
