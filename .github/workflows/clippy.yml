@@ -12,11 +12,12 @@ on:
 
 jobs:
   clippy:
-    name: Clippy
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - run: rustup component add clippy
 
-    - name: Clippy
-      run: cargo clippy
+    - uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
