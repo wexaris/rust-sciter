@@ -100,14 +100,3 @@ jobs:
         cargo test -p sciter-rs
       env:
         SCITER_DEPS: ${{ runner.workspace }}
-
-  # check with clippy
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Clippy
-      run: cargo clippy
