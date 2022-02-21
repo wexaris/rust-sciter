@@ -605,9 +605,15 @@ pub fn set_options(options: RuntimeOptions) -> std::result::Result<(), ()> {
 	}
 }
 
-/// Set a global variable by its path.
+/// Set a global variable by its path to all windows.
 ///
-/// See the per-window [`Window::set_variable`](window/struct.Window.html#method.set_variable).
+/// This variable will be accessible in all windows via `globalThis[path]` or just `path`.
+///
+/// Note that this call affects only _new_ windows,
+/// so it's preferred to call it before the main window creation.
+///
+/// See also per-window [`Window::set_variable`](window/struct.Window.html#method.set_variable)
+/// to assign a global to a single window only.
 pub fn set_variable(path: &str, value: Value) -> dom::Result<()> {
 	let ws = s2u!(path);
 	let ok = (_API.SciterSetVariable)(std::ptr::null_mut(), ws.as_ptr(), value.as_cptr());
@@ -621,6 +627,7 @@ pub fn set_variable(path: &str, value: Value) -> dom::Result<()> {
 /// Get a global variable by its path.
 ///
 /// See the per-window [`Window::get_variable`](window/struct.Window.html#method.get_variable).
+#[doc(hidden)]
 pub fn get_variable(path: &str) -> dom::Result<Value> {
 	let ws = s2u!(path);
 	let mut value = Value::new();
