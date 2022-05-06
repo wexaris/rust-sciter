@@ -637,8 +637,13 @@ impl Value {
 		self.data.t as u32 == VALUE_TYPE::T_DATE as u32
 	}
 	#[allow(missing_docs)]
+	#[deprecated(note = "T_CURRENCY is T_BIG_INT since 4.4.8.32")]
 	pub const fn is_currency(&self) -> bool {
-		self.data.t as u32 == VALUE_TYPE::T_CURRENCY as u32
+		self.data.t as u32 == VALUE_TYPE::T_BIG_INT as u32
+	}
+	#[allow(missing_docs)]
+	pub const fn is_big_int(&self) -> bool {
+		self.data.t as u32 == VALUE_TYPE::T_BIG_INT as u32
 	}
 	#[allow(missing_docs)]
 	pub const fn is_color(&self) -> bool {

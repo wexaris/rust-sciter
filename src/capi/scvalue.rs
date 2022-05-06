@@ -81,8 +81,8 @@ pub enum VALUE_TYPE {
 	/// Data is `FILETIME` (64-bit value in 100ns since the unix epoch).
 	/// No unit is stored but `is_utc` boolean is used during creation.
 	T_DATE,
-	/// Data is a 64-bit number, no units.
-	T_CURRENCY,
+	/// [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt).
+	T_BIG_INT,
 	/// Data is a float (but can be constructed from an int), unit is [`VALUE_UNIT_TYPE_LENGTH`].
 	T_LENGTH,
 	/// Sciter internal array, unit is [`VALUE_UNIT_TYPE_ARRAY`].
