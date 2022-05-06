@@ -347,6 +347,9 @@ pub struct SciterGraphicsAPI {
 
 	// since 4.4.3.20
   pub gFlush: extern "system" fn(hgfx: HGFX) -> GRAPHIN_RESULT,
+
+	// since 4.4.8.27
+	pub imageCreateFromElement: extern "system" fn(poutImg: &mut HIMG, element: HELEMENT) -> GRAPHIN_RESULT,
 }
 
 pub type ImageWriteFunction = extern "system" fn(prm: LPVOID, data: LPCBYTE, data_length: UINT);

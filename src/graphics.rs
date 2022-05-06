@@ -16,6 +16,8 @@ use _GAPI;
 pub use capi::scgraphics::{HGFX, GRAPHIN_RESULT};
 pub use capi::scgraphics::{DRAW_PATH, LINE_CAP, LINE_JOIN};
 
+use crate::HELEMENT;
+
 /// Supported image encodings for [`Image.save()`](struct.Image.html#method.save).
 #[derive(Clone, Copy)]
 #[derive(Debug, PartialEq)]
@@ -251,6 +253,13 @@ impl Image {
     let ok = (_GAPI.imageCreateFromPixmap)(&mut h, width, height, with_alpha as BOOL, pixmap.as_ptr());
     ok_or!(Image(h), ok)
   }
+
+	/// Create a snapshot from the element.
+	pub fn from_snapshot(element: HELEMENT) -> Result<Image> {
+		let mut h = null_mut();
+		let ok = (_GAPI.imageCreateFromElement)(&mut h, element);
+		ok_or!(Image(h), ok)
+	}
 
   /// Load image from memory.
   ///
