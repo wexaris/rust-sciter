@@ -296,6 +296,16 @@ fn process_events(me: &mut dyn EventHandler, he: HELEMENT, evtg: UINT, params: L
 			handled
 		},
 
+		EVENT_GROUPS::HANDLE_ATTRIBUTE_CHANGE => {
+			assert!(!params.is_null());
+			let scnm = params as *const ATTRIBUTE_CHANGE_PARAMS;
+			let nm = unsafe { & *scnm };
+			let name = u2s!(nm.name);
+			let value = if nm.value.is_null() { None } else { Some(w2s!(nm.value)) };
+			let handled = me.on_attribute_change(nm.he, &name, value.as_deref());
+			handled
+		},
+
 		// known notifications:
 		EVENT_GROUPS::HANDLE_MOUSE
 		| EVENT_GROUPS::HANDLE_KEY

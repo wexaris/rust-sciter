@@ -71,6 +71,13 @@ pub struct SOM_PARAMS
 	pub result: SOM_PARAMS_DATA,
 }
 
+#[repr(C)]
+pub struct ATTRIBUTE_CHANGE_PARAMS {
+	pub he: HELEMENT,
+	pub name: LPCSTR,
+	pub value: LPCWSTR,
+}
+
 /// Identifiers of methods currently supported by intrinsic behaviors.
 #[repr(C)]
 #[derive(Debug)]
@@ -198,6 +205,8 @@ pub enum EVENT_GROUPS
 	HANDLE_EXCHANGE              = 0x1000,
 	/// Touch input events.
 	HANDLE_GESTURE               = 0x2000,
+	/// Attribute change events.
+	HANDLE_ATTRIBUTE_CHANGE      = 0x4000,
 	/// SOM passport and asset requests.
 	HANDLE_SOM                   = 0x8000,
 

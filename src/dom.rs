@@ -1628,6 +1628,11 @@ This way you can establish interaction between scipt and native code inside your
     ///
     /// **Subscription**: requires [`HANDLE_SIZE`](enum.EVENT_GROUPS.html).
 		fn on_size(&mut self, root: HELEMENT) {}
+
+		/// Attribute change event.
+		/// 
+		/// An element's attribute was changed.
+		fn on_attribute_change(&mut self, he: HELEMENT, name: &str, value: Option<&str>) -> bool { return false; }
 	}
 
 }
